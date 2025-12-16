@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Mutability vs Immutability في Android</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>ما معنى Mutability vs Immutability ولماذا تؤثر على استقرار البرامج؟ 🔒</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - المفهوم الأساسي والفرق بينهما<br />
+            2 - كيف يعمل ذلك في الذاكرة (Memory Model)<br />
+            3 - تأثيرهما على Thread Safety<br />
+            4 - Immutability في Android تحديدًا<br />
+            5 - المشاكل الحقيقية التي تحدث بسبب Mutability<br />
+            6 - أمثلة عملية من Android Development<br />
+            7 - Best Practices والحلول<br />
+            8 - الخلاصة
+          </p>
+
+          <hr />
+
+          <h2>المفهوم الأساسي 🎯</h2>
+
+          <h3>التعريف البسيط:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المفهوم</th>
+                <th>التعريف</th>
+                <th>مثال من الحياة</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mutable</strong></td>
+                <td>كائن يمكن تعديل محتواه بعد إنشائه</td>
+                <td>كوب ماء يمكن إضافة سكر له أو تفريغه</td>
+              </tr>
+              <tr>
+                <td><strong>Immutable</strong></td>
+                <td>كائن لا يمكن تعديله بعد إنشائه نهائيًا</td>
+                <td>ورقة نقدية مطبوعة، لا يمكن تغيير قيمتها</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <blockquote>
+            <strong>القاعدة الذهبية:</strong><br />
+            Immutability = Once Created, Never Changed<br />
+            أي تعديل = إنشاء نسخة جديدة تمامًا
+          </blockquote>
+
+          <h3>أمثلة أساسية في Kotlin:</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ Immutable: لا يمكن التعديل
+val name: String = "Ahmed"
+name = "Ali"  // ❌ Compilation Error: Val cannot be reassigned
+
+val numbers: List&lt;Int&gt; = listOf(1, 2, 3)
+numbers.add(4)  // ❌ Error: Unresolved reference (no add() method)
+
+
+// ❌ Mutable: يمكن التعديل
+var age: Int = 25
+age = 26  // ✅ OK
+
+val mutableList: MutableList&lt;Int&gt; = mutableListOf(1, 2, 3)
+mutableList.add(4)  // ✅ OK, الـ reference ثابت لكن المحتوى متغير</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ مفهوم شائع خاطئ:</strong><br />
+            <code>val</code> لا تعني Immutable دائمًا!<br />
+            <code>val</code> تعني أن الـ <strong>Reference ثابت</strong>، لكن الكائن نفسه قد يكون Mutable
+          </div>
+
+          <div dir="ltr">
+            <pre>val user = User(name = "Ahmed", age = 25)
+user = User(name = "Ali", age = 30)  // ❌ Error: val cannot be reassigned
+
+user.name = "Ali"  // ✅ OK إذا كان User من نوع class عادي
+user.age = 30      // ✅ OK
+
+// الحل: data class with val properties
+data class User(val name: String, val age: Int)  // Immutable Object</pre>
+          </div>
+
+          <hr />
+
+          <h2>كيف يعمل ذلك في الذاكرة؟ 🧠</h2>
+
+          <h3>سيناريو 1: Immutable Object (String)</h3>
+
+          <div dir="ltr">
+            <pre>var text = "Hello"
+text = "World"
+
+// ما يحدث في الذاكرة:
+┌─────────────────────────────────────────┐
+│           Heap Memory                   │
+├─────────────────────────────────────────┤
+│                                         │
+│  [0x1000]  "Hello"  ← لم يُحذف فورًا    │
+│                       (GC سيحذفه لاحقًا)│
+│                                         │
+│  [0x2000]  "World"  ← نسخة جديدة       │
+│              ↑                          │
+│              │                          │
+│            text ← المتغير يشير للجديد   │
+│                                         │
+└─────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>سيناريو 2: Mutable Object (ArrayList)</h3>
+
+          <div dir="ltr">
+            <pre>val list = mutableListOf(1, 2, 3)
+list.add(4)
+
+// ما يحدث في الذاكرة:
+┌─────────────────────────────────────────┐
+│           Heap Memory                   │
+├─────────────────────────────────────────┤
+│                                         │
+│  [0x3000]  ArrayList                    │
+│            ├─ [1, 2, 3]  ← Before       │
+│            └─ [1, 2, 3, 4]  ← After     │
+│              ↑                          │
+│              │                          │
+│            list ← نفس العنوان          │
+│                                         │
+└─────────────────────────────────────────┘
+
+// الفرق الجوهري:
+// Immutable: عنوان جديد لكل تعديل
+// Mutable: نفس العنوان، المحتوى يتغير</pre>
+          </div>
+
+          <h3>لماذا هذا مهم في Android؟</h3>
+
+          <div dir="ltr">
+            <pre>// مثال واقعي: SharedPreferences
+class SettingsManager(context: Context) {
+    private val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
+    
+    // ❌ خطأ شائع: إرجاع Mutable Collection
+    fun getBlockedUsers(): MutableSet&lt;String&gt; {
+        return prefs.getStringSet("blocked", mutableSetOf())!!
+    }
+}
+
+// في مكان آخر:
+val blocked = settingsManager.getBlockedUsers()
+blocked.add("user123")  // ⚠️ هل تم الحفظ؟ لا!
+
+// المشكلة:
+// SharedPreferences يرجع reference للـ Set الداخلي
+// التعديل عليه لا يُحفظ تلقائيًا!</pre>
+          </div>
+
+          <hr />
+
+          <h2>تأثيرهما على Thread Safety 🔐</h2>
+
+          <h3>المفهوم الأساسي:</h3>
+
+          <blockquote>
+            <strong>Immutable Objects = Thread-Safe by Default</strong><br />
+            لا حاجة لـ Synchronization لأنه لا يمكن تعديلها
+          </blockquote>
+
+          <div dir="ltr">
+            <pre>┌─────────────────────────────────────────────────┐
+│        Mutable Object (Race Condition)          │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│   Thread A               Shared Object          │
+│   ────────              ──────────────          │
+│   Read: 100             counter = 100           │
+│   Calculate: 101                                │
+│                         Thread B                │
+│                         ────────                │
+│                         Read: 100               │
+│                         Calculate: 101          │
+│   Write: 101            counter = 101           │
+│                         Write: 101              │
+│                                                 │
+│   ❌ Expected: 102, Got: 101 (Lost Update!)    │
+│                                                 │
+└─────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>مثال واقعي: مشكلة Race Condition في Android</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ Mutable + Multi-Threading = كارثة
+class UserRepository {
+    private var cachedUsers: MutableList&lt;User&gt; = mutableListOf()
+    
+    fun addUser(user: User) {
+        // يمكن استدعاؤها من Threads مختلفة
+        cachedUsers.add(user)  // ⚠️ Not Thread-Safe!
+    }
+    
+    fun getUsers(): List&lt;User&gt; {
+        return cachedUsers  // ⚠️ قد يتغير أثناء القراءة!
+    }
+}
+
+// السيناريو الكارثي:
+// Thread 1 (Main): يقرأ القائمة لعرضها في RecyclerView
+// Thread 2 (Background): يضيف مستخدم جديد
+// النتيجة: ConcurrentModificationException أو IndexOutOfBoundsException</pre>
+          </div>
+
+          <h3>الحل: استخدام Immutable Collections</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ Immutable + Thread-Safe
+class UserRepository {
+    private var cachedUsers: List&lt;User&gt; = emptyList()
+    private val lock = Any()
+    
+    fun addUser(user: User) {
+        synchronized(lock) {
+            cachedUsers = cachedUsers + user  // نسخة جديدة
+        }
+    }
+    
+    fun getUsers(): List&lt;User&gt; {
+        return cachedUsers  // آمن للقراءة بدون lock
+    }
+}
+
+// أو الأفضل: استخدام StateFlow (Kotlin Coroutines)
+class UserRepository {
+    private val _users = MutableStateFlow&lt;List&lt;User&gt;&gt;(emptyList())
+    val users: StateFlow&lt;List&lt;User&gt;&gt; = _users.asStateFlow()
+    
+    fun addUser(user: User) {
+        _users.update { currentList -&gt; currentList + user }
+        // update() thread-safe داخليًا
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>Immutability في Android تحديدًا 📱</h2>
+
+          <h3>1. Android Lifecycle وتغير Configuration</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة شائعة: Mutable State في ViewModel
+class UserViewModel : ViewModel() {
+    val user = MutableLiveData&lt;User&gt;()
+    
+    fun updateName(newName: String) {
+        user.value?.name = newName  // ⚠️ تعديل مباشر!
+        // LiveData لن يُطلق notification لأن الـ reference لم يتغير
+    }
+}
+
+// ✅ الحل الصحيح:
+class UserViewModel : ViewModel() {
+    private val _user = MutableLiveData&lt;User&gt;()
+    val user: LiveData&lt;User&gt; = _user
+    
+    fun updateName(newName: String) {
+        val currentUser = _user.value ?: return
+        _user.value = currentUser.copy(name = newName)  // نسخة جديدة
+    }
+}</pre>
+          </div>
+
+          <h3>2. Jetpack Compose ونظام Recomposition</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ Compose لن يُعيد الرسم!
+@Composable
+fun UserProfile(user: User) {
+    Text(text = user.name)
+}
+
+// في مكان آخر:
+val user = User(name = "Ahmed", age = 25)
+user.name = "Ali"  // تعديل مباشر
+// Compose لا يعرف أن user تغير!
+
+
+// ✅ الحل: Immutable Data Class
+data class User(val name: String, val age: Int)
+
+@Composable
+fun UserProfile(user: User) {
+    Text(text = user.name)
+}
+
+// Compose State:
+var user by remember { mutableStateOf(User("Ahmed", 25)) }
+user = user.copy(name = "Ali")  // يُطلق recomposition</pre>
+          </div>
+
+          <h3>3. Room Database والـ Entities</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ Room يُفضّل Immutable Entities
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val email: String,
+    val createdAt: Long
+)
+
+// لماذا Immutable؟
+// 1. Thread-Safe للقراءة من Background Thread
+// 2. Cache يعمل بشكل صحيح (الـ reference يتغير عند التحديث)
+// 3. يمنع تعديل غير متوقع للبيانات</pre>
+          </div>
+
+          <hr />
+
+          <h2>المشاكل الحقيقية التي تحدث بسبب Mutability ⚠️</h2>
+
+          <h3>مشكلة 1: Memory Leaks من Mutable Listeners</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة واقعية في Android
+class MainActivity : AppCompatActivity() {
+    private val listeners = mutableListOf&lt;OnDataChangeListener&gt;()
+    
+    fun registerListener(listener: OnDataChangeListener) {
+        listeners.add(listener)
+    }
+    
+    fun unregisterListener(listener: OnDataChangeListener) {
+        listeners.remove(listener)  // ⚠️ قد لا يُحذف!
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // إذا نسيت unregister → Memory Leak
+    }
+}
+
+// ✅ حل أفضل: Immutable + WeakReference
+class DataObserver {
+    private var listeners: List&lt;WeakReference&lt;OnDataChangeListener&gt;&gt; = emptyList()
+    
+    fun registerListener(listener: OnDataChangeListener) {
+        listeners = listeners + WeakReference(listener)
+    }
+    
+    fun notifyChange() {
+        listeners = listeners.filter { it.get() != null }  // تنظيف تلقائي
+        listeners.forEach { it.get()?.onDataChanged() }
+    }
+}</pre>
+          </div>
+
+          <h3>مشكلة 2: Unexpected Behavior في Collections</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ سيناريو كارثي حقيقي
+fun processOrders(orders: MutableList&lt;Order&gt;) {
+    orders.forEach { order -&gt;
+        if (order.status == "pending") {
+            orders.remove(order)  // ⚠️ ConcurrentModificationException!
+        }
+    }
+}
+
+// ✅ الحل:
+fun processOrders(orders: List&lt;Order&gt;): List&lt;Order&gt; {
+    return orders.filter { it.status != "pending" }
+}</pre>
+          </div>
+
+          <h3>مشكلة 3: State Corruption في Coroutines</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة خطيرة في Production
+class CartViewModel : ViewModel() {
+    private val _items = mutableListOf&lt;CartItem&gt;()
+    
+    fun addItem(item: CartItem) {
+        viewModelScope.launch {
+            delay(100)  // محاكاة عملية async
+            _items.add(item)  // ⚠️ Not Thread-Safe!
+        }
+    }
+    
+    fun getTotalPrice(): Double {
+        return _items.sumOf { it.price }  // ⚠️ قد يقرأ state ناقص!
+    }
+}
+
+// السيناريو:
+// User ينقر "Add to Cart" 3 مرات بسرعة
+// 3 Coroutines تُطلق بالتوازي
+// النتيجة: بعض الـ items تُفقد!
+
+
+// ✅ الحل: Immutable + Atomic Updates
+class CartViewModel : ViewModel() {
+    private val _items = MutableStateFlow&lt;List&lt;CartItem&gt;&gt;(emptyList())
+    val items: StateFlow&lt;List&lt;CartItem&gt;&gt; = _items.asStateFlow()
+    
+    fun addItem(item: CartItem) {
+        viewModelScope.launch {
+            delay(100)
+            _items.update { currentList -&gt; currentList + item }
+            // update() thread-safe و atomic
+        }
+    }
+    
+    fun getTotalPrice(): Double {
+        return _items.value.sumOf { it.price }
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة عملية من Android Development 🔧</h2>
+
+          <h3>مثال 1: Navigation Arguments</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ خطأ شائع في Navigation
+@Parcelize
+data class UserProfile(
+    var name: String,  // ⚠️ var = mutable
+    var email: String
+) : Parcelable
+
+// في Fragment A:
+val user = UserProfile("Ahmed", "ahmed@test.com")
+findNavController().navigate(
+    R.id.profileFragment,
+    bundleOf("user" to user)
+)
+user.name = "Ali"  // ⚠️ تعديل بعد الإرسال!
+
+
+// ✅ الحل:
+@Parcelize
+data class UserProfile(
+    val name: String,  // ✅ val = immutable
+    val email: String
+) : Parcelable</pre>
+          </div>
+
+          <h3>مثال 2: Repository Pattern</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ Anti-Pattern
+class ProductRepository {
+    private val cache = mutableMapOf&lt;String, Product&gt;()
+    
+    suspend fun getProduct(id: String): Product? {
+        return cache[id] ?: fetchFromNetwork(id)?.also {
+            cache[id] = it  // ⚠️ خطر على الـ cache
+        }
+    }
+    
+    suspend fun updateProduct(product: Product) {
+        cache[product.id] = product  // ⚠️ تعديل مباشر
+        updateOnServer(product)
+    }
+}
+
+// المشكلة: أي مكان يحصل على Product يمكنه تعديله
+val product = repository.getProduct("123")
+product?.price = 0.0  // ⚠️ يؤثر على الـ cache!
+
+
+// ✅ الحل الصحيح:
+class ProductRepository {
+    private var cache: Map&lt;String, Product&gt; = emptyMap()
+    private val cacheMutex = Mutex()
+    
+    suspend fun getProduct(id: String): Product? {
+        cacheMutex.withLock {
+            return cache[id] ?: fetchFromNetwork(id)?.also { product -&gt;
+                cache = cache + (id to product)  // نسخة جديدة
+            }
+        }
+    }
+    
+    suspend fun updateProduct(product: Product) {
+        cacheMutex.withLock {
+            cache = cache + (product.id to product)
+        }
+        updateOnServer(product)
+    }
+}</pre>
+          </div>
+
+          <h3>مثال 3: RecyclerView وتحديثات القائمة</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة شائعة جدًا
+class ProductAdapter : RecyclerView.Adapter&lt;ProductViewHolder&gt;() {
+    private val items = mutableListOf&lt;Product&gt;()
+    
+    fun updateItems(newItems: List&lt;Product&gt;) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()  // ⚠️ غير فعّال
+    }
+}
+
+// المشاكل:
+// 1. notifyDataSetChanged() يُعيد رسم كل شيء
+// 2. لا يدعم Animations
+// 3. Performance سيء
+
+
+// ✅ الحل: ListAdapter مع DiffUtil
+class ProductAdapter : ListAdapter&lt;Product, ProductViewHolder&gt;(ProductDiffCallback()) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
+        // ...
+    }
+    
+    override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+}
+
+class ProductDiffCallback : DiffUtil.ItemCallback&lt;Product&gt;() {
+    override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean {
+        return oldItem.id == newItem.id
+    }
+    
+    override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean {
+        return oldItem == newItem  // يعمل بشكل صحيح مع Immutable Data Class
+    }
+}
+
+// الاستخدام:
+adapter.submitList(newProducts)  // ✅ DiffUtil يحسب الفرق تلقائيًا</pre>
+          </div>
+
+          <hr />
+
+          <h2>Best Practices والحلول 🎯</h2>
+
+          <h3>1. استخدم Data Classes مع val</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ قاعدة ذهبية
+data class User(
+    val id: String,
+    val name: String,
+    val email: String,
+    val profileImage: String?
+)
+
+// التعديل:
+val updatedUser = user.copy(name = "New Name")</pre>
+          </div>
+
+          <h3>2. Collections: استخدم Immutable بشكل افتراضي</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ تجنب:
+val list = mutableListOf&lt;String&gt;()
+
+// ✅ استخدم:
+val list = listOf&lt;String&gt;()  // أو emptyList()
+
+// ✅ إذا احتجت mutability داخل class:
+class DataManager {
+    private val _items = mutableListOf&lt;Item&gt;()
+    val items: List&lt;Item&gt; get() = _items.toList()  // نسخة immutable
+    
+    fun addItem(item: Item) {
+        _items.add(item)
+    }
+}</pre>
+          </div>
+
+          <h3>3. Android State Management</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ في ViewModel
+class MyViewModel : ViewModel() {
+    // Immutable للخارج
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow&lt;UiState&gt; = _uiState.asStateFlow()
+    
+    fun updateUser(user: User) {
+        _uiState.update { currentState -&gt;
+            currentState.copy(user = user)  // نسخة جديدة
+        }
+    }
+}
+
+data class UiState(
+    val user: User? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)</pre>
+          </div>
+
+          <h3>4. Sealed Classes للحالات المحددة</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ استخدام Sealed Class مع Immutable Data
+sealed class NetworkResult&lt;out T&gt; {
+    data class Success&lt;T&gt;(val data: T) : NetworkResult&lt;T&gt;()
+    data class Error(val exception: Exception) : NetworkResult&lt;Nothing&gt;()
+    object Loading : NetworkResult&lt;Nothing&gt;()
+}
+
+// في Repository:
+suspend fun fetchUser(id: String): NetworkResult&lt;User&gt; {
+    return try {
+        val user = api.getUser(id)
+        NetworkResult.Success(user)  // Immutable
+    } catch (e: Exception) {
+        NetworkResult.Error(e)
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>مقارنة شاملة 📊</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المعيار</th>
+                <th>Mutable</th>
+                <th>Immutable</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Thread Safety</strong></td>
+                <td>❌ يحتاج Synchronization</td>
+                <td>✅ آمن بشكل افتراضي</td>
+              </tr>
+              <tr>
+                <td><strong>Performance</strong></td>
+                <td>✅ أسرع للتعديلات المتكررة</td>
+                <td>⚠️ ينشئ نسخ جديدة</td>
+              </tr>
+              <tr>
+                <td><strong>Memory</strong></td>
+                <td>✅ يستهلك أقل</td>
+                <td>⚠️ نسخ متعددة مؤقتة</td>
+              </tr>
+              <tr>
+                <td><strong>Debugging</strong></td>
+                <td>❌ صعب تتبع من عدّل</td>
+                <td>✅ سهل التتبع</td>
+              </tr>
+              <tr>
+                <td><strong>Testing</strong></td>
+                <td>❌ State غير متوقع</td>
+                <td>✅ Predictable</td>
+              </tr>
+              <tr>
+                <td><strong>Caching</strong></td>
+                <td>❌ Cache قد يفسد</td>
+                <td>✅ آمن للـ Cache</td>
+              </tr>
+              <tr>
+                <td><strong>Compose</strong></td>
+                <td>❌ لا يُطلق Recomposition</td>
+                <td>✅ يعمل بشكل صحيح</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>متى تستخدم كل منهما؟ 🤔</h2>
+
+          <h3>استخدم Immutable عندما:</h3>
+          <ul>
+            <li>تعمل مع <strong>Multi-Threading</strong></li>
+            <li>State Management في <strong>ViewModel</strong></li>
+            <li>Data Classes في <strong>Model Layer</strong></li>
+            <li><strong>Navigation Arguments</strong></li>
+            <li><strong>Jetpack Compose State</strong></li>
+            <li><strong>Cache Keys</strong> في HashMap</li>
+            <li>أي data يُشارك بين أكثر من مكون</li>
+          </ul>
+
+          <h3>استخدم Mutable عندما:</h3>
+          <ul>
+            <li>Performance Critical (مثل Game Loop)</li>
+            <li>بناء Collections كبيرة مرة واحدة</li>
+            <li>داخل Scope محدود وآمن</li>
+            <li>StringBuilder للنصوص الطويلة</li>
+          </ul>
+
+          <div class="warning">
+            <strong>⚠️ قاعدة مهمة:</strong><br />
+            إذا كان الكائن يُشارك أو يُمرر خارج Scope الحالي:<br />
+            → استخدم <strong>Immutable</strong><br />
+            <br />
+            إذا كان محصورًا داخل دالة واحدة وقصيرة:<br />
+            → يمكن استخدام <strong>Mutable</strong>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة 🎓</h2>
+
+          <blockquote>
+            <strong>Immutability ليست ترفًا، بل ضرورة في Android الحديث</strong><br />
+            <br />
+            السبب:<br />
+            • Android يعمل بـ Multi-Threading بطبيعته<br />
+            • Lifecycle Events تحدث بشكل غير متوقع<br />
+            • Configuration Changes تُعيد إنشاء Components<br />
+            • Compose وState Management يعتمدان على Immutability<br />
+            <br />
+            <strong>القاعدة البسيطة:</strong><br />
+            Mutable = Shared State = مصدر للمشاكل<br />
+            Immutable = Predictable State = Stable App
+          </blockquote>
+
+          <h3>النقاط الجوهرية:</h3>
+
+          <div dir="ltr">
+            <pre>✓ Immutable Objects آمنة للـ Multi-Threading بدون locks
+✓ val لا تعني Immutable دائمًا (فقط الـ reference ثابت)
+✓ Data Classes مع val properties = Best Practice
+✓ استخدم copy() للتعديلات
+✓ Collections: استخدم List بدلاً من MutableList كـ default
+✓ في ViewModel: MutableStateFlow داخلي، StateFlow للخارج
+✓ Compose يعتمد على Immutability للـ Recomposition
+✓ DiffUtil يعمل بشكل أفضل مع Immutable Objects</pre>
+          </div>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>يستخدم var و MutableList في كل مكان</td>
+                <td>يستخدم val و Immutable Collections كـ default</td>
+              </tr>
+              <tr>
+                <td>يعدّل Objects بشكل مباشر</td>
+                <td>ينشئ نسخ جديدة بـ copy()</td>
+              </tr>
+              <tr>
+                <td>لا يفهم لماذا Compose لا يُعيد الرسم</td>
+                <td>يعرف أن State يجب أن يتغير reference-wise</td>
+              </tr>
+              <tr>
+                <td>يحصل على ConcurrentModificationException</td>
+                <td>يستخدم Immutable Collections مع Threads</td>
+              </tr>
+              <tr>
+                <td>يواجه Race Conditions غامضة</td>
+                <td>يحمي State بـ Immutability + Atomic Updates</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>أسئلة شائعة (FAQ) 💭</h2>
+
+          <h3>س1: هل Immutability تؤثر على Performance؟</h3>
+          <p>
+            <strong>الجواب:</strong> في الحالات العادية: <strong>لا</strong>، التأثير ضئيل جدًا.<br />
+            Kotlin تستخدم <strong>Structural Sharing</strong> في Collections الكبيرة.<br />
+            الـ GC الحديث سريع في تنظيف النسخ المؤقتة.<br />
+            <br />
+            متى تهتم؟ فقط في:<br />
+            • Game Loops (60 FPS)<br />
+            • معالجة Bitmaps كبيرة<br />
+            • عمليات متكررة جدًا (مئات المرات/ثانية)
+          </p>
+
+          <h3>س2: ماذا عن الـ Deep Copy؟</h3>
+          <div dir="ltr">
+            <pre>// مشكلة: copy() سطحي فقط
+data class User(
+    val name: String,
+    val address: Address  // Object آخر
+)
+
+val user1 = User("Ahmed", Address("Cairo"))
+val user2 = user1.copy()
+user2.address.city = "Alex"  // ⚠️ يؤثر على user1 أيضًا!
+
+// الحل:
+data class User(
+    val name: String,
+    val address: Address
+) {
+    fun deepCopy() = copy(address = address.copy())
+}
+
+// أو الأفضل: اجعل Address immutable أيضًا
+data class Address(val city: String)  // val = immutable</pre>
+          </div>
+
+          <h3>س3: كيف أتعامل مع APIs ترجع Mutable Objects؟</h3>
+          <div dir="ltr">
+            <pre>// مثال: Gson ينشئ Objects بـ var
+data class ApiUser(
+    var id: String,
+    var name: String
+)
+
+// الحل: Data Transfer Object + Mapper
+data class ApiUser(var id: String, var name: String)  // للـ API فقط
+
+data class User(val id: String, val name: String)  // Domain Model
+
+fun ApiUser.toDomain() = User(id = id, name = name)</pre>
+          </div>
+
+          <h3>س4: ماذا عن Parcelize؟</h3>
+          <div dir="ltr">
+            <pre>// ✅ Parcelize يعمل بشكل رائع مع Immutable
+@Parcelize
+data class User(
+    val id: String,
+    val name: String
+) : Parcelable
+
+// يُمرر بأمان بين Activities/Fragments</pre>
+          </div>
+
+          <hr />
+
+          <h2>نصائح عملية نهائية 💡</h2>
+
+          <div class="success">
+            <strong>✨ قواعد ذهبية:</strong><br />
+            <br />
+            1. <strong>Default to Immutable</strong> - استخدم Immutable ما لم يكن هناك سبب قوي<br />
+            2. <strong>Expose Immutable APIs</strong> - الـ public API يجب أن يكون immutable<br />
+            3. <strong>Mutable Internally, Immutable Externally</strong> - نمط شائع وآمن<br />
+            4. <strong>Copy, Don't Modify</strong> - أنشئ نسخ جديدة بدلاً من التعديل<br />
+            5. <strong>Trust the Tools</strong> - استخدم StateFlow, DiffUtil, Data Classes<br />
+            <br />
+            <strong>تذكّر:</strong><br />
+            كل Bug معقد في Android يمكن تجنبه بـ Immutability ✅
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

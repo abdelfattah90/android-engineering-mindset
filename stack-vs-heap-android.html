@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Stack vs Heap في Android</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>ما الفرق بين Stack vs Heap من ناحية الأساس البرمجي والتفكير المنطقي؟ 🧠</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - المفهوم الأساسي والفلسفة<br />
+            2 - كيف يعمل Stack: التفكير المنطقي<br />
+            3 - كيف يعمل Heap: التفكير المنطقي<br />
+            4 - المقارنة الشاملة<br />
+            5 - التطبيق في Android<br />
+            6 - المشاكل الشائعة وحلولها<br />
+            7 - أمثلة عملية متقدمة<br />
+            8 - الخلاصة
+          </p>
+
+          <hr />
+
+          <h2>المفهوم الأساسي والفلسفة 🎯</h2>
+
+          <blockquote>
+            <strong>القاعدة الذهبية:</strong><br />
+            Stack = الذاكرة المؤقتة السريعة للتنفيذ (Execution Context)<br />
+            Heap = الذاكرة الدائمة البطيئة للبيانات (Data Storage)
+          </blockquote>
+
+          <h3>التشبيه البصري:</h3>
+
+          <div dir="ltr">
+            <pre>┌─────────────────────────────────────────────────────────────┐
+│                    Memory Layout in Android                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────┐                  ┌───────────────────┐   │
+│  │    STACK     │                  │       HEAP        │   │
+│  │              │                  │                   │   │
+│  │   مثل برج    │                  │   مثل مستودع     │   │
+│  │   الأطباق    │                  │   ضخم ومنظّم     │   │
+│  │              │                  │                   │   │
+│  │  ┌────────┐  │                  │  ┌─────┐ ┌─────┐ │   │
+│  │  │ Frame3 │  │ ← Top            │  │ Obj1│ │ Obj2│ │   │
+│  │  ├────────┤  │                  │  └─────┘ └─────┘ │   │
+│  │  │ Frame2 │  │                  │                   │   │
+│  │  ├────────┤  │                  │  ┌─────┐         │   │
+│  │  │ Frame1 │  │                  │  │ Obj3│  Free   │   │
+│  │  └────────┘  │ ← Bottom         │  └─────┘  Space  │   │
+│  │              │                  │                   │   │
+│  │ • Fast       │                  │ • Slow            │   │
+│  │ • Auto Clean │                  │ • Manual Clean    │   │
+│  │ • LIFO       │                  │ • Random Access   │   │
+│  │ • Limited    │                  │ • Large           │   │
+│  └──────────────┘                  └───────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>الفرق الجوهري في التفكير:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المعيار</th>
+                <th>Stack</th>
+                <th>Heap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>الغرض</strong></td>
+                <td>إدارة تنفيذ الدوال (Execution)</td>
+                <td>تخزين الكائنات والبيانات (Storage)</td>
+              </tr>
+              <tr>
+                <td><strong>الفلسفة</strong></td>
+                <td>مؤقت، تلقائي، منظّم</td>
+                <td>دائم، يدوي، فوضوي</td>
+              </tr>
+              <tr>
+                <td><strong>نوع البيانات</strong></td>
+                <td>Primitives + References</td>
+                <td>Objects + Arrays</td>
+              </tr>
+              <tr>
+                <td><strong>العمر الافتراضي</strong></td>
+                <td>طوال فترة تنفيذ الدالة</td>
+                <td>حتى يُحذف بواسطة GC</td>
+              </tr>
+              <tr>
+                <td><strong>من يتحكم؟</strong></td>
+                <td>النظام تلقائيًا</td>
+                <td>Garbage Collector</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>كيف يعمل Stack: التفكير المنطقي 📚</h2>
+
+          <h3>المبدأ الأساسي: LIFO (Last In, First Out)</h3>
+
+          <div dir="ltr">
+            <pre>// كود بسيط
+fun main() {
+    val x = 10           // Line 2
+    calculateSum(5, 3)   // Line 3
+}
+
+fun calculateSum(a: Int, b: Int): Int {
+    val result = a + b   // Line 7
+    return result        // Line 8
+}
+
+// تدفق Stack:
+
+1. main() يُستدعى → Stack Frame يُنشأ
+┌──────────────┐
+│ main()       │
+│ x = 10       │
+└──────────────┘
+
+2. calculateSum() يُستدعى → Stack Frame جديد يُضاف
+┌──────────────┐
+│ calculateSum │ ← Top (آخر دالة)
+│ a = 5        │
+│ b = 3        │
+│ result = 8   │
+├──────────────┤
+│ main()       │
+│ x = 10       │
+└──────────────┘
+
+3. calculateSum() ينتهي → Frame يُحذف تلقائيًا
+┌──────────────┐
+│ main()       │
+│ x = 10       │
+└──────────────┘
+
+4. main() ينتهي → Stack فارغ تمامًا
+┌──────────────┐
+│   Empty      │
+└──────────────┘</pre>
+          </div>
+
+          <h3>خصائص Stack:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الخاصية</th>
+                <th>الشرح</th>
+                <th>التأثير</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Size</strong></td>
+                <td>محدود (1-2 MB في Android)</td>
+                <td>Recursion عميق → StackOverflowError</td>
+              </tr>
+              <tr>
+                <td><strong>Speed</strong></td>
+                <td>سريع جدًا (CPU Cache Friendly)</td>
+                <td>الوصول في O(1)</td>
+              </tr>
+              <tr>
+                <td><strong>Lifetime</strong></td>
+                <td>حياة الدالة فقط</td>
+                <td>تُحذف المتغيرات تلقائيًا</td>
+              </tr>
+              <tr>
+                <td><strong>Thread Safety</strong></td>
+                <td>كل Thread له Stack خاص</td>
+                <td>لا مشاكل في Multi-Threading</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>ماذا يُخزّن في Stack؟</h3>
+
+          <div dir="ltr">
+            <pre>fun example() {
+    // ✅ في Stack
+    val age: Int = 25              // Primitive
+    val price: Double = 99.99      // Primitive
+    val isActive: Boolean = true   // Primitive
+    
+    // ✅ Reference في Stack، Object في Heap
+    val user: User = User("Ali")   // Reference → Stack
+                                    // User Object → Heap
+    
+    // ✅ Array Reference في Stack، Array Content في Heap
+    val numbers: IntArray = intArrayOf(1, 2, 3)
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>كيف يعمل Heap: التفكير المنطقي 🏗️</h2>
+
+          <h3>المبدأ الأساسي: Dynamic Allocation</h3>
+
+          <div dir="ltr">
+            <pre>// Heap = مستودع ضخم للكائنات
+
+┌───────────────────────────────────────────────────┐
+│                    HEAP Memory                    │
+├───────────────────────────────────────────────────┤
+│                                                   │
+│  ┌──────────────┐    ┌──────────────┐            │
+│  │  User@A1B2   │    │  List@C3D4   │            │
+│  │ name="Ali"   │    │ [1, 2, 3]    │            │
+│  │ age=25       │    │ size=3       │            │
+│  └──────────────┘    └──────────────┘            │
+│                                                   │
+│       ┌──────────────┐                            │
+│       │ String@E5F6  │   Free Space               │
+│       │ "Hello"      │                            │
+│       └──────────────┘                            │
+│                                                   │
+│  • Objects يتم تخزينها بشكل عشوائي               │
+│  • GC يبحث عن Objects غير المستخدمة ويحذفها      │
+│  • الحجم كبير (عشرات/مئات الـ MB)                │
+│                                                   │
+└───────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>خصائص Heap:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الخاصية</th>
+                <th>الشرح</th>
+                <th>التأثير</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Size</strong></td>
+                <td>كبير جدًا (مئات MB)</td>
+                <td>يمكن تخزين ملايين Objects</td>
+              </tr>
+              <tr>
+                <td><strong>Speed</strong></td>
+                <td>بطيء نسبيًا</td>
+                <td>Allocation/Deallocation مكلفة</td>
+              </tr>
+              <tr>
+                <td><strong>Lifetime</strong></td>
+                <td>حتى يُحذف بواسطة GC</td>
+                <td>قد يبقى طويلاً → Memory Leaks</td>
+              </tr>
+              <tr>
+                <td><strong>Thread Safety</strong></td>
+                <td>مشترك بين كل Threads</td>
+                <td>يحتاج Synchronization</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>ماذا يُخزّن في Heap؟</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ كل شيء عدا Primitives
+val user = User("Ali")         // Object → Heap
+val list = listOf(1, 2, 3)     // List → Heap
+val array = arrayOf("A", "B")  // Array → Heap
+val lambda = { x: Int -> x * 2 } // Lambda → Heap (في Kotlin)
+
+data class User(val name: String)  // String أيضًا في Heap</pre>
+          </div>
+
+          <hr />
+
+          <h2>المقارنة الشاملة: Stack vs Heap 🔍</h2>
+
+          <h3>الفروقات الأساسية:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المعيار</th>
+                <th>Stack</th>
+                <th>Heap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>الحجم</strong></td>
+                <td>صغير (1-2 MB)</td>
+                <td>كبير (عشرات/مئات MB)</td>
+              </tr>
+              <tr>
+                <td><strong>السرعة</strong></td>
+                <td>سريع جدًا ⚡</td>
+                <td>بطيء نسبيًا 🐢</td>
+              </tr>
+              <tr>
+                <td><strong>التنظيم</strong></td>
+                <td>منظّم (LIFO)</td>
+                <td>عشوائي</td>
+              </tr>
+              <tr>
+                <td><strong>إدارة الذاكرة</strong></td>
+                <td>تلقائية (Auto)</td>
+                <td>يدوية (GC)</td>
+              </tr>
+              <tr>
+                <td><strong>العمر الافتراضي</strong></td>
+                <td>طوال فترة الدالة</td>
+                <td>حتى GC يحذفه</td>
+              </tr>
+              <tr>
+                <td><strong>الأخطاء الشائعة</strong></td>
+                <td>StackOverflowError</td>
+                <td>OutOfMemoryError</td>
+              </tr>
+              <tr>
+                <td><strong>Thread Safety</strong></td>
+                <td>كل Thread منفصل ✅</td>
+                <td>مشترك ⚠️</td>
+              </tr>
+              <tr>
+                <td><strong>Fragmentation</strong></td>
+                <td>لا يوجد</td>
+                <td>يحدث بكثرة</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>مثال توضيحي شامل:</h3>
+
+          <div dir="ltr">
+            <pre>fun createUser(name: String, age: Int) {
+    // Stack:
+    // - name reference
+    // - age value (25)
+    // - user reference
+    
+    val user = User(name, age)
+    // Heap:
+    // - User object
+    // - String object للـ name
+    
+    processUser(user)
+}
+
+fun processUser(user: User) {
+    // Stack:
+    // - user reference (نفس الـ reference)
+    
+    val result = user.name.uppercase()
+    // Stack:
+    // - result reference
+    // Heap:
+    // - String object جديد للـ uppercase
+}
+
+// تدفق الذاكرة الكامل:
+
+Stack:                              Heap:
+┌──────────────────┐               ┌────────────────────┐
+│ processUser()    │               │ User@A1B2          │
+│ user → A1B2      │ ──────────────→│ name → X9Y8        │
+│ result → Z7W6    │ ──┐           │ age = 25           │
+├──────────────────┤   │           ├────────────────────┤
+│ createUser()     │   │           │ String@X9Y8        │
+│ name → X9Y8      │ ──┘           │ "Ali"              │
+│ age = 25         │               ├────────────────────┤
+│ user → A1B2      │               │ String@Z7W6        │
+└──────────────────┘               │ "ALI"              │
+                                   └────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>التطبيق في Android 📱</h2>
+
+          <h3>مثال 1: Activity Lifecycle</h3>
+
+          <div dir="ltr">
+            <pre>class MainActivity : AppCompatActivity() {
+    
+    // ❌ خطأ شائع: تسريب Heap Memory
+    private var listener: View.OnClickListener? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Stack: savedInstanceState reference
+        // Heap: Bundle object
+        
+        val name = "Ali"  // Stack: name reference
+                          // Heap: String "Ali"
+        
+        // ⚠️ هذا يُنشئ Anonymous Class على Heap
+        listener = View.OnClickListener {
+            // هذا الـ lambda يحتفظ بـ reference لـ Activity
+            // → Memory Leak إذا لم يُحذف
+            Toast.makeText(this, name, Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // ✅ تنظيف Heap Memory
+        listener = null
+    }
+}
+
+// الحل الأفضل:
+class MainActivity : AppCompatActivity() {
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // ✅ Lambda بدون reference للـ Activity
+        val name = "Ali"
+        button.setOnClickListener {
+            Log.d("TAG", name)  // name سيُنسخ
+        }
+    }
+}</pre>
+          </div>
+
+          <h3>مثال 2: ViewModel vs Activity</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ خطأ: تخزين context في ViewModel
+class BadViewModel(private val context: Context) : ViewModel() {
+    // context على Heap
+    // ViewModel على Heap
+    // → Memory Leak لأن ViewModel يعيش أطول من Activity
+    
+    fun showToast() {
+        Toast.makeText(context, "Hello", Toast.LENGTH_SHORT).show()
+    }
+}
+
+// ✅ الحل: استخدام Application Context
+class GoodViewModel(application: Application) : AndroidViewModel(application) {
+    // application context آمن لأنه يعيش طوال حياة التطبيق
+    
+    private val appContext = getApplication<Application>()
+    
+    fun showToast() {
+        Toast.makeText(appContext, "Hello", Toast.LENGTH_SHORT).show()
+    }
+}
+
+// الذاكرة:
+Stack:                          Heap:
+┌──────────────┐               ┌─────────────────────┐
+│ Activity     │               │ BadViewModel        │
+│ viewModel →  │ ───────────────→│ context → Activity │ ← Leak!
+└──────────────┘               │ (يحتفظ بـ Activity)  │
+                               └─────────────────────┘
+
+// عند rotation:
+Activity القديم يُدمّر لكن ViewModel يحتفظ به → Memory Leak</pre>
+          </div>
+
+          <h3>مثال 3: Bitmap في Android</h3>
+
+          <div dir="ltr">
+            <pre>fun loadImage(context: Context) {
+    // ❌ مشكلة: Bitmap كبير على Heap
+    val bitmap = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.large_image  // مثلاً 10 MB
+    )
+    // Heap: 10 MB مخصصة للـ Bitmap
+    
+    imageView.setImageBitmap(bitmap)
+    
+    // ⚠️ إذا لم يُحذف Bitmap، سيبقى على Heap
+    // حتى يعمل GC
+}
+
+// ✅ الحل: استخدام inSampleSize
+fun loadImageEfficiently(context: Context) {
+    val options = BitmapFactory.Options().apply {
+        inSampleSize = 4  // تقليل الحجم 4x
+        inJustDecodeBounds = false
+    }
+    
+    val bitmap = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.large_image,
+        options
+    )
+    // Heap: 10 MB / 16 = 625 KB فقط
+    
+    imageView.setImageBitmap(bitmap)
+}
+
+// ✅ الأفضل: استخدام Glide/Coil (يُدير Heap تلقائيًا)
+Glide.with(context)
+    .load(R.drawable.large_image)
+    .into(imageView)</pre>
+          </div>
+
+          <hr />
+
+          <h2>المشاكل الشائعة وحلولها ⚠️</h2>
+
+          <h3>1. StackOverflowError</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة: Recursion بدون Base Case
+fun factorial(n: Int): Int {
+    return n * factorial(n - 1)  // لا يتوقف أبدًا
+}
+
+// Stack:
+┌──────────────┐
+│ factorial(5) │
+├──────────────┤
+│ factorial(4) │
+├──────────────┤
+│ factorial(3) │
+├──────────────┤
+│ factorial(2) │
+├──────────────┤
+│ factorial(1) │
+├──────────────┤
+│ factorial(0) │
+├──────────────┤
+│ factorial(-1)│ ← Stack امتلأ
+└──────────────┘
+💥 StackOverflowError
+
+// ✅ الحل 1: Base Case
+fun factorial(n: Int): Int {
+    if (n <= 1) return 1  // Base Case
+    return n * factorial(n - 1)
+}
+
+// ✅ الحل 2: Tail Recursion
+tailrec fun factorial(n: Int, acc: Int = 1): Int {
+    if (n <= 1) return acc
+    return factorial(n - 1, acc * n)
+}
+// Kotlin Compiler يحوّلها لـ Loop → لا Stack Overflow</pre>
+          </div>
+
+          <h3>2. OutOfMemoryError (Heap)</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة: تخزين Bitmaps كثيرة
+class ImageCache {
+    private val cache = mutableListOf<Bitmap>()
+    
+    fun addImage(bitmap: Bitmap) {
+        cache.add(bitmap)  // Heap يمتلئ تدريجيًا
+    }
+}
+
+// بعد 100 صورة:
+Heap: [Bitmap 10MB, Bitmap 10MB, ..., Bitmap 10MB]
+      ↓
+      1000 MB مستخدمة
+      ↓
+💥 OutOfMemoryError: Failed to allocate
+
+// ✅ الحل: استخدام LruCache
+class ImageCache {
+    private val cache = LruCache<String, Bitmap>(
+        maxSize = 10 * 1024 * 1024  // 10 MB فقط
+    )
+    
+    fun addImage(key: String, bitmap: Bitmap) {
+        cache.put(key, bitmap)
+        // عند امتلاء الـ Cache، يُحذف أقدم Bitmap تلقائيًا
+    }
+}</pre>
+          </div>
+
+          <h3>3. Memory Leak من Reference</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة: Static Reference
+class LeakyActivity : AppCompatActivity() {
+    
+    companion object {
+        // ⚠️ Static reference على Heap
+        var instance: LeakyActivity? = null
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance = this  // Activity لن يُحذف أبدًا
+    }
+}
+
+// Heap:
+┌─────────────────────────────┐
+│ LeakyActivity (Instance 1)  │ ← GC لا يستطيع حذفها
+├─────────────────────────────┤
+│ LeakyActivity (Instance 2)  │ ← بعد rotation
+├─────────────────────────────┤
+│ LeakyActivity (Instance 3)  │ ← بعد rotation ثانٍ
+└─────────────────────────────┘
+💥 Memory Leak: كل rotation يضيف Activity جديد
+
+// ✅ الحل: استخدام WeakReference
+class FixedActivity : AppCompatActivity() {
+    
+    companion object {
+        // ✅ WeakReference تسمح لـ GC بحذف Activity
+        var instance: WeakReference<FixedActivity>? = null
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance = WeakReference(this)
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        instance = null
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة عملية متقدمة 🚀</h2>
+
+          <h3>مثال 4: List Operations في Kotlin</h3>
+
+          <div dir="ltr">
+            <pre>fun processData() {
+    // Stack: numbers reference
+    // Heap: List object + 3 Integer objects
+    val numbers = listOf(1, 2, 3)
+    
+    // ⚠️ كل operation ينشئ List جديد على Heap
+    val doubled = numbers.map { it * 2 }     // Heap: List جديد
+    val filtered = doubled.filter { it > 2 } // Heap: List جديد
+    val sum = filtered.sum()                 // Stack: sum value
+    
+    // الذاكرة:
+    // Heap: [1,2,3], [2,4,6], [4,6], sum=10
+    // GC سيحذف Lists القديمة لاحقًا
+}
+
+// ✅ الأفضل: استخدام Sequence للـ Lazy Evaluation
+fun processDataEfficiently() {
+    val numbers = listOf(1, 2, 3)
+    
+    // ✅ Sequence = Lazy (لا ينشئ Lists وسيطة)
+    val sum = numbers.asSequence()
+        .map { it * 2 }     // لا يُنفّذ الآن
+        .filter { it > 2 }  // لا يُنفّذ الآن
+        .sum()              // يُنفّذ كل شيء مرة واحدة
+    
+    // Heap: فقط List الأصلي + النتيجة النهائية
+}</pre>
+          </div>
+
+          <h3>مثال 5: RecyclerView ViewHolder</h3>
+
+          <div dir="ltr">
+            <pre>class UserAdapter : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+    
+    private val users = mutableListOf<User>()
+    
+    // ❌ خطأ: إنشاء ViewHolder جديد في كل مرة
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_user, parent, false)
+        return ViewHolder(view)
+        // كل ViewHolder على Heap
+        // إذا كان لديك 1000 item → 1000 ViewHolder
+        // 💥 OutOfMemoryError
+    }
+    
+    // ✅ الحل: RecyclerView يُعيد استخدام ViewHolders
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        // RecyclerView يُعيد استخدام نفس ViewHolder
+        // بدلاً من إنشاء جديد
+        holder.bind(users[position])
+    }
+    
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        // Stack: المتغيرات المحلية
+        // Heap: Views
+        
+        private val nameText: TextView = itemView.findViewById(R.id.nameText)
+        
+        fun bind(user: User) {
+            // Stack: user reference
+            nameText.text = user.name
+        }
+    }
+}
+
+// الذاكرة:
+// بدلاً من: 1000 ViewHolder على Heap
+// RecyclerView ينشئ: ~10 ViewHolder فقط (الظاهرة على الشاشة)
+// ويُعيد استخدامهم → توفير Heap Memory</pre>
+          </div>
+
+          <h3>مثال 6: Coroutines vs Threads</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة: Thread لكل task
+fun loadDataWithThreads() {
+    repeat(1000) {
+        // كل Thread له Stack خاص (~1 MB)
+        Thread {
+            Thread.sleep(1000)
+            println("Task $it done")
+        }.start()
+    }
+    // 1000 Thread × 1 MB = 1000 MB من Stack Memory
+    // 💥 OutOfMemoryError
+}
+
+// ✅ الحل: Coroutines (Lightweight Threads)
+suspend fun loadDataWithCoroutines() {
+    coroutineScope {
+        repeat(1000) {
+            launch {
+                // Coroutine لا تحتاج Stack كامل
+                // تستخدم Continuation على Heap
+                delay(1000)
+                println("Task $it done")
+            }
+        }
+    }
+    // 1000 Coroutine = بضع KB فقط
+}
+
+// المقارنة:
+┌─────────────────────────────────────────┐
+│           Memory Usage                  │
+├─────────────────────────────────────────┤
+│ Threads:                                │
+│ • 1000 threads × 1 MB = 1000 MB         │
+│ • كل thread له Stack منفصل             │
+│                                         │
+│ Coroutines:                             │
+│ • 1000 coroutines = ~10 MB              │
+│ • تشارك نفس الـ Threads                 │
+│ • تُحفظ الحالة في Continuation (Heap)  │
+└─────────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>التفكير المنطقي: متى تستخدم أيهما؟ 🤔</h2>
+
+          <h3>قواعد اتخاذ القرار:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>السيناريو</th>
+                <th>الاختيار</th>
+                <th>السبب</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>متغير بسيط، قصير العمر</td>
+                <td>Stack (Primitive)</td>
+                <td>سريع، تلقائي</td>
+              </tr>
+              <tr>
+                <td>كائن كبير، طويل العمر</td>
+                <td>Heap (Object)</td>
+                <td>مرونة في الحجم</td>
+              </tr>
+              <tr>
+                <td>بيانات مشتركة بين Threads</td>
+                <td>Heap + Synchronization</td>
+                <td>Heap مشترك</td>
+              </tr>
+              <tr>
+                <td>عمليات متكررة (Loop)</td>
+                <td>Stack لـ counters</td>
+                <td>سرعة الوصول</td>
+              </tr>
+              <tr>
+                <td>Cache للصور</td>
+                <td>Heap + LruCache</td>
+                <td>إدارة الحجم</td>
+              </tr>
+              <tr>
+                <td>Recursion عميق</td>
+                <td>تحويل لـ Iteration</td>
+                <td>تجنب Stack Overflow</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>الأنماط الشائعة في Android:</h3>
+
+          <div dir="ltr">
+            <pre>// Pattern 1: Data Classes على Heap
+data class User(
+    val id: Int,        // Primitive على Stack (في الاستدعاء)
+    val name: String    // Reference على Stack، String على Heap
+)
+
+// Pattern 2: Singleton على Heap
+object DatabaseManager {
+    // Object يُنشأ مرة واحدة على Heap
+    // ويعيش طوال حياة التطبيق
+}
+
+// Pattern 3: Scope Functions (تحسين Stack)
+fun processUser(user: User?) {
+    // ❌ بدون scope
+    if (user != null) {
+        println(user.name)
+        println(user.email)
+        // كل استدعاء يُضيف Frame للـ Stack
+    }
+    
+    // ✅ مع scope
+    user?.let {
+        println(it.name)
+        println(it.email)
+        // Frame واحد فقط
+    }
+}
+
+// Pattern 4: ViewBinding (إدارة Heap)
+class MainActivity : AppCompatActivity() {
+    
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null  // ✅ تحرير Heap Memory
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>نصائح متقدمة للمحترفين 🎯</h2>
+
+          <h3>1. استخدام Android Profiler:</h3>
+
+          <div dir="ltr">
+            <pre>// في Android Studio:
+View → Tool Windows → Profiler
+
+// راقب:
+• Memory Usage (Heap)
+• Thread Count (Stack)
+• Allocations per second
+• GC Events
+
+// ابحث عن:
+• Memory Leaks (Heap لا يتناقص)
+• Excessive Allocations (Heap ينمو بسرعة)
+• Too many Threads (Stack overhead)</pre>
+          </div>
+
+          <h3>2. استخدام LeakCanary:</h3>
+
+          <div dir="ltr">
+            <pre>// في build.gradle
+dependencies {
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+}
+
+// LeakCanary يكتشف تلقائيًا:
+• Activity/Fragment Leaks
+• ViewModel Leaks
+• Static Reference Leaks
+
+// مثال على Leak Report:
+┌─────────────────────────────────────────┐
+│ LEAK FOUND                              │
+├─────────────────────────────────────────┤
+│ MainActivity leaked!                    │
+│                                         │
+│ Reference chain:                        │
+│ static MyApp.instance                   │
+│ ↓ MyApp.activity                        │
+│ ↓ MainActivity (leaked)                 │
+│                                         │
+│ Retaining 2.4 MB in Heap               │
+└─────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>3. Optimization Techniques:</h3>
+
+          <div dir="ltr">
+            <pre>// Technique 1: Object Pooling (تقليل Heap Allocations)
+class ObjectPool<T>(
+    private val create: () -> T,
+    private val reset: (T) -> Unit
+) {
+    private val pool = ArrayDeque<T>()
+    
+    fun acquire(): T {
+        return if (pool.isNotEmpty()) {
+            pool.removeFirst()  // إعادة استخدام
+        } else {
+            create()            // إنشاء جديد فقط عند الحاجة
+        }
+    }
+    
+    fun release(obj: T) {
+        reset(obj)
+        pool.addLast(obj)
+    }
+}
+
+// Technique 2: Lazy Initialization (تأخير Heap Allocation)
+class ExpensiveResource {
+    // ❌ ينشأ فورًا
+    private val data = loadHugeData()
+    
+    // ✅ ينشأ عند أول استخدام
+    private val data by lazy { loadHugeData() }
+}
+
+// Technique 3: Use Primitives (تقليل Heap)
+// ❌ Heap: List<Integer>
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// ✅ Stack + Small Heap: IntArray
+val numbers = intArrayOf(1, 2, 3, 4, 5)</pre>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة 🎓</h2>
+
+          <h3>الفرق الجوهري:</h3>
+
+          <blockquote>
+            <strong>Stack = الذاكرة المؤقتة للتنفيذ</strong><br />
+            • سريع، منظّم، محدود<br />
+            • يُدار تلقائيًا<br />
+            • للمتغيرات المحلية والمعاملات<br />
+            <br />
+            <strong>Heap = الذاكرة الدائمة للبيانات</strong><br />
+            • بطيء، عشوائي، كبير<br />
+            • يُدار بواسطة GC<br />
+            • للكائنات والبيانات الكبيرة
+          </blockquote>
+
+          <h3>القواعد الذهبية:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>القاعدة</th>
+                <th>التطبيق في Android</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Stack سريع، استخدمه للبيانات المؤقتة</td>
+                <td>Primitives في الدوال</td>
+              </tr>
+              <tr>
+                <td>Heap كبير، لكن يحتاج إدارة</td>
+                <td>Objects، استخدم LruCache</td>
+              </tr>
+              <tr>
+                <td>كل Thread له Stack خاص</td>
+                <td>استخدم Coroutines بدلاً من Threads</td>
+              </tr>
+              <tr>
+                <td>Memory Leaks تحدث في Heap</td>
+                <td>استخدم WeakReference، اتبع Lifecycle</td>
+              </tr>
+              <tr>
+                <td>StackOverflow من Recursion عميق</td>
+                <td>استخدم tailrec أو Iteration</td>
+              </tr>
+              <tr>
+                <td>OutOfMemory من Heap امتلأ</td>
+                <td>قلل Bitmap size، استخدم Glide</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>لا يعرف أين تُخزّن البيانات</td>
+                <td>يفهم Stack vs Heap ويستغلهما</td>
+              </tr>
+              <tr>
+                <td>يُنشئ Objects بدون تفكير</td>
+                <td>يستخدم Object Pooling، Lazy Init</td>
+              </tr>
+              <tr>
+                <td>لا يهتم بـ Memory Leaks</td>
+                <td>يستخدم LeakCanary، WeakReference</td>
+              </tr>
+              <tr>
+                <td>يُحمّل Bitmaps كاملة</td>
+                <td>يستخدم Glide، inSampleSize</td>
+              </tr>
+              <tr>
+                <td>ينشئ Thread لكل task</td>
+                <td>يستخدم Coroutines</td>
+              </tr>
+              <tr>
+                <td>لا يقرأ Profiler</td>
+                <td>يراقب Memory، يُحلل Allocations</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>أسئلة شائعة (FAQ) 💭</h2>
+
+          <h3>س1: هل String على Stack أم Heap؟</h3>
+          <p>
+            <strong>String object على Heap، لكن الـ reference على Stack.</strong><br />
+            مثال: <code>val name = "Ali"</code><br />
+            • <code>name</code> reference → Stack<br />
+            • <code>"Ali"</code> object → Heap (في String Pool)
+          </p>
+
+          <h3>س2: لماذا Heap أبطأ من Stack؟</h3>
+          <p>
+            لأن:<br />
+            1. Stack منظّم (LIFO) → الوصول O(1) مباشر<br />
+            2. Heap عشوائي → يحتاج بحث عن مكان فارغ<br />
+            3. Heap يحتاج GC → overhead إضافي<br />
+            4. Stack في CPU Cache → سريع جدًا
+          </p>
+
+          <h3>س3: ماذا يحدث عند rotation للـ Activity؟</h3>
+          <p>
+            • Activity القديم يُدمّر → Stack Frames تُحذف<br />
+            • Objects على Heap تبقى حتى يعمل GC<br />
+            • إذا كان هناك static reference → Memory Leak<br />
+            • ViewModel يبقى على Heap (لأنه خارج Activity Lifecycle)
+          </p>
+
+          <h3>س4: كيف أتجنب OutOfMemoryError؟</h3>
+          <p>
+            1. استخدم <strong>LruCache</strong> للـ Bitmaps<br />
+            2. استخدم <strong>Glide/Coil</strong> لتحميل الصور<br />
+            3. قلل <strong>inSampleSize</strong> للصور الكبيرة<br />
+            4. اتبع <strong>Lifecycle</strong> وحرّر الموارد<br />
+            5. استخدم <strong>Profiler</strong> لتتبع Memory Leaks
+          </p>
+
+          <h3>س5: هل Coroutines تستخدم Stack أم Heap؟</h3>
+          <p>
+            <strong>كلاهما:</strong><br />
+            • عند التنفيذ → Stack (مثل أي دالة)<br />
+            • عند Suspension → تُحفظ الحالة في Continuation على Heap<br />
+            • ثم تُحرّر Stack Frame<br />
+            • هذا يجعلها Lightweight (لا Stack overhead)
+          </p>
+
+          <hr />
+
+          <h2>خاتمة 🏁</h2>
+
+          <div class="success">
+            <strong>✨ النقطة الأساسية:</strong><br />
+            فهم Stack vs Heap ليس للحفظ، بل لـ:<br />
+            <br />
+            • <strong>تحسين الأداء:</strong> استخدام Stack للبيانات المؤقتة<br />
+            • <strong>تجنب Memory Leaks:</strong> إدارة Heap بحذر<br />
+            • <strong>حل المشاكل:</strong> فهم StackOverflow vs OutOfMemory<br />
+            • <strong>اتخاذ قرارات معمارية:</strong> متى تستخدم Object Pooling، Caching، إلخ<br />
+            <br />
+            <strong>المهندس المحترف يفكر في الذاكرة كما يفكر في الكود.</strong>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ تذكّر دائمًا:</strong><br />
+            • Stack = سريع، محدود، تلقائي<br />
+            • Heap = بطيء، كبير، يحتاج إدارة<br />
+            • Memory Leaks = العدو الأول في Android<br />
+            • Profiler = أفضل صديق لك
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

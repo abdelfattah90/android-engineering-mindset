@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Call Stack في Android</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>ما هي وظيفة Call Stack وكيف يؤثر على تنفيذ الكود؟ 🧠</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - المفهوم الأساسي<br />
+            2 - كيف يعمل Call Stack في الذاكرة<br />
+            3 - تأثير Call Stack على تنفيذ الكود<br />
+            4 - Call Stack في Android تحديدًا<br />
+            5 - المشاكل الشائعة وحلولها<br />
+            6 - أمثلة عملية من Android<br />
+            7 - الخلاصة
+          </p>
+
+          <hr />
+
+          <h2>المفهوم الأساسي 🎯</h2>
+
+          <h3>التعريف:</h3>
+          <p>
+            <strong>Call Stack</strong> هو هيكل بيانات من نوع <strong>Stack (LIFO - Last In First Out)</strong> يُستخدم لتتبع تنفيذ الدوال (Functions) في البرنامج. كل مرة تُستدعى دالة، يتم إضافة <strong>Stack Frame</strong> جديد يحتوي على معلومات التنفيذ.
+          </p>
+
+          <blockquote>
+            <strong>القاعدة الذهبية:</strong><br />
+            Call Stack = سجل تنفيذ الدوال بترتيب LIFO<br />
+            آخر دالة تُستدعى هي أول دالة تنتهي
+          </blockquote>
+
+          <div dir="ltr">
+            <pre>┌─────────────────────────────────────────┐
+│         Call Stack Structure            │
+├─────────────────────────────────────────┤
+│                                         │
+│  ┌─────────────────┐                   │
+│  │   Frame 3       │  ← Top (آخر دالة)  │
+│  │   function C()  │                   │
+│  ├─────────────────┤                   │
+│  │   Frame 2       │                   │
+│  │   function B()  │                   │
+│  ├─────────────────┤                   │
+│  │   Frame 1       │                   │
+│  │   function A()  │                   │
+│  ├─────────────────┤                   │
+│  │   Frame 0       │                   │
+│  │   main()        │  ← Bottom (أول)   │
+│  └─────────────────┘                   │
+│                                         │
+└─────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>مكونات Stack Frame:</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>المكون</th>
+                <th>الوصف</th>
+                <th>مثال</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Local Variables</strong></td>
+                <td>المتغيرات المحلية للدالة</td>
+                <td><code>val result = 10</code></td>
+              </tr>
+              <tr>
+                <td><strong>Parameters</strong></td>
+                <td>المعاملات الممررة للدالة</td>
+                <td><code>fun sum(a: Int, b: Int)</code></td>
+              </tr>
+              <tr>
+                <td><strong>Return Address</strong></td>
+                <td>عنوان العودة بعد انتهاء الدالة</td>
+                <td>السطر التالي بعد الاستدعاء</td>
+              </tr>
+              <tr>
+                <td><strong>Saved Registers</strong></td>
+                <td>قيم السجلات المحفوظة</td>
+                <td>حالة CPU</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>كيف يعمل Call Stack في الذاكرة 💾</h2>
+
+          <h3>1️⃣ تقسيم الذاكرة في Android Process:</h3>
+
+          <div dir="ltr">
+            <pre>┌─────────────────────────────────────────┐
+│       Android Process Memory Layout     │
+├─────────────────────────────────────────┤
+│                                         │
+│  ┌─────────────────┐  High Address     │
+│  │   Stack         │  ← ينمو للأسفل    │
+│  │   (Call Stack)  │                   │
+│  ├─────────────────┤                   │
+│  │   ↓↓↓           │                   │
+│  │   Free Space    │                   │
+│  │   ↑↑↑           │                   │
+│  ├─────────────────┤                   │
+│  │   Heap          │  ← ينمو للأعلى    │
+│  │   (Objects)     │                   │
+│  ├─────────────────┤                   │
+│  │   BSS/Data      │  (متغيرات عامة)   │
+│  ├─────────────────┤                   │
+│  │   Text (Code)   │  (الكود المترجم)   │
+│  └─────────────────┘  Low Address      │
+│                                         │
+└─────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>2️⃣ مثال تفصيلي: كيف ينمو Stack؟</h3>
+
+          <div dir="ltr">
+            <pre>fun main() {
+    val x = 5           // Frame 0
+    functionA(x)
+}
+
+fun functionA(a: Int) {
+    val y = a * 2       // Frame 1
+    functionB(y)
+}
+
+fun functionB(b: Int) {
+    val z = b + 10      // Frame 2
+    println(z)
+}</pre>
+          </div>
+
+          <h4>حالة Stack أثناء التنفيذ:</h4>
+
+          <div dir="ltr">
+            <pre>════════════════════════════════════════
+Step 1: main() يبدأ
+────────────────────────────────────────
+Stack:
+┌─────────────────┐
+│ Frame 0: main() │
+│ x = 5           │
+└─────────────────┘
+
+════════════════════════════════════════
+Step 2: functionA(5) يُستدعى
+────────────────────────────────────────
+Stack:
+┌─────────────────┐
+│ Frame 1: funcA()│ ← Current
+│ a = 5           │
+│ y = 10          │
+├─────────────────┤
+│ Frame 0: main() │
+│ x = 5           │
+└─────────────────┘
+
+════════════════════════════════════════
+Step 3: functionB(10) يُستدعى
+────────────────────────────────────────
+Stack:
+┌─────────────────┐
+│ Frame 2: funcB()│ ← Current
+│ b = 10          │
+│ z = 20          │
+├─────────────────┤
+│ Frame 1: funcA()│
+│ a = 5, y = 10   │
+├─────────────────┤
+│ Frame 0: main() │
+│ x = 5           │
+└─────────────────┘
+
+════════════════════════════════════════
+Step 4: functionB() تنتهي (Pop)
+────────────────────────────────────────
+Stack:
+┌─────────────────┐
+│ Frame 1: funcA()│ ← Current
+│ a = 5, y = 10   │
+├─────────────────┤
+│ Frame 0: main() │
+│ x = 5           │
+└─────────────────┘
+
+════════════════════════════════════════
+Step 5: functionA() تنتهي (Pop)
+────────────────────────────────────────
+Stack:
+┌─────────────────┐
+│ Frame 0: main() │ ← Current
+│ x = 5           │
+└─────────────────┘
+
+════════════════════════════════════════
+Step 6: main() تنتهي (Pop)
+────────────────────────────────────────
+Stack: Empty (البرنامج ينتهي)</pre>
+          </div>
+
+          <hr />
+
+          <h2>تأثير Call Stack على تنفيذ الكود ⚡</h2>
+
+          <h3>1️⃣ التنفيذ المتسلسل (Sequential Execution)</h3>
+
+          <p>
+            Call Stack يفرض تنفيذ الدوال بشكل متسلسل: الدالة الحالية يجب أن تنتهي قبل العودة للدالة التي استدعتها.
+          </p>
+
+          <div dir="ltr">
+            <pre>fun fetchUserData() {
+    println("1. Start fetching")
+    val data = networkCall()      // ينتظر هنا!
+    println("3. Data received")
+}
+
+fun networkCall(): String {
+    println("2. Making network call")
+    Thread.sleep(3000)  // Blocking
+    return "User Data"
+}
+
+// Output (بالترتيب):
+// 1. Start fetching
+// 2. Making network call
+// (3 seconds wait)
+// 3. Data received</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ المشكلة في Android:</strong><br />
+            إذا حدث Blocking على Main Thread (UI Thread)، التطبيق سيتجمد لأن Call Stack معلق في انتظار انتهاء الدالة!
+          </div>
+
+          <h3>2️⃣ عمق الاستدعاء (Call Depth)</h3>
+
+          <p>
+            كل استدعاء يضيف Frame جديد، وإذا كان العمق كبير جدًا → <strong>StackOverflowError</strong>
+          </p>
+
+          <div dir="ltr">
+            <pre>// ❌ مثال: Recursion بلا نهاية
+fun infiniteRecursion(n: Int) {
+    println(n)
+    infiniteRecursion(n + 1)  // يستدعي نفسه للأبد
+}
+
+// Result:
+// Exception in thread "main" 
+// java.lang.StackOverflowError</pre>
+          </div>
+
+          <h4>لماذا يحدث StackOverflow؟</h4>
+
+          <div dir="ltr">
+            <pre>Stack Memory (محدود ~1-2 MB):
+┌─────────────────┐
+│ Frame 10000     │  ← وصل للحد الأقصى
+│ Frame 9999      │
+│ Frame 9998      │
+│ ...             │
+│ Frame 2         │
+│ Frame 1         │
+│ Frame 0: main() │
+└─────────────────┘
+     ↓
+   CRASH! StackOverflowError</pre>
+          </div>
+
+          <h3>3️⃣ Scope وLifetime للمتغيرات</h3>
+
+          <p>
+            المتغيرات المحلية تعيش فقط داخل Stack Frame الخاص بها، وتُحذف تلقائيًا عند Pop.
+          </p>
+
+          <div dir="ltr">
+            <pre>fun calculate() {
+    val result = 100  // موجود في Stack Frame
+    println(result)   // OK
+}  // ← هنا يُحذف result تلقائيًا
+
+// result لا يمكن الوصول إليه هنا!</pre>
+          </div>
+
+          <hr />
+
+          <h2>Call Stack في Android تحديدًا 📱</h2>
+
+          <h3>1️⃣ Main Thread (UI Thread) Stack</h3>
+
+          <p>
+            في Android، Main Thread له Call Stack خاص به، وأي عملية طويلة تسبب ANR (Application Not Responding).
+          </p>
+
+          <div dir="ltr">
+            <pre>class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // ❌ هذا سيُجمد التطبيق!
+        Thread.sleep(5000)  // Blocking Main Thread
+
+        // Call Stack معلق هنا:
+        // Frame 2: Thread.sleep()
+        // Frame 1: onCreate()
+        // Frame 0: ActivityThread.handleLaunchActivity()
+    }
+}</pre>
+          </div>
+
+          <h4>ما يحدث في System:</h4>
+
+          <div dir="ltr">
+            <pre>Main Thread Call Stack (معلق):
+┌─────────────────────────────┐
+│ Thread.sleep(5000)          │ ← معلق هنا!
+├─────────────────────────────┤
+│ onCreate()                  │
+├─────────────────────────────┤
+│ handleLaunchActivity()      │
+└─────────────────────────────┘
+         ↓
+   UI لا يستجيب
+         ↓
+   بعد 5 ثواني: ANR Dialog</pre>
+          </div>
+
+          <h3>2️⃣ Coroutines: تجاوز حدود Call Stack</h3>
+
+          <p>
+            Coroutines تحل المشكلة عن طريق <strong>Suspension</strong>: الدالة تتوقف مؤقتًا وتُحرر Call Stack!
+          </p>
+
+          <div dir="ltr">
+            <pre>class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            // ✅ Suspend Function
+            val data = fetchUserData()  // لا يُعلق Main Thread!
+            updateUI(data)
+        }
+    }
+
+    suspend fun fetchUserData(): String {
+        return withContext(Dispatchers.IO) {
+            // يعمل في Background Thread
+            delay(3000)  // Suspending (ليس Blocking)
+            "User Data"
+        }
+    }
+}</pre>
+          </div>
+
+          <h4>الفرق بين Blocking و Suspending:</h4>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Blocking</th>
+                <th>Suspending</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>يُعلق Call Stack بالكامل</td>
+                <td>يُحرر Call Stack مؤقتًا</td>
+              </tr>
+              <tr>
+                <td>Thread معلق</td>
+                <td>Thread حر لتنفيذ عمليات أخرى</td>
+              </tr>
+              <tr>
+                <td>مثال: <code>Thread.sleep()</code></td>
+                <td>مثال: <code>delay()</code></td>
+              </tr>
+              <tr>
+                <td>يسبب ANR على Main Thread</td>
+                <td>لا يسبب ANR</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>3️⃣ Exception Handling و Call Stack</h3>
+
+          <p>
+            عند حدوث Exception، Android يعرض <strong>Stack Trace</strong> (تتبع Call Stack).
+          </p>
+
+          <div dir="ltr">
+            <pre>fun main() {
+    functionA()
+}
+
+fun functionA() {
+    functionB()
+}
+
+fun functionB() {
+    val result = 10 / 0  // ArithmeticException
+}</pre>
+          </div>
+
+          <h4>Stack Trace الناتج:</h4>
+
+          <div dir="ltr">
+            <pre>Exception in thread "main" java.lang.ArithmeticException: / by zero
+    at MainKt.functionB(Main.kt:12)    ← حدثت هنا
+    at MainKt.functionA(Main.kt:8)     ← استُدعيت من هنا
+    at MainKt.main(Main.kt:4)          ← استُدعيت من هنا</pre>
+          </div>
+
+          <p>
+            Stack Trace يقرأ من <strong>الأسفل للأعلى</strong> (عكس اتجاه Call Stack).
+          </p>
+
+          <hr />
+
+          <h2>المشاكل الشائعة وحلولها ⚠️</h2>
+
+          <h3>❌ مشكلة 1: StackOverflowError</h3>
+
+          <h4>السبب:</h4>
+          <ul>
+            <li>Recursion عميقة بلا نهاية</li>
+            <li>استدعاءات متداخلة كثيرة جدًا</li>
+          </ul>
+
+          <div dir="ltr">
+            <pre>// ❌ مثال خاطئ
+fun factorial(n: Int): Int {
+    return n * factorial(n - 1)  // لا يوجد Base Case
+}</pre>
+          </div>
+
+          <h4>الحل:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ إضافة Base Case
+fun factorial(n: Int): Int {
+    if (n <= 1) return 1  // Base Case
+    return n * factorial(n - 1)
+}
+
+// ✅ أو استخدام Tail Recursion
+tailrec fun factorial(n: Int, acc: Int = 1): Int {
+    if (n <= 1) return acc
+    return factorial(n - 1, n * acc)
+}
+
+// ✅ أو استخدام Loop
+fun factorial(n: Int): Int {
+    var result = 1
+    for (i in 1..n) {
+        result *= i
+    }
+    return result
+}</pre>
+          </div>
+
+          <h3>❌ مشكلة 2: ANR (Application Not Responding)</h3>
+
+          <h4>السبب:</h4>
+          <p>عملية طويلة (Blocking) على Main Thread تُعلق Call Stack.</p>
+
+          <div dir="ltr">
+            <pre>// ❌ خطأ شائع
+button.setOnClickListener {
+    val data = fetchFromNetwork()  // Blocking I/O
+    textView.text = data
+    // UI معلق هنا لـ 5 ثواني!
+}</pre>
+          </div>
+
+          <h4>الحل:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ استخدام Coroutines
+button.setOnClickListener {
+    lifecycleScope.launch {
+        val data = withContext(Dispatchers.IO) {
+            fetchFromNetwork()  // في Background
+        }
+        textView.text = data  // العودة لـ Main Thread
+    }
+}</pre>
+          </div>
+
+          <h3>❌ مشكلة 3: Memory Leak من Call Stack</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة: Inner Class تحتفظ بـ Activity
+class MainActivity : AppCompatActivity() {
+
+    inner class MyTask {
+        fun doWork() {
+            // هذا يحتفظ بـ reference للـ Activity
+            // حتى لو Activity تم تدميره!
+        }
+    }
+
+    fun startTask() {
+        val task = MyTask()
+        thread {
+            Thread.sleep(60000)  // دقيقة كاملة
+            task.doWork()  // Activity لا يمكن جمعه من Garbage Collector
+        }
+    }
+}</pre>
+          </div>
+
+          <h4>الحل:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ استخدام Static Class أو Standalone
+class MainActivity : AppCompatActivity() {
+
+    class MyTask(private val contextRef: WeakReference<Context>) {
+        fun doWork() {
+            val context = contextRef.get() ?: return
+            // استخدام Context بأمان
+        }
+    }
+
+    fun startTask() {
+        val task = MyTask(WeakReference(this))
+        lifecycleScope.launch(Dispatchers.IO) {
+            delay(60000)
+            task.doWork()
+        }
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة عملية من Android 💡</h2>
+
+          <h3>مثال 1: تتبع Navigation Stack في Android</h3>
+
+          <p>
+            Android يستخدم مفهوم مشابه لـ Call Stack اسمه <strong>Back Stack</strong> لتتبع الـ Activities/Fragments.
+          </p>
+
+          <div dir="ltr">
+            <pre>// Navigation بين Screens
+MainActivity → DetailsActivity → SettingsActivity
+
+Back Stack:
+┌─────────────────────┐
+│ SettingsActivity    │ ← Current (Top)
+├─────────────────────┤
+│ DetailsActivity     │
+├─────────────────────┤
+│ MainActivity        │ ← Root
+└─────────────────────┘
+
+عند الضغط على Back Button:
+┌─────────────────────┐
+│ DetailsActivity     │ ← Current
+├─────────────────────┤
+│ MainActivity        │
+└─────────────────────┘</pre>
+          </div>
+
+          <h3>مثال 2: Callback Hell و Call Stack</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ Callback Hell: Call Stack معقد
+fun loadUserProfile(userId: String) {
+    fetchUser(userId) { user ->
+        fetchPosts(user.id) { posts ->
+            fetchComments(posts[0].id) { comments ->
+                updateUI(user, posts, comments)
+                // Call Stack عميق جدًا!
+            }
+        }
+    }
+}
+
+// ✅ الحل: Coroutines
+suspend fun loadUserProfile(userId: String) {
+    val user = fetchUser(userId)
+    val posts = fetchPosts(user.id)
+    val comments = fetchComments(posts[0].id)
+    updateUI(user, posts, comments)
+    // Call Stack بسيط ومباشر
+}</pre>
+          </div>
+
+          <h3>مثال 3: فهم Crash من Stack Trace</h3>
+
+          <div dir="ltr">
+            <pre>// Stack Trace حقيقي من Android
+E/AndroidRuntime: FATAL EXCEPTION: main
+    Process: com.example.app, PID: 12345
+    java.lang.NullPointerException: user.name must not be null
+        at com.example.UserViewModel.updateUser(UserViewModel.kt:45)
+        at com.example.ProfileFragment.onSaveClick(ProfileFragment.kt:78)
+        at com.example.ProfileFragment.access$onSaveClick(ProfileFragment.kt:1)
+        at com.example.ProfileFragment$onCreate$1.onClick(ProfileFragment.kt:34)
+        at android.view.View.performClick(View.java:7125)
+        at android.view.View.performClickInternal(View.java:7102)
+        ...</pre>
+          </div>
+
+          <h4>قراءة Stack Trace:</h4>
+
+          <div dir="ltr">
+            <pre>المسار (من الأسفل للأعلى):
+1. User نقر على Button
+   └─ View.performClick()
+
+2. Click Listener تم تنفيذه
+   └─ ProfileFragment$onCreate$1.onClick()
+
+3. دالة onSaveClick() استُدعيت
+   └─ ProfileFragment.onSaveClick()
+
+4. updateUser() استُدعيت
+   └─ UserViewModel.updateUser()
+
+5. الـ Crash حدث هنا (Line 45)
+   └─ NullPointerException في user.name</pre>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة 🎓</h2>
+
+          <h3>النقاط الجوهرية:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المفهوم</th>
+                <th>الشرح</th>
+                <th>التأثير في Android</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>LIFO Structure</strong></td>
+                <td>آخر دالة تُستدعى أول من تنتهي</td>
+                <td>تحديد ترتيب التنفيذ</td>
+              </tr>
+              <tr>
+                <td><strong>Stack Frame</strong></td>
+                <td>وحدة تخزين لكل دالة</td>
+                <td>يحتوي على المتغيرات المحلية والمعاملات</td>
+              </tr>
+              <tr>
+                <td><strong>Sequential Execution</strong></td>
+                <td>الدالة يجب أن تنتهي قبل العودة</td>
+                <td>Blocking يسبب ANR على Main Thread</td>
+              </tr>
+              <tr>
+                <td><strong>Limited Size</strong></td>
+                <td>حجم محدود (~1-2 MB)</td>
+                <td>استدعاءات كثيرة → StackOverflowError</td>
+              </tr>
+              <tr>
+                <td><strong>Stack Trace</strong></td>
+                <td>سجل Call Stack عند الـ Exception</td>
+                <td>أداة debugging أساسية</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>القواعد الذهبية:</h3>
+
+          <div dir="ltr">
+            <pre>✓ Call Stack يتحكم في ترتيب تنفيذ الكود
+✓ كل دالة لها Frame خاص بها في الذاكرة
+✓ المتغيرات المحلية تُحذف تلقائيًا عند انتهاء الدالة
+✓ Blocking على Main Thread = تجميد التطبيق
+✓ Stack Trace يقرأ من الأسفل للأعلى
+✓ Coroutines تحل مشكلة Blocking بـ Suspension</pre>
+          </div>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>لا يفهم لماذا حدث StackOverflow</td>
+                <td>يعرف أن الـ Recursion تحتاج Base Case</td>
+              </tr>
+              <tr>
+                <td>يضع كود Blocking على Main Thread</td>
+                <td>يستخدم Coroutines للعمليات الطويلة</td>
+              </tr>
+              <tr>
+                <td>لا يقرأ Stack Trace</td>
+                <td>يستخدمه لتتبع مصدر الـ Exception</td>
+              </tr>
+              <tr>
+                <td>يكتب Callback Hell</td>
+                <td>يستخدم suspend functions</td>
+              </tr>
+              <tr>
+                <td>لا يفهم Memory Leaks من References</td>
+                <td>يستخدم WeakReference ويراقب Lifecycle</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>تطبيقات عملية إضافية 🔧</h2>
+
+          <h3>مثال 4: Debugging باستخدام Call Stack</h3>
+
+          <p>
+            في Android Studio، يمكنك مشاهدة Call Stack الحالي أثناء Debugging:
+          </p>
+
+          <div dir="ltr">
+            <pre>fun calculateTotal(items: List&lt;Item&gt;): Double {
+    var total = 0.0
+    items.forEach { item ->
+        total += calculateItemPrice(item)  // ضع Breakpoint هنا
+    }
+    return total
+}
+
+// عند Breakpoint، Call Stack في Debugger:
+┌─────────────────────────────────────┐
+│ calculateItemPrice() - Line 15      │ ← Current
+├─────────────────────────────────────┤
+│ calculateTotal() - Line 10          │
+├─────────────────────────────────────┤
+│ onCheckoutClick() - Line 45         │
+├─────────────────────────────────────┤
+│ onClick() - Line 32                 │
+└─────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>مثال 5: حماية من StackOverflow في Real-World</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ مشكلة: عرض هيكل شجري عميق
+data class TreeNode(
+    val value: Int,
+    val children: List&lt;TreeNode&gt;
+)
+
+fun printTree(node: TreeNode, depth: Int = 0) {
+    println("  ".repeat(depth) + node.value)
+    node.children.forEach { child ->
+        printTree(child, depth + 1)  // قد يسبب StackOverflow
+    }
+}
+
+// ✅ الحل: استخدام Queue بدلاً من Recursion
+fun printTreeIterative(root: TreeNode) {
+    val queue = ArrayDeque&lt;Pair&lt;TreeNode, Int&gt;&gt;()
+    queue.add(root to 0)
+
+    while (queue.isNotEmpty()) {
+        val (node, depth) = queue.removeFirst()
+        println("  ".repeat(depth) + node.value)
+        node.children.forEach { child ->
+            queue.add(child to depth + 1)
+        }
+    }
+}</pre>
+          </div>
+
+          <h3>مثال 6: تأثير Call Stack على Performance</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ استدعاءات كثيرة = overhead على Stack
+fun processItems(items: List&lt;String&gt;) {
+    items.forEach { item ->
+        validateItem(item)
+        transformItem(item)
+        saveItem(item)
+    }
+    // كل forEach iteration تضيف Stack Frames
+}
+
+// ✅ تقليل الاستدعاءات
+fun processItems(items: List&lt;String&gt;) {
+    items.forEach { item ->
+        // Inline العمليات البسيطة
+        if (item.isNotEmpty()) {
+            val transformed = item.uppercase()
+            database.save(transformed)
+        }
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>نصائح متقدمة للمحترفين 🎯</h2>
+
+          <h3>1. استخدام inline functions لتقليل Stack Overhead:</h3>
+
+          <div dir="ltr">
+            <pre>// بدون inline: استدعاء جديد يُضاف للـ Stack
+fun measureTime(block: () -&gt; Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    println("Time: ${end - start}ms")
+}
+
+// مع inline: الكود يُنسخ مباشرة (No Stack Frame)
+inline fun measureTime(block: () -&gt; Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    println("Time: ${end - start}ms")
+}</pre>
+          </div>
+
+          <h3>2. فهم Call Stack في RxJava vs Coroutines:</h3>
+
+          <div dir="ltr">
+            <pre>// RxJava: Call Stack معقد
+fun loadData() {
+    repository.getUser()
+        .flatMap { user -&gt; repository.getPosts(user.id) }
+        .flatMap { posts -&gt; repository.getComments(posts[0].id) }
+        .subscribe(
+            { result -&gt; updateUI(result) },
+            { error -&gt; handleError(error) }
+        )
+    // Stack Trace عند Exception معقد جداً!
+}
+
+// Coroutines: Call Stack بسيط وواضح
+suspend fun loadData() {
+    try {
+        val user = repository.getUser()
+        val posts = repository.getPosts(user.id)
+        val comments = repository.getComments(posts[0].id)
+        updateUI(comments)
+    } catch (e: Exception) {
+        handleError(e)
+    }
+    // Stack Trace واضح ومباشر
+}</pre>
+          </div>
+
+          <h3>3. تتبع Call Stack في Multi-Threading:</h3>
+
+          <div dir="ltr">
+            <pre>// كل Thread له Call Stack خاص به!
+fun startBackgroundWork() {
+    thread(name = "Worker-1") {
+        doWork()  // Stack مستقل عن Main Thread
+    }
+}
+
+// Main Thread Stack:
+┌─────────────────────┐
+│ onCreate()          │
+│ startBackgroundWork()│
+└─────────────────────┘
+
+// Worker-1 Thread Stack:
+┌─────────────────────┐
+│ doWork()            │
+│ run()               │
+└─────────────────────┘</pre>
+          </div>
+
+          <div class="success">
+            <strong>✅ النقطة الأساسية:</strong><br />
+            فهم Call Stack ليس للحفظ، بل لتحليل المشاكل:<br />
+            • لماذا تطبيقي بطيء؟<br />
+            • لماذا حدث ANR؟<br />
+            • من أين جاء الـ NullPointerException؟<br />
+            • كيف أحسّن الأداء؟
+          </div>
+
+          <hr />
+
+          <h2>أسئلة شائعة (FAQ) 💭</h2>
+
+          <h3>س1: هل Call Stack محدود الحجم؟</h3>
+          <p>
+            <strong>نعم.</strong> في Android، حجم Stack لكل Thread حوالي 1-2 MB. عند الوصول للحد الأقصى → StackOverflowError.
+          </p>
+
+          <h3>س2: ماذا يحدث للمتغيرات بعد انتهاء الدالة؟</h3>
+          <p>
+            المتغيرات المحلية (Local Variables) تُحذف تلقائياً عند Pop من Stack. لكن الـ Objects على Heap تبقى حتى يجمعها Garbage Collector.
+          </p>
+
+          <h3>س3: هل Coroutines تستخدم Call Stack؟</h3>
+          <p>
+            <strong>نعم ولا.</strong> Coroutines تستخدم Call Stack عند التنفيذ، لكن عند Suspension تُحرر Stack وتحفظ الحالة في Continuation Object على Heap.
+          </p>
+
+          <h3>س4: كيف أتجنب StackOverflow في Recursion؟</h3>
+          <p>
+            استخدم:<br />
+            1. <strong>Base Case</strong> واضح<br />
+            2. <strong>Tail Recursion</strong> مع <code>tailrec</code><br />
+            3. أو استبدل بـ <strong>Iteration</strong> (Loop)
+          </p>
+
+          <h3>س5: لماذا Stack Trace مهم؟</h3>
+          <p>
+            لأنه يعرض لك <strong>المسار الكامل</strong> الذي أدى للـ Exception، من نقطة البداية حتى نقطة الفشل.
+          </p>
+
+          <hr />
+
+          <h2>خاتمة 🏁</h2>
+
+          <blockquote>
+            <strong>Call Stack ليس مجرد مفهوم نظري</strong><br />
+            هو الأساس الذي يُبنى عليه:<br />
+            • فهم تدفق تنفيذ البرنامج<br />
+            • حل مشاكل الأداء والتجميد<br />
+            • قراءة وتحليل Crash Reports<br />
+            • اتخاذ قرارات معمارية صحيحة<br />
+            <br />
+            <strong>المهندس المحترف يفهم Call Stack ويستغله في Debugging والتحسين.</strong>
+          </blockquote>
+
+          <div class="success">
+            <strong>✨ الخطوة التالية:</strong><br />
+            جرّب في Android Studio:<br />
+            1. ضع Breakpoint في أي دالة<br />
+            2. شغّل الـ Debugger<br />
+            3. راقب Call Stack Panel<br />
+            4. جرّب Step Into / Step Over وشاهد التغييرات
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

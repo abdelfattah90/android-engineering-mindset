@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Program Logical Thinking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+       font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+      
+    }
+
+    body {
+      margin: 0;
+       font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    /* Code blocks */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+       font-family: 'Roboto', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    /* Inline code */
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    /* Sections spacing */
+    section {
+      margin-bottom: 32px;
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+            <div dir="rtl">
+              <h1 id="ما-هو-البرنامج-">ما هو البرنامج؟ 🧠</h1>
+              <h2 id="المحتويات">المحتويات</h2>
+              <p>
+                1 - المفهوم الأساسي<br />
+                2- من ناحية التفكير المنطقي<br />
+                3- من ناحية اللغة البرمجية<br />
+                4- البرنامج في Android<br />
+                5- أمثلة عملية<br />
+                6- المشاكل الشائعة<br />
+                7- الخلاصة
+              </p>
+              <hr />
+              <h2 id="المفهوم-الأساسي-">المفهوم الأساسي 🎯</h2>
+              <h3 id="التعريف-البسيط">التعريف البسيط:</h3>
+              <p>
+                <strong>البرنامج</strong> هو مجموعة من
+                <strong>التعليمات المرتبة</strong> التي تُنفّذ
+                <strong>بتسلسل محدد</strong> لتحويل
+                <strong>مدخلات (Input)</strong> إلى
+                <strong>مخرجات (Output)</strong> من خلال
+                <strong>معالجة (Processing)</strong>.
+              </p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>┌─────────────────────────────────────────┐
+│         Program Execution Flow          │
+├─────────────────────────────────────────┤
+│                                         │
+│  Input  ──→  Processing  ──→  Output   │
+│                                         │
+│  البيانات      المعالجة      النتائج   │
+│                                         │
+└─────────────────────────────────────────┘
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="من-ناحية-التفكير-المنطقي-">
+                من ناحية التفكير المنطقي 🧩
+              </h2>
+              <h3 id="البرنامج--خوارزمية--بنية-بيانات">
+                البرنامج = خوارزمية + بنية بيانات
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>Program = Algorithm + Data Structure
+</code></pre>
+              </div>
+              <h3 id="1️⃣-الخوارزمية-algorithm">1️⃣ الخوارزمية (Algorithm)</h3>
+              <p>
+                <strong>هي سلسلة خطوات منطقية واضحة لحل مشكلة معينة</strong>
+              </p>
+              <h4 id="مثال-تفكير-منطقي-حساب-مجموع-الأعداد-الزوجية">
+                مثال تفكير منطقي: حساب مجموع الأعداد الزوجية
+              </h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>الخطوات المنطقية:
+1. ابدأ من القائمة
+2. لكل عنصر في القائمة:
+   - هل العنصر زوجي؟
+     ├─ نعم → أضفه للمجموع
+     └─ لا → تجاهله
+3. أرجع المجموع النهائي
+</code></pre>
+              </div>
+              <h4 id="العناصر-الأساسية-في-التفكير-المنطقي">
+                العناصر الأساسية في التفكير المنطقي:
+              </h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>العنصر</th>
+                    <th>الوصف</th>
+                    <th>مثال من الحياة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Sequence</strong></td>
+                    <td>تنفيذ الخطوات بالترتيب</td>
+                    <td>وصفة طبخ</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Selection</strong></td>
+                    <td>اتخاذ قرار (if/else)</td>
+                    <td>إذا كان المطر نازلاً، خذ مظلة</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Iteration</strong></td>
+                    <td>تكرار عملية</td>
+                    <td>عد من 1 إلى 10</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 id="2️⃣-بنية-البيانات-data-structure">
+                2️⃣ بنية البيانات (Data Structure)
+              </h3>
+              <p>
+                <strong
+                  >هي طريقة تنظيم وتخزين البيانات لتسهيل الوصول والتعديل</strong
+                >
+              </p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>التفكير المنطقي في البيانات:
+- كيف أخزن البيانات؟
+- كيف أصل إليها بسرعة؟
+- كيف أعدّلها بكفاءة؟
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="من-ناحية-اللغة-البرمجية-">من ناحية اللغة البرمجية 💻</h2>
+              <h3 id="البرنامج--نص-برمجي-يُترجم-إلى-تعليمات-الآلة">
+                البرنامج = نص برمجي يُترجم إلى تعليمات الآلة
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>┌──────────────────────────────────────────────────┐
+│          Program Compilation Pipeline            │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  Source Code (Kotlin)                            │
+│       ↓                                          │
+│  Compiler (kotlinc)                              │
+│       ↓                                          │
+│  Bytecode (.class files)                         │
+│       ↓                                          │
+│  Dalvik Executable (.dex)                        │
+│       ↓                                          │
+│  ART (Android Runtime)                           │
+│       ↓                                          │
+│  Machine Code (Native CPU instructions)          │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+</code></pre>
+              </div>
+              <h3 id="المكونات-الأساسية-في-اللغة-البرمجية">
+                المكونات الأساسية في اللغة البرمجية:
+              </h3>
+              <h4 id="1-variables---المتغيرات">
+                1. <strong>Variables</strong> - المتغيرات
+              </h4>
+              <p>مكان لتخزين البيانات في الذاكرة</p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// Declaration: حجز مساحة في الذاكرة</span>
+<span class="token keyword keyword-val">val</span> username<span class="token operator">:</span> String <span class="token operator">=</span> <span class="token string-literal singleline"><span class="token string">"Ahmed"</span></span>
+<span class="token keyword keyword-var">var</span> age<span class="token operator">:</span> Int <span class="token operator">=</span> <span class="token number">25</span>
+
+<span class="token comment">// في الذاكرة:</span>
+<span class="token comment">// Address: 0x1000 → Value: "Ahmed"</span>
+<span class="token comment">// Address: 0x1004 → Value: 25</span>
+</code></pre>
+              </div>
+              <h4 id="2-operators---المعاملات">
+                2. <strong>Operators</strong> - المعاملات
+              </h4>
+              <p>أدوات لمعالجة البيانات</p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-val">val</span> sum <span class="token operator">=</span> <span class="token number">10</span> <span class="token operator">+</span> <span class="token number">5</span>        <span class="token comment">// Arithmetic</span>
+<span class="token keyword keyword-val">val</span> isValid <span class="token operator">=</span> age <span class="token operator">&gt;</span> <span class="token number">18</span>   <span class="token comment">// Comparison</span>
+<span class="token keyword keyword-val">val</span> result <span class="token operator">=</span> <span class="token boolean">true</span> <span class="token operator">&amp;&amp;</span> <span class="token boolean">false</span> <span class="token comment">// Logical</span>
+</code></pre>
+              </div>
+              <h4 id="3-control-flow---التحكم-في-التدفق">
+                3. <strong>Control Flow</strong> - التحكم في التدفق
+              </h4>
+              <p>تحديد مسار التنفيذ</p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// Selection</span>
+<span class="token keyword keyword-if">if</span> <span class="token punctuation">(</span>age <span class="token operator">&gt;=</span> <span class="token number">18</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">println</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"Adult"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword keyword-else">else</span> <span class="token punctuation">{</span>
+    <span class="token function">println</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"Minor"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Iteration</span>
+<span class="token keyword keyword-for">for</span> <span class="token punctuation">(</span>i <span class="token keyword keyword-in">in</span> <span class="token number">1</span><span class="token operator">..</span><span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">println</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h4 id="4-functions---الدوال">
+                4. <strong>Functions</strong> - الدوال
+              </h4>
+              <p>كتل برمجية قابلة لإعادة الاستخدام</p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-fun">fun</span> <span class="token function">calculateSum</span><span class="token punctuation">(</span>numbers<span class="token operator">:</span> List<span class="token operator">&lt;</span>Int<span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator">:</span> Int <span class="token punctuation">{</span>
+    <span class="token keyword keyword-return">return</span> numbers<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h4 id="5-data-structures---هياكل-البيانات">
+                5. <strong>Data Structures</strong> - هياكل البيانات
+              </h4>
+              <p>طرق تنظيم البيانات</p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-val">val</span> list <span class="token operator">=</span> <span class="token function">listOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>           <span class="token comment">// Ordered collection</span>
+<span class="token keyword keyword-val">val</span> map <span class="token operator">=</span> <span class="token function">mapOf</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"key"</span></span> <span class="token keyword keyword-to">to</span> <span class="token string-literal singleline"><span class="token string">"value"</span></span><span class="token punctuation">)</span>     <span class="token comment">// Key-Value pairs</span>
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="البرنامج-في-android-">البرنامج في Android 📱</h2>
+              <h3 id="البرنامج-في-android--apk">البرنامج في Android = APK</h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>APK Structure:
+├── AndroidManifest.xml      (البيان: ما يحتويه التطبيق)
+├── classes.dex              (Bytecode: التعليمات المترجمة)
+├── resources.arsc           (الموارد: الصور، النصوص)
+├── res/                     (ملفات الموارد)
+├── lib/                     (المكتبات الأصلية)
+└── META-INF/                (التوقيعات والشهادات)
+</code></pre>
+              </div>
+              <h3 id="رحلة-البرنامج-من-الكود-إلى-التنفيذ">
+                رحلة البرنامج من الكود إلى التنفيذ:
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// 1. Source Code (ما تكتبه)</span>
+<span class="token keyword keyword-class">class</span> MainActivity <span class="token operator">:</span> <span class="token function">AppCompatActivity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token operator">:</span> Bundle<span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword keyword-super">super</span><span class="token punctuation">.</span><span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token punctuation">)</span>
+        <span class="token function">setContentView</span><span class="token punctuation">(</span>R<span class="token punctuation">.</span>layout<span class="token punctuation">.</span>activity_main<span class="token punctuation">)</span>
+
+        <span class="token keyword keyword-val">val</span> result <span class="token operator">=</span> <span class="token function">calculateSum</span><span class="token punctuation">(</span><span class="token function">listOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        Log<span class="token punctuation">.</span><span class="token function">d</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"Result"</span></span><span class="token punctuation">,</span> <span class="token string-literal singleline"><span class="token string">"Sum: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">$</span><span class="token expression">result</span></span><span class="token string">"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword keyword-private">private</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">calculateSum</span><span class="token punctuation">(</span>numbers<span class="token operator">:</span> List<span class="token operator">&lt;</span>Int<span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator">:</span> Int <span class="token punctuation">{</span>
+        <span class="token keyword keyword-return">return</span> numbers<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>2. Compilation (ما يحدث خلف الكواليس):
+
+   Kotlin Compiler
+        ↓
+   .class files (Java Bytecode)
+        ↓
+   D8/R8 Compiler
+        ↓
+   .dex files (Dalvik Bytecode)
+        ↓
+   APK Package
+</code></pre>
+              </div>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>3. Runtime Execution (على الجهاز):
+
+   Android OS يُحمّل APK
+        ↓
+   ART يُجهّز البرنامج
+        ↓
+   Process يُنشأ للتطبيق
+        ↓
+   الكود يُنفّذ instruction by instruction
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="أمثلة-عملية-">أمثلة عملية 💡</h2>
+              <h3 id="مثال-1-برنامج-بسيط---حساب-مجموع-الأعداد-الزوجية">
+                مثال 1: برنامج بسيط - حساب مجموع الأعداد الزوجية
+              </h3>
+              <h4 id="التفكير-المنطقي">التفكير المنطقي:</h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>Input: [1, 2, 3, 4, 5, 6]
+Processing:
+  - فحص كل عنصر
+  - إذا كان زوجي (n % 2 == 0)
+  - أضفه للمجموع
+Output: 12 (لأن 2 + 4 + 6 = 12)
+</code></pre>
+              </div>
+              <h4 id="الكود-في-kotlin">الكود في Kotlin:</h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-fun">fun</span> <span class="token function">sumEvenNumbers</span><span class="token punctuation">(</span>numbers<span class="token operator">:</span> List<span class="token operator">&lt;</span>Int<span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator">:</span> Int <span class="token punctuation">{</span>
+    <span class="token keyword keyword-var">var</span> sum <span class="token operator">=</span> <span class="token number">0</span>  <span class="token comment">// State: حالة مؤقتة</span>
+
+    <span class="token comment">// Iteration: تكرار</span>
+    <span class="token keyword keyword-for">for</span> <span class="token punctuation">(</span>number <span class="token keyword keyword-in">in</span> numbers<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Selection: اتخاذ قرار</span>
+        <span class="token keyword keyword-if">if</span> <span class="token punctuation">(</span>number <span class="token operator">%</span> <span class="token number">2</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            sum <span class="token operator">+=</span> number  <span class="token comment">// Accumulation: تجميع</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword keyword-return">return</span> sum  <span class="token comment">// Output</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// الاستخدام</span>
+<span class="token keyword keyword-fun">fun</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword keyword-val">val</span> numbers <span class="token operator">=</span> <span class="token function">listOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">)</span>
+    <span class="token keyword keyword-val">val</span> result <span class="token operator">=</span> <span class="token function">sumEvenNumbers</span><span class="token punctuation">(</span>numbers<span class="token punctuation">)</span>
+    <span class="token function">println</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"Sum of even numbers: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">$</span><span class="token expression">result</span></span><span class="token string">"</span></span><span class="token punctuation">)</span>  <span class="token comment">// Output: 12</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h4 id="ما-يحدث-في-الذاكرة">ما يحدث في الذاكرة:</h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>Memory State During Execution:
+
+Iteration 1: number = 1
+  ├─ 1 % 2 == 0? false
+  └─ sum = 0 (no change)
+
+Iteration 2: number = 2
+  ├─ 2 % 2 == 0? true
+  └─ sum = 2
+
+Iteration 3: number = 3
+  ├─ 3 % 2 == 0? false
+  └─ sum = 2 (no change)
+
+Iteration 4: number = 4
+  ├─ 4 % 2 == 0? true
+  └─ sum = 6
+
+Iteration 5: number = 5
+  ├─ 5 % 2 == 0? false
+  └─ sum = 6 (no change)
+
+Iteration 6: number = 6
+  ├─ 6 % 2 == 0? true
+  └─ sum = 12
+
+Final: return 12
+</code></pre>
+              </div>
+              <h3 id="مثال-2-برنامج-android---عرض-قائمة-مستخدمين">
+                مثال 2: برنامج Android - عرض قائمة مستخدمين
+              </h3>
+              <h4 id="التفكير-المنطقي-1">التفكير المنطقي:</h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>Input: قائمة بيانات المستخدمين من API
+Processing:
+  1. جلب البيانات (Network Call)
+  2. تحويل JSON إلى Objects
+  3. تصفية المستخدمين النشطين
+  4. ترتيبهم حسب الاسم
+Output: عرض القائمة على الشاشة
+</code></pre>
+              </div>
+              <h4 id="الكود-في-kotlin-1">الكود في Kotlin:</h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-data">data</span> <span class="token keyword keyword-class">class</span> <span class="token function">User</span><span class="token punctuation">(</span>
+    <span class="token keyword keyword-val">val</span> id<span class="token operator">:</span> Int<span class="token punctuation">,</span>
+    <span class="token keyword keyword-val">val</span> name<span class="token operator">:</span> String<span class="token punctuation">,</span>
+    <span class="token keyword keyword-val">val</span> isActive<span class="token operator">:</span> Boolean
+<span class="token punctuation">)</span>
+
+<span class="token keyword keyword-class">class</span> UserViewModel <span class="token operator">:</span> <span class="token function">ViewModel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token comment">// State: الحالة التي يراقبها UI</span>
+    <span class="token keyword keyword-private">private</span> <span class="token keyword keyword-val">val</span> _users <span class="token operator">=</span> MutableLiveData<span class="token operator">&lt;</span>List<span class="token operator">&lt;</span>User<span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword keyword-val">val</span> users<span class="token operator">:</span> LiveData<span class="token operator">&lt;</span>List<span class="token operator">&lt;</span>User<span class="token operator">&gt;</span><span class="token operator">&gt;</span> <span class="token operator">=</span> _users
+
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">loadUsers</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        viewModelScope<span class="token punctuation">.</span><span class="token function">launch</span> <span class="token punctuation">{</span>
+            <span class="token comment">// Input: جلب البيانات</span>
+            <span class="token keyword keyword-val">val</span> response <span class="token operator">=</span> userRepository<span class="token punctuation">.</span><span class="token function">fetchUsers</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+            <span class="token comment">// Processing: معالجة البيانات</span>
+            <span class="token keyword keyword-val">val</span> activeUsers <span class="token operator">=</span> response
+                <span class="token punctuation">.</span><span class="token function">filter</span> <span class="token punctuation">{</span> it<span class="token punctuation">.</span>isActive <span class="token punctuation">}</span>      <span class="token comment">// تصفية النشطين فقط</span>
+                <span class="token punctuation">.</span><span class="token function">sortedBy</span> <span class="token punctuation">{</span> it<span class="token punctuation">.</span>name <span class="token punctuation">}</span>        <span class="token comment">// ترتيب حسب الاسم</span>
+
+            <span class="token comment">// Output: تحديث الحالة</span>
+            _users<span class="token punctuation">.</span>value <span class="token operator">=</span> activeUsers
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-class">class</span> UsersActivity <span class="token operator">:</span> <span class="token function">AppCompatActivity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword keyword-private">private</span> <span class="token keyword keyword-val">val</span> viewModel<span class="token operator">:</span> UserViewModel <span class="token keyword keyword-by">by</span> <span class="token function">viewModels</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token operator">:</span> Bundle<span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword keyword-super">super</span><span class="token punctuation">.</span><span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token punctuation">)</span>
+        <span class="token function">setContentView</span><span class="token punctuation">(</span>R<span class="token punctuation">.</span>layout<span class="token punctuation">.</span>activity_users<span class="token punctuation">)</span>
+
+        <span class="token comment">// Observe: مراقبة التغييرات</span>
+        viewModel<span class="token punctuation">.</span>users<span class="token punctuation">.</span><span class="token function">observe</span><span class="token punctuation">(</span><span class="token keyword keyword-this">this</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> users <span class="token operator">-&gt;</span>
+            <span class="token comment">// UI Update: تحديث الواجهة</span>
+            <span class="token function">updateRecyclerView</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment">// Trigger: بدء العملية</span>
+        viewModel<span class="token punctuation">.</span><span class="token function">loadUsers</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h4 id="ما-يحدث-على-مستوى-النظام">ما يحدث على مستوى النظام:</h4>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>Android System Level:
+
+1. Main Thread (UI Thread):
+   └─ onCreate() executed
+   └─ observe() registered
+   └─ loadUsers() called
+
+2. Background Thread (Coroutine):
+   └─ Network request sent
+   └─ Response received
+   └─ Data processing (filter, sort)
+   └─ Post result to Main Thread
+
+3. Main Thread (UI Thread):
+   └─ LiveData value changed
+   └─ Observer triggered
+   └─ RecyclerView updated
+   └─ UI redrawn
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="المشاكل-الشائعة-️">المشاكل الشائعة ⚠️</h2>
+              <h3 id="-مشكلة-1-عدم-فهم-الفرق-بين-declaration-و-execution">
+                ❌ مشكلة 1: عدم فهم الفرق بين Declaration و Execution
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// Declaration: تعريف الدالة (لا يُنفّذ)</span>
+<span class="token keyword keyword-fun">fun</span> <span class="token function">greet</span><span class="token punctuation">(</span>name<span class="token operator">:</span> String<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">println</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"Hello, </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">$</span><span class="token expression">name</span></span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Execution: تنفيذ الدالة</span>
+<span class="token function">greet</span><span class="token punctuation">(</span><span class="token string-literal singleline"><span class="token string">"Ahmed"</span></span><span class="token punctuation">)</span>  <span class="token comment">// هنا فقط يُطبع النص</span>
+</code></pre>
+              </div>
+              <p><strong>الخطأ الشائع:</strong></p>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token keyword keyword-class">class</span> MainActivity <span class="token operator">:</span> <span class="token function">AppCompatActivity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token comment">// ❌ هذا مجرد تعريف، لن يُنفّذ تلقائيًا</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">showMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        Toast<span class="token punctuation">.</span><span class="token function">makeText</span><span class="token punctuation">(</span><span class="token keyword keyword-this">this</span><span class="token punctuation">,</span> <span class="token string-literal singleline"><span class="token string">"Hello"</span></span><span class="token punctuation">,</span> Toast<span class="token punctuation">.</span>LENGTH_SHORT<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">show</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token operator">:</span> Bundle<span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword keyword-super">super</span><span class="token punctuation">.</span><span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token punctuation">)</span>
+        <span class="token comment">// ✅ يجب استدعاء الدالة لتنفيذها</span>
+        <span class="token function">showMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h3 id="-مشكلة-2-عدم-فهم-state-management">
+                ❌ مشكلة 2: عدم فهم State Management
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// ❌ الحالة المحلية تُفقد عند إعادة إنشاء Activity</span>
+<span class="token keyword keyword-class">class</span> MainActivity <span class="token operator">:</span> <span class="token function">AppCompatActivity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword keyword-var">var</span> counter <span class="token operator">=</span> <span class="token number">0</span>  <span class="token comment">// ستُفقد عند تدوير الشاشة</span>
+
+    <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token operator">:</span> Bundle<span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword keyword-super">super</span><span class="token punctuation">.</span><span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token punctuation">)</span>
+        <span class="token comment">// counter سيعود إلى 0 بعد التدوير</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// ✅ الحل: استخدام ViewModel للحفاظ على الحالة</span>
+<span class="token keyword keyword-class">class</span> CounterViewModel <span class="token operator">:</span> <span class="token function">ViewModel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword keyword-var">var</span> counter <span class="token operator">=</span> <span class="token number">0</span>  <span class="token comment">// تبقى حية أثناء Configuration Changes</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h3 id="-مشكلة-3-blocking-main-thread">
+                ❌ مشكلة 3: Blocking Main Thread
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// ❌ عملية طويلة على Main Thread</span>
+<span class="token keyword keyword-class">class</span> MainActivity <span class="token operator">:</span> <span class="token function">AppCompatActivity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token operator">:</span> Bundle<span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword keyword-super">super</span><span class="token punctuation">.</span><span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token punctuation">)</span>
+
+        <span class="token comment">// هذا سيجمد التطبيق!</span>
+        <span class="token keyword keyword-val">val</span> <span class="token keyword keyword-data">data</span> <span class="token operator">=</span> <span class="token function">fetchDataFromNetwork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment">// 5 seconds</span>
+        <span class="token function">updateUI</span><span class="token punctuation">(</span><span class="token keyword keyword-data">data</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// ✅ الحل: استخدام Coroutines</span>
+<span class="token keyword keyword-class">class</span> MainActivity <span class="token operator">:</span> <span class="token function">AppCompatActivity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token operator">:</span> Bundle<span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword keyword-super">super</span><span class="token punctuation">.</span><span class="token function">onCreate</span><span class="token punctuation">(</span>savedInstanceState<span class="token punctuation">)</span>
+
+        lifecycleScope<span class="token punctuation">.</span><span class="token function">launch</span> <span class="token punctuation">{</span>
+            <span class="token comment">// يعمل في Background Thread</span>
+            <span class="token keyword keyword-val">val</span> <span class="token keyword keyword-data">data</span> <span class="token operator">=</span> <span class="token function">withContext</span><span class="token punctuation">(</span>Dispatchers<span class="token punctuation">.</span>IO<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">fetchDataFromNetwork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// يعود إلى Main Thread</span>
+            <span class="token function">updateUI</span><span class="token punctuation">(</span><span class="token keyword keyword-data">data</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="الربط-بمبادئ-software-engineering-️">
+                الربط بمبادئ Software Engineering 🏗️
+              </h2>
+              <h3 id="1-single-responsibility-principle">
+                1. Single Responsibility Principle
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// ❌ دالة تفعل أكثر من شيء</span>
+<span class="token keyword keyword-fun">fun</span> <span class="token function">processUser</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> Int<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword keyword-val">val</span> user <span class="token operator">=</span> <span class="token function">fetchUser</span><span class="token punctuation">(</span>userId<span class="token punctuation">)</span>      <span class="token comment">// Network</span>
+    <span class="token function">validateUser</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>                <span class="token comment">// Validation</span>
+    <span class="token function">saveToDatabase</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>              <span class="token comment">// Database</span>
+    <span class="token function">sendNotification</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>            <span class="token comment">// Notification</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ✅ فصل المسؤوليات</span>
+<span class="token keyword keyword-class">class</span> UserRepository <span class="token punctuation">{</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">fetchUser</span><span class="token punctuation">(</span>id<span class="token operator">:</span> Int<span class="token punctuation">)</span><span class="token operator">:</span> User <span class="token punctuation">{</span> <span class="token comment">/*...*/</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword keyword-class">class</span> UserValidator <span class="token punctuation">{</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">validate</span><span class="token punctuation">(</span>user<span class="token operator">:</span> User<span class="token punctuation">)</span><span class="token operator">:</span> Boolean <span class="token punctuation">{</span> <span class="token comment">/*...*/</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword keyword-class">class</span> UserDatabase <span class="token punctuation">{</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">save</span><span class="token punctuation">(</span>user<span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/*...*/</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword keyword-class">class</span> NotificationService <span class="token punctuation">{</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">notify</span><span class="token punctuation">(</span>user<span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/*...*/</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              </div>
+              <h3 id="2-dry-dont-repeat-yourself">
+                2. DRY (Don't Repeat Yourself)
+              </h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info="kotlin"
+                  class="language-kotlin kotlin"
+                ><code><span class="token comment">// ❌ تكرار الكود</span>
+<span class="token keyword keyword-fun">fun</span> <span class="token function">calculateDiscountForStudent</span><span class="token punctuation">(</span>price<span class="token operator">:</span> Double<span class="token punctuation">)</span><span class="token operator">:</span> Double <span class="token punctuation">{</span>
+    <span class="token keyword keyword-return">return</span> price <span class="token operator">*</span> <span class="token number">0.8</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword keyword-fun">fun</span> <span class="token function">calculateDiscountForEmployee</span><span class="token punctuation">(</span>price<span class="token operator">:</span> Double<span class="token punctuation">)</span><span class="token operator">:</span> Double <span class="token punctuation">{</span>
+    <span class="token keyword keyword-return">return</span> price <span class="token operator">*</span> <span class="token number">0.8</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ✅ استخراج الكود المشترك</span>
+<span class="token keyword keyword-fun">fun</span> <span class="token function">calculateDiscount</span><span class="token punctuation">(</span>price<span class="token operator">:</span> Double<span class="token punctuation">,</span> percentage<span class="token operator">:</span> Double<span class="token punctuation">)</span><span class="token operator">:</span> Double <span class="token punctuation">{</span>
+    <span class="token keyword keyword-return">return</span> price <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">-</span> percentage<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword keyword-val">val</span> studentPrice <span class="token operator">=</span> <span class="token function">calculateDiscount</span><span class="token punctuation">(</span><span class="token number">100.0</span><span class="token punctuation">,</span> <span class="token number">0.2</span><span class="token punctuation">)</span>
+<span class="token keyword keyword-val">val</span> employeePrice <span class="token operator">=</span> <span class="token function">calculateDiscount</span><span class="token punctuation">(</span><span class="token number">100.0</span><span class="token punctuation">,</span> <span class="token number">0.2</span><span class="token punctuation">)</span>
+</code></pre>
+              </div>
+              <hr />
+              <h2 id="الخلاصة-">الخلاصة 🎓</h2>
+              <h3 id="النقاط-الجوهرية">النقاط الجوهرية:</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>المنظور</th>
+                    <th>التعريف</th>
+                    <th>المثال في Android</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>التفكير المنطقي</strong></td>
+                    <td>خوارزمية + بنية بيانات</td>
+                    <td>تصفية قائمة، ترتيب بيانات</td>
+                  </tr>
+                  <tr>
+                    <td><strong>اللغة البرمجية</strong></td>
+                    <td>تعليمات تُترجم لكود الآلة</td>
+                    <td>Kotlin → Bytecode → Machine Code</td>
+                  </tr>
+                  <tr>
+                    <td><strong>وقت التنفيذ</strong></td>
+                    <td>Process في الذاكرة يُنفّذ تعليمات</td>
+                    <td>ART يُنفّذ APK على Android</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 id="القاعدة-الذهبية">القاعدة الذهبية:</h3>
+              <div dir="ltr">
+                <pre
+                  data-role="codeBlock"
+                  data-info=""
+                  class="language-text"
+                ><code>البرنامج ليس فقط "كود يعمل"
+البرنامج هو:
+  ✓ حل منطقي لمشكلة
+  ✓ بيانات منظمة
+  ✓ تعليمات قابلة للتنفيذ
+  ✓ حالة (State) تتغير مع الوقت
+  ✓ تفاعل مع النظام والمستخدم
+</code></pre>
+              </div>
+              <h3 id="الفرق-بين-المبتدئ-والمحترف">
+                الفرق بين المبتدئ والمحترف:
+              </h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>المبتدئ</th>
+                    <th>المحترف</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>يكتب كود "يعمل"</td>
+                    <td>يكتب كود يُفهم ويُصان</td>
+                  </tr>
+                  <tr>
+                    <td>يفكر في Features</td>
+                    <td>يفكر في Architecture</td>
+                  </tr>
+                  <tr>
+                    <td>يحل المشكلة مرة</td>
+                    <td>يبني حل قابل لإعادة الاستخدام</td>
+                  </tr>
+                  <tr>
+                    <td>يكتب كل شيء في مكان واحد</td>
+                    <td>يفصل المسؤوليات</td>
+                  </tr>
+                  <tr>
+                    <td>يختبر يدويًا</td>
+                    <td>يكتب Unit Tests</td>
+                  </tr>
+                </tbody>
+              </table>
+
+          
+        </div>
+    </div>
+  </div>
+</body>
+</html>

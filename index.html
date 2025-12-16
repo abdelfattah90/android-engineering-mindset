@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Android Engineering Mindset</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        margin: 50px 0;
+        font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+        background: #f4f6f8;
+        color: #1f2933;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        background: #ffffff;
+        padding: 32px 36px;
+        border-radius: 14px;
+        width: 520px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 26px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #5f6c7b;
+        font-size: 14px;
+        margin-bottom: 28px;
+        line-height: 1.6;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      li {
+        margin-bottom: 14px;
+      }
+
+      a {
+        display: block;
+        padding: 16px 18px;
+        border-radius: 10px;
+        background: #f9fafb;
+        color: #1f2933;
+        text-decoration: none;
+        transition: box-shadow 0.2s ease, transform 0.1s ease;
+        border: 1px solid #e5e7eb;
+      }
+
+      a:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .description {
+        font-size: 14px;
+        color: #4b5563;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Android Engineering Mindset</h1>
+      <div class="subtitle">
+        شرح أساسيات التفكير البرمجي وكيف يعمل البرنامج داخليًا، بعيدًا عن أي لغة
+        برمجة، مع الحفاظ على المصطلحات الأساسية بالإنجليزية
+      </div>
+
+      <ul>
+        <li>
+          <a href="program_logical_thinking.html">
+            <div class="title">ما هو البرنامج؟ (Program Logical Thinking)</div>
+            <div class="description">
+              فهم البرنامج كمنظومة منطقية لحل المشكلات، وكيف يحول العقل البشري
+              الأفكار إلى خطوات قابلة للتنفيذ.
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a href="control_flow.html">
+            <div class="title">كيف يعمل Control Flow داخل البرنامج؟</div>
+            <div class="description">
+              شرح مسار تنفيذ الكود، وكيف تتحكم الشروط (Conditions) والتكرار
+              (Loops) في اتخاذ القرارات.
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a href="call_stack_guide.html">
+            <div class="title">ما هي وظيفة Call Stack؟</div>
+            <div class="description">
+              فهم آلية استدعاء الدوال، ولماذا ترتيب التنفيذ مهم، وكيف تؤدي
+              الأخطاء إلى Stack Overflow.
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a href="stack-vs-heap-android.html">
+            <div class="title">Stack vs Heap</div>
+            <div class="description">
+              الفرق الجوهري بينهما من ناحية التفكير البرمجي، وليس من ناحية
+              اللغة، وكيف يؤثر ذلك على الأداء والذاكرة.
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a href="reference_vs_value.html">
+            <div class="title">Reference vs Value</div>
+            <div class="description">
+              لماذا تمرير البيانات أحيانًا يسبب سلوكًا غير متوقع، وكيف تنشأ
+              الأخطاء الخفية بسبب مشاركة نفس المرجع.
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a href="mutability_immutability.html">
+            <div class="title">Mutability vs Immutability</div>
+            <div class="description">
+              كيف يؤثر تغيير البيانات أو ثباتها على استقرار البرامج، ولماذا
+              تعتبر Immutability أساسًا في الأنظمة الآمنة.
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
