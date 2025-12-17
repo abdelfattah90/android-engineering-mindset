@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Process Death, Tasks & Back Stack - الحقيقة الكاملة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    .info {
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #1e40af;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>Process Death, Tasks & Back Stack ☠️</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - ما هو Process Death؟<br />
+            2 - التشبيه الواقعي: المسرحية والانقطاع<br />
+            3 - متى يحدث Process Death؟<br />
+            4 - ما يحدث خلال Process Death<br />
+            5 - Process Recreation: العودة للحياة<br />
+            6 - كيف تختبر Process Death؟<br />
+            7 - ما هو Task؟<br />
+            8 - Back Stack: كيف يعمل؟<br />
+            9 - Launch Modes بالتفصيل<br />
+            10 - Intent Flags<br />
+            11 - Task Affinity<br />
+            12 - Activity vs Task vs Process<br />
+            13 - أمثلة معقدة من الواقع<br />
+            14 - الخلاصة والنصائح العملية
+          </p>
+
+          <hr />
+
+          <h2>ما هو Process Death؟ ☠️</h2>
+
+          <h3>التعريف الحقيقي:</h3>
+
+          <blockquote>
+            <strong>Process Death:</strong><br />
+            قتل Process بالكامل بواسطة نظام التشغيل<br />
+            <br />
+            <strong>ماذا يعني؟</strong><br />
+            • Process يختفي من Memory فوراً (< 100ms)<br />
+            • كل Activities تموت<br />
+            • كل Services تموت<br />
+            • Application object يموت<br />
+            • كل Threads تموت<br />
+            • كل Static variables تُمسح<br />
+            • كل Singletons تُدمر<br />
+            <br />
+            <strong>→ كل شيء يختفي، كأن App لم يعمل أبداً!</strong>
+          </blockquote>
+
+          <h3>الفرق بين Activity Death و Process Death:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الجانب</th>
+                <th>Activity Death</th>
+                <th>Process Death</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ما يموت؟</strong></td>
+                <td>Activity واحدة فقط</td>
+                <td>Process بالكامل</td>
+              </tr>
+              <tr>
+                <td><strong>Application</strong></td>
+                <td>يبقى حياً ✓</td>
+                <td>يموت ☠️</td>
+              </tr>
+              <tr>
+                <td><strong>Static variables</strong></td>
+                <td>تبقى ✓</td>
+                <td>تُمسح ☠️</td>
+              </tr>
+              <tr>
+                <td><strong>Singletons</strong></td>
+                <td>تبقى ✓</td>
+                <td>تُدمر ☠️</td>
+              </tr>
+              <tr>
+                <td><strong>Other Activities</strong></td>
+                <td>تبقى حية ✓</td>
+                <td>تموت كلها ☠️</td>
+              </tr>
+              <tr>
+                <td><strong>onDestroy()</strong></td>
+                <td>يُستدعى (عادةً)</td>
+                <td>لا يُستدعى! ☠️</td>
+              </tr>
+              <tr>
+                <td><strong>السبب</strong></td>
+                <td>Rotation, finish(), Back</td>
+                <td>Low Memory, Force Stop</td>
+              </tr>
+              <tr>
+                <td><strong>التكرار</strong></td>
+                <td>كثير جداً (يومي)</td>
+                <td>نادر نسبياً</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>لماذا Process Death خطير؟</h3>
+
+          <div class="warning">
+            <strong>⚠️ Process Death = Silent Killer</strong><br />
+            <br />
+            <strong>المشكلة:</strong><br />
+            • يحدث بدون تحذير (no callbacks!)<br />
+            • User لا يعرف أن شيئاً حدث<br />
+            • App يبدو "يعمل" لكنه بدأ من جديد<br />
+            • State ضاع إذا لم تحفظه<br />
+            <br />
+            <strong>مثال:</strong><br />
+            1. User يملأ Form طويل<br />
+            2. يضغط Home (App في background)<br />
+            3. System يقتل Process (Low Memory)<br />
+            4. User يرجع للـ App<br />
+            5. Form فارغ! كل البيانات ضاعت! 💔<br />
+            <br />
+            <strong>→ User frustrated → 1-star review → Uninstall</strong>
+          </div>
+
+          <hr />
+
+          <h2>التشبيه الواقعي: المسرحية والانقطاع 🎭</h2>
+
+          <h3>تخيل مسرحية حية:</h3>
+
+          <div dir="ltr">
+            <pre>┌──────────────────────────────────────────────────────┐
+│                  Theater Performance                 │
+│                (Android Application)                 │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  ACT 1: Normal Performance                           │
+│  ┌────────────────────────────────────────┐          │
+│  │ Stage: MainActivityبواسطة              │          │
+│  │ Actors: Fragments, Views                │          │
+│  │ Props: Data, State                      │          │
+│  │ Building: Process (Power ON)            │          │
+│  │ [Performance ongoing...]                │          │
+│  └────────────────────────────────────────┘          │
+│                                                      │
+│  ─── Intermission (User presses Home) ───            │
+│                                                      │
+│  ACT 2: Intermission                                 │
+│  ┌────────────────────────────────────────┐          │
+│  │ Curtain closed (Activity stopped)       │          │
+│  │ Actors backstage (Activities in memory) │          │
+│  │ Building still powered (Process cached) │          │
+│  │ Waiting for Act 2...                    │          │
+│  └────────────────────────────────────────┘          │
+│                                                      │
+│  ─── Power Outage! (Process Death) ───               │
+│                                                      │
+│  DISASTER: Power Cut (SIGKILL)                       │
+│  ┌────────────────────────────────────────┐          │
+│  │ 💡 LIGHTS OUT! (< 100ms)                │          │
+│  │ • Building loses power (Process killed) │          │
+│  │ • Actors disappear (Activities gone)    │          │
+│  │ • Props vanish (State lost)             │          │
+│  │ • Everything in darkness ☠️             │          │
+│  │                                         │          │
+│  │ No chance to:                           │          │
+│  │ ❌ Save props properly                  │          │
+│  │ ❌ Tell actors what happened            │          │
+│  │ ❌ Record current scene                 │          │
+│  │                                         │          │
+│  │ It just... ends.                        │          │
+│  └────────────────────────────────────────┘          │
+│                                                      │
+│  ─── Audience Returns (User comes back) ───          │
+│                                                      │
+│  RESTORATION: Emergency Recovery                     │
+│  ┌────────────────────────────────────────┐          │
+│  │ 1. Power restored (New Process)         │          │
+│  │ 2. Stage rebuilt from blueprints        │          │
+│  │    (Activity recreation)                │          │
+│  │ 3. Props found from emergency save      │          │
+│  │    (savedInstanceState)                 │          │
+│  │ 4. Actors try to remember scene         │          │
+│  │    (ViewModel, if exists)               │          │
+│  │                                         │          │
+│  │ IF saved properly: Continue smoothly ✓  │          │
+│  │ IF not saved: Start from beginning ❌   │          │
+│  └────────────────────────────────────────┘          │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+
+Key Lessons:
+1. Power outage = No warning, instant
+2. Everything lost except emergency saves
+3. Audience (User) expects continuity
+4. Good theater = Good emergency plans</pre>
+          </div>
+
+          <blockquote>
+            <strong>🎯 الدروس:</strong><br />
+            1. <strong>No Warning:</strong> Process Death فجائي (SIGKILL)<br />
+            2. <strong>Total Loss:</strong> كل شيء يختفي<br />
+            3. <strong>User Expectation:</strong> User يتوقع الاستمرار<br />
+            4. <strong>Emergency Save:</strong> onSaveInstanceState() + ViewModel<br />
+            5. <strong>Recovery:</strong> onCreate(savedInstanceState) يسترجع<br />
+            6. <strong>Transparent:</strong> User يجب ألا يلاحظ شيئاً!
+          </blockquote>
+
+          <hr />
+
+          <h2>متى يحدث Process Death؟ ⏰</h2>
+
+          <h3>السيناريوهات الرئيسية:</h3>
+
+          <h4>1. Low Memory Killer (الأكثر شيوعاً):</h4>
+
+          <div dir="ltr">
+            <pre>Scenario: User multitasking heavily
+
+Timeline:
+┌────────────────────────────────────────────┐
+│ T=0s:   User using Your App               │
+│         • OOM Adj: -800 (Foreground)       │
+│         • Safe ✓                           │
+│                                            │
+│ T=10s:  User presses Home                  │
+│         • Your App: onPause → onStop       │
+│         • OOM Adj: 400 (Background)        │
+│         • Vulnerable!                      │
+│                                            │
+│ T=20s:  User opens Chrome                 │
+│         • Chrome loads 20 tabs (RAM hog!)  │
+│         • Free RAM: 300 MB → 150 MB        │
+│                                            │
+│ T=30s:  User opens Camera                 │
+│         • Camera needs 200 MB              │
+│         • Free RAM: 150 MB (NOT ENOUGH!)   │
+│                                            │
+│ T=31s:  Low Memory Killer activates! 🔪   │
+│         • Scans processes by OOM Adj       │
+│         • Your App (OOM=400) selected      │
+│         • SIGKILL sent                     │
+│         • Process dies (< 100ms)           │
+│         • RAM freed: 150 MB → 250 MB ✓     │
+│                                            │
+│ T=60s:  User returns to Your App          │
+│         • Process dead → Cold Start        │
+│         • Application.onCreate() again     │
+│         • Activity.onCreate(savedInstanceState)│
+│         • IF state saved: Good ✓           │
+│         • IF not saved: Data lost ❌       │
+└────────────────────────────────────────────┘
+
+Frequency: Very common!
+• Happens daily on mid/low-end devices
+• More likely with heavy multitasking
+• Inevitable on devices with < 4 GB RAM</pre>
+          </div>
+
+          <h4>2. User Force Stop:</h4>
+
+          <div dir="ltr">
+            <pre>User Action: Settings → Apps → Your App → Force Stop
+
+Result:
+┌────────────────────────────────────────────┐
+│ 1. User clicks "Force Stop"                │
+│ 2. System sends SIGKILL immediately        │
+│ 3. Process dies (< 50ms)                   │
+│ 4. All Activities/Services killed          │
+│ 5. Removed from Recent Apps                │
+│ 6. Next launch: Cold Start                 │
+└────────────────────────────────────────────┘
+
+When Users do this:
+• App misbehaving (battery drain, crashes)
+• Following online "speed up phone" guides
+• Trying to fix perceived issues
+
+Result:
+• Complete reset (like first install)
+• All cached data may be cleared
+• Next launch: Clean slate</pre>
+          </div>
+
+          <h4>3. Developer Options: "Don't keep activities":</h4>
+
+          <div dir="ltr">
+            <pre>Setting: Developer Options → Don't keep activities
+
+Behavior:
+┌────────────────────────────────────────────┐
+│ EVERY time Activity goes to background:    │
+│ └─→ Process killed immediately!            │
+│                                            │
+│ Example:                                   │
+│ User in Activity A                         │
+│ └─→ Opens Activity B                       │
+│     └─→ A goes to background               │
+│         └─→ Process killed! ☠️             │
+│             (if only A was in Process)     │
+│                                            │
+│ User presses Back                          │
+│ └─→ A must be recreated                    │
+│     └─→ onCreate(savedInstanceState)       │
+└────────────────────────────────────────────┘
+
+Purpose: Testing tool!
+• Simulates aggressive memory conditions
+• Forces Process Death on every navigation
+• CRITICAL for testing state save/restore
+• Every developer MUST test with this ON!</pre>
+          </div>
+
+          <h4>4. Background Time Limit:</h4>
+
+          <div dir="ltr">
+            <pre>Android 8+ Background Execution Limits
+
+Timeline:
+┌────────────────────────────────────────────┐
+│ T=0min:   App goes to background           │
+│           • Service running                │
+│           • Process state: Background      │
+│                                            │
+│ T=1min:   Warning (conceptually)           │
+│           • System monitoring              │
+│                                            │
+│ T=5min:   Time limit reached!              │
+│           • Service killed (stopService)   │
+│           • If no other components:        │
+│             └─→ Process killed! ☠️         │
+│                                            │
+│ Exception: Foreground Service              │
+│ └─→ Can run indefinitely (with notification)│
+└────────────────────────────────────────────┘
+
+Affected:
+• Started Services (startService)
+• Not affected: Foreground Services, Jobs
+
+Prevention:
+• Use WorkManager
+• Use Foreground Service (with notification)
+• Don't rely on background Services</pre>
+          </div>
+
+          <h4>5. System Reboot/Update:</h4>
+
+          <div dir="ltr">
+            <pre>System Events:
+
+1. Device Reboot:
+   • All processes killed
+   • Clean slate on next boot
+
+2. System Update:
+   • Device reboots
+   • All apps killed
+
+3. App Update:
+   • Process killed before update
+   • Fresh start after update
+
+4. Airplane Mode / Network Changes:
+   • May trigger process kills on some devices
+   • Especially if doing network work</pre>
+          </div>
+
+          <h3>احتمالية Process Death:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الحالة</th>
+                <th>الاحتمال</th>
+                <th>متى؟</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Foreground</strong></td>
+                <td>< 1%</td>
+                <td>فقط في حالات طارئة</td>
+              </tr>
+              <tr>
+                <td><strong>Background (< 1 min)</strong></td>
+                <td>5-10%</td>
+                <td>Heavy multitasking</td>
+              </tr>
+              <tr>
+                <td><strong>Background (5 min)</strong></td>
+                <td>20-30%</td>
+                <td>Low memory devices</td>
+              </tr>
+              <tr>
+                <td><strong>Background (30 min)</strong></td>
+                <td>50-70%</td>
+                <td>معظم الأجهزة</td>
+              </tr>
+              <tr>
+                <td><strong>Cached (hours)</strong></td>
+                <td>90%+</td>
+                <td>تقريباً مؤكد</td>
+              </tr>
+              <tr>
+                <td><strong>Don't keep activities</strong></td>
+                <td>100%</td>
+                <td>كل navigation!</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>ما يحدث خلال Process Death 💀</h2>
+
+          <h3>التسلسل الزمني الدقيق:</h3>
+
+          <div dir="ltr">
+            <pre>Process Death Sequence (< 100ms total):
+
+T=0ms: Low Memory Killer decision
+       └─→ Target Process selected (Your App)
+
+T=1ms: SIGKILL signal sent
+       └─→ Kernel signal to Process
+
+T=2ms: Process receives signal
+       ┌───────────────────────────────────┐
+       │ NO CHANCE TO:                     │
+       │ ❌ Call onDestroy()               │
+       │ ❌ Save unsaved data              │
+       │ ❌ Close file handles             │
+       │ ❌ Cleanup resources              │
+       │ ❌ Notify other components        │
+       │                                   │
+       │ Just... instant termination       │
+       └───────────────────────────────────┘
+
+T=5ms: Memory cleanup begins
+       • All Pages unmapped
+       • Memory returned to System
+       • Process entry removed
+
+T=50ms: Cleanup complete
+        • Process fully removed from memory
+        • All references gone
+        • Like it never existed
+
+T=100ms: System stable
+         • Memory reclaimed
+         • Available for other apps
+         • Your App = completely erased
+
+What's Lost:
+┌─────────────────────────────────────────┐
+│ ☠️ Application instance                │
+│ ☠️ All Activity instances               │
+│ ☠️ All Service instances                │
+│ ☠️ All Thread objects                   │
+│ ☠️ All Static variables                 │
+│ ☠️ All Singletons                       │
+│ ☠️ In-memory caches                     │
+│ ☠️ Network connections                  │
+│ ☠️ File handles                         │
+│ ☠️ Everything in RAM                    │
+└─────────────────────────────────────────┘
+
+What Survives:
+┌─────────────────────────────────────────┐
+│ ✓ savedInstanceState Bundles           │
+│   (saved by ActivityManager before)    │
+│ ✓ Files on disk                        │
+│ ✓ SharedPreferences                    │
+│ ✓ Database                             │
+│ ✓ Task/Back Stack structure            │
+│   (maintained by System)               │
+└─────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>Before vs After Process Death:</h3>
+
+          <div dir="ltr">
+            <pre>BEFORE Process Death:
+┌──────────────────────────────────────────┐
+│ Process (PID: 12345)                     │
+│ ├─ Application instance                 │
+│ │  └─ Singletons, global state          │
+│ │                                        │
+│ ├─ Activity A (stopped, in back stack)  │
+│ │  └─ Views, local state                │
+│ │                                        │
+│ ├─ Activity B (stopped, in back stack)  │
+│ │  └─ Views, local state                │
+│ │                                        │
+│ ├─ Activity C (stopped, in back stack)  │
+│ │  └─ Views, local state                │
+│ │                                        │
+│ └─ Static variables                     │
+│    └─ DataManager.cache = [data]        │
+│                                          │
+│ Memory: 150 MB                           │
+└──────────────────────────────────────────┘
+
+AFTER Process Death:
+┌──────────────────────────────────────────┐
+│ Process: DOES NOT EXIST ☠️               │
+│                                          │
+│ Everything is GONE                       │
+│                                          │
+│ BUT:                                     │
+│ System remembers:                        │
+│ • Task structure (A → B → C)            │
+│ • savedInstanceState for each Activity  │
+│ • Which Activity was on top             │
+└──────────────────────────────────────────┘
+
+User perspective:
+• Presses app icon or Returns
+• Expects to see Activity C (where they left off)
+• System must recreate entire chain! A → B → C</pre>
+          </div>
+
+          <hr />
+
+          <h2>Process Recreation: العودة للحياة 🔄</h2>
+
+          <h3>ما يحدث عند عودة User:</h3>
+
+          <div dir="ltr">
+            <pre>Recreation Sequence:
+
+User returns to App (e.g., from Recent Apps):
+
+Step 1: System checks Process
+┌────────────────────────────────────────┐
+│ Process exists?                        │
+│ ├─→ YES: Resume Activities (fast!)    │
+│ └─→ NO: Must recreate! (slow)         │
+└────────────────────────────────────────┘
+
+Step 2: Task Structure Restoration
+┌────────────────────────────────────────┐
+│ System remembers Task:                 │
+│ • Activity A (bottom)                  │
+│ • Activity B (middle)                  │
+│ • Activity C (top)                     │
+│                                        │
+│ Decision: Recreate entire stack!       │
+└────────────────────────────────────────┘
+
+Step 3: Process Creation
+┌────────────────────────────────────────┐
+│ T=0ms:   Zygote fork (new Process)     │
+│          └─→ PID: 67890 (different!)   │
+│                                        │
+│ T=50ms:  Application.onCreate()        │
+│          └─→ Initialize singletons     │
+│              (from scratch!)           │
+│                                        │
+│ T=100ms: Singletons reinitialized      │
+│          └─→ Static vars = default     │
+│              Cache = empty             │
+└────────────────────────────────────────┘
+
+Step 4: Activities Recreation
+┌────────────────────────────────────────┐
+│ Activity A:                            │
+│ ├─→ onCreate(savedInstanceState)       │
+│ │   └─→ Restore from Bundle           │
+│ ├─→ onStart()                          │
+│ └─→ onRestoreInstanceState()           │
+│     (NOT onResume - not top!)          │
+│                                        │
+│ Activity B:                            │
+│ ├─→ onCreate(savedInstanceState)       │
+│ ├─→ onStart()                          │
+│ └─→ onRestoreInstanceState()           │
+│                                        │
+│ Activity C (top of stack):             │
+│ ├─→ onCreate(savedInstanceState)       │
+│ ├─→ onStart()                          │
+│ ├─→ onRestoreInstanceState()           │
+│ └─→ onResume() ← Now user sees this!  │
+└────────────────────────────────────────┘
+
+Step 5: Final State
+┌────────────────────────────────────────┐
+│ New Process (PID: 67890)               │
+│ ├─ Application instance (NEW)          │
+│ ├─ Activity A (NEW instance)           │
+│ ├─ Activity B (NEW instance)           │
+│ ├─ Activity C (NEW instance, visible)  │
+│ └─ Static variables (reinitialized)    │
+│                                        │
+│ Total time: 500-2000ms (visible lag!)  │
+└────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>Cold Start vs Warm Start vs Hot Start:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>النوع</th>
+                <th>متى؟</th>
+                <th>الوقت</th>
+                <th>ما يحدث؟</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cold Start</strong></td>
+                <td>Process ميت</td>
+                <td>500-2000ms</td>
+                <td>Process جديد + Application.onCreate() + Activities</td>
+              </tr>
+              <tr>
+                <td><strong>Warm Start</strong></td>
+                <td>Process حي، Activity ميت</td>
+                <td>200-500ms</td>
+                <td>Activity.onCreate() فقط</td>
+              </tr>
+              <tr>
+                <td><strong>Hot Start</strong></td>
+                <td>Process حي، Activity حية</td>
+                <td>50-200ms</td>
+                <td>Activity.onRestart() → onStart() → onResume()</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>savedInstanceState: المنقذ!</h3>
+
+          <div dir="ltr">
+            <pre>savedInstanceState Lifecycle:
+
+BEFORE Process Death:
+┌────────────────────────────────────────┐
+│ User navigates away (Home button)      │
+│                                        │
+│ Activity.onPause()                     │
+│ Activity.onStop()                      │
+│ Activity.onSaveInstanceState(outState) │ ⚡ CRITICAL!
+│ └─→ outState.putString("key", "value")│
+│     outState.putInt("scroll", 100)     │
+│                                        │
+│ System saves Bundle to disk/memory     │
+│ (not in Process memory!)               │
+└────────────────────────────────────────┘
+
+AFTER Process Death:
+┌────────────────────────────────────────┐
+│ System recreates Process               │
+│                                        │
+│ Activity.onCreate(savedInstanceState)  │
+│ └─→ savedInstanceState != null ✓      │
+│     val value = savedInstanceState     │
+│         .getString("key")              │
+│     val scroll = savedInstanceState    │
+│         .getInt("scroll")              │
+│                                        │
+│ State restored! ✓                      │
+└────────────────────────────────────────┘
+
+What to save:
+✓ User input (EditText content)
+✓ Scroll positions
+✓ Selected items
+✓ Expanded/collapsed states
+✓ Transient UI state
+
+What NOT to save:
+❌ Large objects (> 500 KB)
+❌ Bitmaps (use ViewModel)
+❌ Complex objects (serialize or use ViewModel)
+❌ Sensitive data (encrypt if needed)
+
+Size limit: ~1 MB
+• TransactionTooLargeException if exceeded!
+• Keep Bundles small and simple</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ Common Mistake:</strong><br />
+            <br />
+            <strong>Assuming onDestroy() will be called:</strong><br />
+            <br />
+            // ❌ WRONG!<br />
+            override fun onDestroy() {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;super.onDestroy()<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;saveData()  // Never called on Process Death!<br />
+            }<br />
+            <br />
+            // ✅ CORRECT!<br />
+            override fun onStop() {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;super.onStop()<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;saveData()  // Always called! ✓<br />
+            }<br />
+            <br />
+            override fun onSaveInstanceState(outState: Bundle) {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;super.onSaveInstanceState(outState)<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;outState.putString("data", data)  // Saved by System ✓<br />
+            }
+          </div>
+
+          <hr />
+
+          <h2>كيف تختبر Process Death؟ 🧪</h2>
+
+          <h3>الطرق الأربع:</h3>
+
+          <h4>1. Developer Options: "Don't keep activities"</h4>
+
+          <div dir="ltr">
+            <pre>// Best for regular testing
+
+Steps:
+1. Settings → Developer Options
+2. Enable "Don't keep activities"
+3. Run your app
+4. Navigate between activities
+5. Every background Activity is killed!
+
+Pros:
+✓ Simulates aggressive conditions
+✓ Automatic (no manual steps)
+✓ Tests every navigation
+✓ Catches issues quickly
+
+Cons:
+❌ Too aggressive (not realistic)
+❌ Kills on every navigation
+❌ Hard to test multi-activity flows
+
+Use when:
+• During development
+• Testing state save/restore
+• Quick bug checking</pre>
+          </div>
+
+          <h4>2. ADB Command: Kill Process</h4>
+
+          <div dir="ltr">
+            <pre>// More realistic testing
+
+Steps:
+1. Run your app
+2. Navigate to Activity you want to test
+3. Press Home button (app to background)
+4. Run ADB command:
+   $ adb shell am kill com.example.app
+5. Return to app (Recent Apps or icon)
+6. App should restore state ✓
+
+Pros:
+✓ Realistic (simulates LMK)
+✓ Manual control
+✓ Can test specific scenarios
+
+Cons:
+❌ Manual process
+❌ Need ADB access
+
+Use when:
+• Testing specific flows
+• QA testing
+• Reproduction of bugs</pre>
+          </div>
+
+          <h4>3. Android Studio: Stop Process</h4>
+
+          <div dir="ltr">
+            <pre>// IDE-based testing
+
+Steps:
+1. Run app in Debug mode
+2. Navigate to desired state
+3. Press Home (app to background)
+4. In Android Studio:
+   Run → Stop (or click Stop button)
+5. Return to app
+6. Observe restoration
+
+Pros:
+✓ Easy (one click)
+✓ No ADB needed
+✓ Works in IDE
+
+Cons:
+❌ Only in Debug mode
+❌ Slightly different from real kill
+
+Use when:
+• Quick testing during development
+• No device ADB access</pre>
+          </div>
+
+          <h4>4. Simulate in Code: ViewModel + savedInstanceState</h4>
+
+          <div dir="ltr">
+            <pre>// Automated testing
+
+Test Case:
+@Test
+fun testActivityRecreation() {
+    val scenario = ActivityScenario.launch(MainActivity::class.java)
+    
+    // Enter some state
+    scenario.onActivity { activity ->
+        activity.editText.setText("Test data")
+    }
+    
+    // Simulate recreation (rotation/process death)
+    scenario.recreate()
+    
+    // Verify state restored
+    scenario.onActivity { activity ->
+        assertEquals("Test data", activity.editText.text.toString())
+    }
+}
+
+Pros:
+✓ Automated
+✓ Repeatable
+✓ CI/CD friendly
+
+Cons:
+❌ Doesn't test actual Process Death
+❌ More setup required
+
+Use when:
+• Unit/Integration tests
+• Automated QA
+• Regression testing</pre>
+          </div>
+
+          <h3>Comprehensive Testing Checklist:</h3>
+
+          <div class="success">
+            <strong>✅ Process Death Testing Checklist:</strong><br />
+            <br />
+            <strong>Before Release:</strong><br />
+            <br />
+            ☐ Enable "Don't keep activities"<br />
+            ☐ Navigate through ALL screens<br />
+            ☐ Fill forms, scroll lists, select items<br />
+            ☐ Go to background, return<br />
+            ☐ Verify all state restored<br />
+            <br />
+            ☐ Test with ADB kill:<br />
+            &nbsp;&nbsp;- Fill long form<br />
+            &nbsp;&nbsp;- Go to background<br />
+            &nbsp;&nbsp;- Kill process<br />
+            &nbsp;&nbsp;- Return, verify form intact<br />
+            <br />
+            ☐ Test rotation + process death<br />
+            ☐ Test with low memory (background apps)<br />
+            ☐ Test deep linking after process death<br />
+            ☐ Test notifications after process death<br />
+            <br />
+            <strong>→ If anything fails: FIX IMMEDIATELY!</strong>
+          </div>
+
+          <hr />
+
+          <h2>ما هو Task؟ 📋</h2>
+
+          <h3>التعريف الحقيقي:</h3>
+
+          <blockquote>
+            <strong>Task:</strong><br />
+            مجموعة من Activities مرتبة في Stack، تمثل "وحدة عمل" من منظور User<br />
+            <br />
+            <strong>Key Points:</strong><br />
+            • Task = Back Stack (نفس الشيء تقريباً)<br />
+            • Task يمكن أن يحتوي Activities من apps مختلفة!<br />
+            • Task له هوية منفصلة عن Process<br />
+            • Task يبقى حتى لو Process مات<br />
+            • User يرى Tasks في Recent Apps<br />
+            <br />
+            <strong>→ Task = وحدة التنقل من منظور User</strong>
+          </blockquote>
+
+          <h3>Task vs Process:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الجانب</th>
+                <th>Task</th>
+                <th>Process</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>التعريف</strong></td>
+                <td>مجموعة Activities (Stack)</td>
+                <td>مساحة في Memory</td>
+              </tr>
+              <tr>
+                <td><strong>User-facing</strong></td>
+                <td>نعم ✓ (Recent Apps)</td>
+                <td>لا ❌ (خلف الكواليس)</td>
+              </tr>
+              <tr>
+                <td><strong>البقاء</strong></td>
+                <td>يبقى بعد Process Death</td>
+                <td>يموت فوراً</td>
+              </tr>
+              <tr>
+                <td><strong>Multi-App</strong></td>
+                <td>يمكن (Activities من apps مختلفة)</td>
+                <td>لا (app واحد فقط)</td>
+              </tr>
+              <tr>
+                <td><strong>يُدار بواسطة</strong></td>
+                <td>ActivityManager</td>
+                <td>Kernel + Zygote</td>
+              </tr>
+              <tr>
+                <td><strong>User Control</strong></td>
+                <td>نعم (Swipe away من Recent)</td>
+                <td>لا (مباشر)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Task Structure:</h3>
+
+          <div dir="ltr">
+            <pre>Task Anatomy:
+
+┌─────────────────────────────────────────────┐
+│ Task ID: 12345                              │
+│ Base Activity: MainActivity                 │
+│ Root: com.example.app                       │
+├─────────────────────────────────────────────┤
+│                                             │
+│ Back Stack (bottom to top):                 │
+│                                             │
+│ ┌─────────────────────────────────────────┐│
+│ │ Activity A (MainActivity)               ││ ← Bottom (Root)
+│ │ • State: STOPPED                        ││
+│ │ • App: com.example.app                  ││
+│ └─────────────────────────────────────────┘│
+│                  ↑                          │
+│ ┌─────────────────────────────────────────┐│
+│ │ Activity B (DetailActivity)             ││
+│ │ • State: STOPPED                        ││
+│ │ • App: com.example.app                  ││
+│ └─────────────────────────────────────────┘│
+│                  ↑                          │
+│ ┌─────────────────────────────────────────┐│
+│ │ Activity C (ShareActivity)              ││ ← Top (Foreground)
+│ │ • State: RESUMED                        ││
+│ │ • App: com.android.messaging            ││ ← Different app!
+│ └─────────────────────────────────────────┘│
+│                                             │
+└─────────────────────────────────────────────┘
+
+User sees: Activity C (messaging app)
+User presses Back: → Activity B (your app)
+User presses Back: → Activity A (your app)
+User presses Back: → Task destroyed, Home screen
+
+Key: All 3 activities in SAME Task, different apps!</pre>
+          </div>
+
+          <h3>Task في Recent Apps:</h3>
+
+          <div dir="ltr">
+            <pre>Recent Apps Screen (Overview):
+
+┌────────────────────────────────────┐
+│  Task 1: Chrome                    │
+│  └─ 10 tabs open                   │
+│     (Single Task, many Activities) │
+├────────────────────────────────────┤
+│  Task 2: Gmail                     │
+│  └─ Composing email                │
+├────────────────────────────────────┤
+│  Task 3: Your App                  │
+│  └─ DetailActivity visible         │
+│     (but MainActivity below in stack)│
+├────────────────────────────────────┤
+│  Task 4: Settings                  │
+│  └─ Wi-Fi settings                 │
+└────────────────────────────────────┘
+
+Swipe away Task 3:
+• Task removed from System
+• If Process alive: finish() called on Activities
+• If Process dead: Task just disappears
+• Next launch: Fresh Task (new stack)</pre>
+          </div>
+
+          <hr />
+
+          <h2>Back Stack: كيف يعمل؟ 🔙</h2>
+
+          <h3>Back Stack = LIFO Stack:</h3>
+
+          <blockquote>
+            <strong>Back Stack:</strong> Last In, First Out<br />
+            <br />
+            • آخر Activity تُفتح = أول Activity تُغلق بـ Back<br />
+            • مثل Stack of plates (أطباق مرصوصة)<br />
+            • Back button = Pop من Stack<br />
+            • New Activity = Push إلى Stack
+          </blockquote>
+
+          <h3>Navigation Flow:</h3>
+
+          <div dir="ltr">
+            <pre>Navigation Example:
+
+Initial State:
+┌──────────┐
+│    A     │ ← Top (visible)
+└──────────┘
+Stack: [A]
+
+User clicks button → Start Activity B:
+┌──────────┐
+│    B     │ ← Top (visible)
+├──────────┤
+│    A     │ ← Below (stopped)
+└──────────┘
+Stack: [A, B]
+
+User clicks button → Start Activity C:
+┌──────────┐
+│    C     │ ← Top (visible)
+├──────────┤
+│    B     │ ← Below
+├──────────┤
+│    A     │ ← Bottom
+└──────────┘
+Stack: [A, B, C]
+
+User presses Back:
+┌──────────┐
+│    B     │ ← Top (visible again)
+├──────────┤
+│    A     │ ← Below
+└──────────┘
+Stack: [A, B]  (C destroyed)
+
+User presses Back:
+┌──────────┐
+│    A     │ ← Top (visible)
+└──────────┘
+Stack: [A]  (B destroyed)
+
+User presses Back:
+(empty)
+Stack: []  (A destroyed, Task finished, Home screen)</pre>
+          </div>
+
+          <h3>Lifecycle في Back Stack:</h3>
+
+          <div dir="ltr">
+            <pre>Activity States in Stack:
+
+When B starts from A:
+
+A's Lifecycle:
+├─→ onPause()      (loses focus)
+├─→ onStop()       (not visible)
+└─→ STOPPED        (but alive in stack!)
+
+B's Lifecycle:
+├─→ onCreate()
+├─→ onStart()
+└─→ onResume()     (visible)
+
+Stack: [A(stopped), B(resumed)]
+
+
+When Back pressed (B → A):
+
+B's Lifecycle:
+├─→ onPause()      (loses focus)
+├─→ onStop()       (not visible)
+├─→ onDestroy()    (destroyed)
+└─→ DESTROYED      (removed from memory)
+
+A's Lifecycle:
+├─→ onRestart()    (coming back!)
+├─→ onStart()
+└─→ onResume()     (visible again)
+
+Stack: [A(resumed)]  (B gone)
+
+Key: A was NOT destroyed, just stopped!
+     No onCreate() again, just onRestart()</pre>
+          </div>
+
+          <h3>Multiple Tasks Example:</h3>
+
+          <div dir="ltr">
+            <pre>Scenario: User navigating multiple apps
+
+Task 1 (Your App):
+┌──────────┐
+│    C     │ ← Top
+├──────────┤
+│    B     │
+├──────────┤
+│    A     │ ← Root
+└──────────┘
+
+User presses Home → Opens Email App:
+
+Task 2 (Email):
+┌──────────┐
+│ Compose  │ ← Top
+├──────────┤
+│ Inbox    │ ← Root
+└──────────┘
+
+Both Tasks exist simultaneously!
+• Task 1: Backgrounded (all Activities stopped)
+• Task 2: Foreground (Compose resumed)
+
+User presses Back in Email:
+• Compose destroyed
+• Inbox resumed
+• Task 2 still alive
+
+User presses Back again:
+• Inbox destroyed
+• Task 2 finished
+• System switches to Task 1
+• Activity C resumed!
+
+User now sees YOUR app (Activity C)!
+Task switching is automatic and seamless.</pre>
+          </div>
+
+          <hr />
+
+          <h2>Launch Modes بالتفصيل 🚀</h2>
+
+          <h3>الـ Launch Modes الأربع:</h3>
+
+          <h4>1. standard (Default):</h4>
+
+          <div dir="ltr">
+            <pre>standard: Create new instance every time
+
+Behavior:
+• Always creates NEW instance
+• Added to top of stack
+• Can have multiple instances
+• Default mode
+
+Example:
+┌──────────┐
+│    A     │
+└──────────┘
+startActivity(A)
+┌──────────┐
+│    A     │ ← New instance!
+├──────────┤
+│    A     │
+└──────────┘
+startActivity(A)
+┌──────────┐
+│    A     │ ← Another new instance!
+├──────────┤
+│    A     │
+├──────────┤
+│    A     │
+└──────────┘
+
+Use cases:
+✓ Detail screens (can open many)
+✓ Form screens
+✓ Most regular activities
+
+Code:
+<activity android:name=".DetailActivity"
+          android:launchMode="standard" /></pre>
+          </div>
+
+          <h4>2. singleTop:</h4>
+
+          <div dir="ltr">
+            <pre>singleTop: Reuse if already on top
+
+Behavior:
+• If instance on TOP of stack: reuse it
+• If instance elsewhere in stack: create new
+• onNewIntent() called on reused instance
+
+Example:
+┌──────────┐
+│    B     │
+├──────────┤
+│    A     │
+└──────────┘
+startActivity(B)  // B already on top!
+┌──────────┐
+│    B     │ ← SAME instance! (no new)
+├──────────┤      onNewIntent() called
+│    A     │
+└──────────┘
+
+But:
+┌──────────┐
+│    A     │
+├──────────┤
+│    B     │
+└──────────┘
+startActivity(B)  // B not on top
+┌──────────┐
+│    B     │ ← New instance created
+├──────────┤
+│    A     │
+├──────────┤
+│    B     │ ← Old instance still there
+└──────────┘
+
+Use cases:
+✓ Notification activities
+✓ Search results (don't stack duplicates)
+✓ Activities launched frequently
+
+Code:
+<activity android:name=".SearchActivity"
+          android:launchMode="singleTop" />
+
+Handle in Activity:
+override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    setIntent(intent)  // Update current intent
+    // Handle new data
+    val query = intent.getStringExtra("query")
+    performSearch(query)
+}</pre>
+          </div>
+
+          <h4>3. singleTask:</h4>
+
+          <div dir="ltr">
+            <pre>singleTask: Only ONE instance per Task
+
+Behavior:
+• Only ONE instance in Task
+• If exists: clear everything above it
+• If not exists: create new
+• Acts as Task root (usually)
+
+Example:
+┌──────────┐
+│    D     │
+├──────────┤
+│    C     │
+├──────────┤
+│    B     │  ← singleTask
+├──────────┤
+│    A     │
+└──────────┘
+startActivity(B)  // B exists in stack!
+┌──────────┐
+│    B     │ ← Same instance, C & D destroyed!
+├──────────┤      onNewIntent() called
+│    A     │
+└──────────┘
+
+Use cases:
+✓ Main/Home activity
+✓ Email inbox
+✓ App root screen
+
+⚠️ Warning:
+• Destroys activities above it!
+• Can confuse users if not careful
+• Use sparingly
+
+Code:
+<activity android:name=".MainActivity"
+          android:launchMode="singleTask" /></pre>
+          </div>
+
+          <h4>4. singleInstance:</h4>
+
+          <div dir="ltr">
+            <pre>singleInstance: Own Task, one instance system-wide
+
+Behavior:
+• Lives in its OWN Task (alone!)
+• Only ONE instance in entire system
+• No other activities in its Task
+• Activities started from it: go to other Task
+
+Example:
+Task 1 (Your App):
+┌──────────┐
+│    B     │
+├──────────┤
+│    A     │
+└──────────┘
+startActivity(C)  // C is singleInstance
+
+Task 2 (New Task, just for C):
+┌──────────┐
+│    C     │ ← Alone in its own Task!
+└──────────┘
+
+From C, startActivity(D):
+Task 2:
+┌──────────┐
+│    C     │ ← Still alone
+└──────────┘
+
+Task 1 (or new Task 3):
+┌──────────┐
+│    D     │ ← Goes to different Task!
+├──────────┤
+│    B     │
+├──────────┤
+│    A     │
+└──────────┘
+
+Use cases:
+✓ Launcher activity (Android launcher)
+✓ Browser (Chrome)
+✓ Phone dialer
+✓ Very rare in normal apps!
+
+⚠️ Rarely needed:
+• Complex Task behavior
+• Can confuse users (separate Recent entry)
+• Use only if you really need it
+
+Code:
+<activity android:name=".BrowserActivity"
+          android:launchMode="singleInstance" /></pre>
+          </div>
+
+          <h3>Launch Mode Comparison:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Instances</th>
+                <th>في نفس Task؟</th>
+                <th>الاستخدام</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>standard</strong></td>
+                <td>Multiple</td>
+                <td>نعم</td>
+                <td>معظم Activities</td>
+              </tr>
+              <tr>
+                <td><strong>singleTop</strong></td>
+                <td>Multiple (no duplicate on top)</td>
+                <td>نعم</td>
+                <td>Notifications, Search</td>
+              </tr>
+              <tr>
+                <td><strong>singleTask</strong></td>
+                <td>واحد per Task</td>
+                <td>نعم</td>
+                <td>Main/Root Activity</td>
+              </tr>
+              <tr>
+                <td><strong>singleInstance</strong></td>
+                <td>واحد system-wide</td>
+                <td>لا (Task خاص)</td>
+                <td>Launcher, Browser (نادر!)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>Intent Flags 🚩</h2>
+
+          <h3>Common Intent Flags:</h3>
+
+          <h4>FLAG_ACTIVITY_NEW_TASK:</h4>
+
+          <div dir="ltr">
+            <pre>FLAG_ACTIVITY_NEW_TASK
+
+Behavior:
+• Start Activity in new Task
+• Or bring existing Task to front
+
+Use case:
+• Starting Activity from non-Activity context
+  (Service, BroadcastReceiver, Application)
+
+Example:
+val intent = Intent(context, MainActivity::class.java)
+intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+context.startActivity(intent)
+
+// Without this flag from Service: Crash!
+// "Calling startActivity() from outside of an Activity context 
+//  requires FLAG_ACTIVITY_NEW_TASK flag"</pre>
+          </div>
+
+          <h4>FLAG_ACTIVITY_CLEAR_TOP:</h4>
+
+          <div dir="ltr">
+            <pre>FLAG_ACTIVITY_CLEAR_TOP
+
+Behavior:
+• If Activity exists in stack: destroy everything above it
+• Then: recreate that Activity (or call onNewIntent)
+
+Example:
+Stack: [A, B, C, D, E]
+startActivity(B with CLEAR_TOP)
+Stack: [A, B]  (C, D, E destroyed)
+
+Common use:
+• "Back to home" button
+• Logout (clear stack, go to login)
+
+Code:
+val intent = Intent(this, MainActivity::class.java)
+intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+startActivity(intent)
+
+// Often combined with:
+intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or 
+               Intent.FLAG_ACTIVITY_NEW_TASK</pre>
+          </div>
+
+          <h4>FLAG_ACTIVITY_CLEAR_TASK:</h4>
+
+          <div dir="ltr">
+            <pre>FLAG_ACTIVITY_CLEAR_TASK
+
+Behavior:
+• Clear entire Task
+• Must be used with NEW_TASK
+• Fresh start (no previous activities)
+
+Example:
+Stack: [A, B, C, D]
+startActivity(X with CLEAR_TASK | NEW_TASK)
+Stack: [X]  (A, B, C, D all destroyed)
+
+Common use:
+• Logout → Login screen (fresh start)
+• First launch after onboarding
+• Reset app state
+
+Code:
+val intent = Intent(this, LoginActivity::class.java)
+intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or 
+               Intent.FLAG_ACTIVITY_NEW_TASK
+startActivity(intent)
+finish()  // Destroy current Activity too</pre>
+          </div>
+
+          <h4>FLAG_ACTIVITY_SINGLE_TOP:</h4>
+
+          <div dir="ltr">
+            <pre>FLAG_ACTIVITY_SINGLE_TOP
+
+Behavior:
+• Same as singleTop launch mode
+• But applied per-Intent (not in manifest)
+
+Example:
+Stack: [A, B]
+startActivity(B with SINGLE_TOP)
+Stack: [A, B]  (same B, onNewIntent called)
+
+Use case:
+• Dynamic behavior (sometimes single top, sometimes not)
+• Notification activities
+
+Code:
+val intent = Intent(this, DetailActivity::class.java)
+intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+startActivity(intent)</pre>
+          </div>
+
+          <h4>FLAG_ACTIVITY_REORDER_TO_FRONT:</h4>
+
+          <div dir="ltr">
+            <pre>FLAG_ACTIVITY_REORDER_TO_FRONT
+
+Behavior:
+• If Activity exists: move it to top (don't recreate)
+• Other activities stay in place
+
+Example:
+Stack: [A, B, C, D]
+startActivity(B with REORDER_TO_FRONT)
+Stack: [A, C, D, B]  (B moved to top, not recreated)
+
+Use case:
+• Bring existing Activity forward
+• Don't want to recreate
+• Maintain state
+
+Code:
+val intent = Intent(this, ExistingActivity::class.java)
+intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+startActivity(intent)</pre>
+          </div>
+
+          <h3>Flag Combinations:</h3>
+
+          <div dir="ltr">
+            <pre>Common Flag Combinations:
+
+1. Logout:
+   CLEAR_TASK | NEW_TASK
+   └─→ Clear everything, fresh Login screen
+
+2. Deep Link from notification:
+   NEW_TASK | CLEAR_TOP | SINGLE_TOP
+   └─→ Bring app to front, clear to target, reuse if on top
+
+3. From Service/Receiver:
+   NEW_TASK
+   └─→ Required for non-Activity context
+
+4. Tab-like behavior:
+   REORDER_TO_FRONT
+   └─→ Switch between existing Activities
+
+5. Home button:
+   CLEAR_TOP | SINGLE_TOP
+   └─→ Go to main, reuse if already there</pre>
+          </div>
+
+          <hr />
+
+          <h2>Task Affinity 🔗</h2>
+
+          <h3>ما هو Task Affinity؟</h3>
+
+          <blockquote>
+            <strong>Task Affinity:</strong> تفضيل Activity للـ Task الذي ينتمي إليه<br />
+            <br />
+            • Default: package name<br />
+            • يحدد أي Task يدخله Activity<br />
+            • مهم مع singleTask و NEW_TASK
+          </blockquote>
+
+          <h3>Task Affinity Example:</h3>
+
+          <div dir="ltr">
+            <pre>// App package: com.example.app
+
+// MainActivity.kt
+<activity android:name=".MainActivity"
+          android:taskAffinity=""  /> ← Default (package name)
+
+// DetailActivity.kt
+<activity android:name=".DetailActivity"
+          android:taskAffinity="com.example.app.details" />
+          
+// ChatActivity.kt
+<activity android:name=".ChatActivity"
+          android:taskAffinity="com.example.app.chat" />
+
+
+Scenario:
+From MainActivity, start ChatActivity with NEW_TASK:
+
+Result:
+Task 1 (affinity: com.example.app):
+┌──────────┐
+│   Main   │
+└──────────┘
+
+Task 2 (affinity: com.example.app.chat):
+┌──────────┐
+│   Chat   │ ← Separate Task!
+└──────────┘
+
+Recent Apps shows TWO entries for same app!
+
+Use cases:
+✓ Multi-window split-screen
+✓ Separate workflows (email compose vs inbox)
+✓ Independent navigation stacks
+
+⚠️ Rare:
+• Most apps don't need this
+• Can confuse users (multiple entries)
+• Use default unless specific need</pre>
+          </div>
+
+          <hr />
+
+          <h2>Activity vs Task vs Process 🔍</h2>
+
+          <h3>الفرق الكامل:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الجانب</th>
+                <th>Activity</th>
+                <th>Task</th>
+                <th>Process</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>التعريف</strong></td>
+                <td>شاشة واحدة</td>
+                <td>Stack من Activities</td>
+                <td>مساحة Memory</td>
+              </tr>
+              <tr>
+                <td><strong>Lifetime</strong></td>
+                <td>قصير (seconds-minutes)</td>
+                <td>متوسط (minutes-hours)</td>
+                <td>متوسط-طويل</td>
+              </tr>
+              <tr>
+                <td><strong>User-facing</strong></td>
+                <td>نعم (ما يراه User)</td>
+                <td>نعم (Recent Apps)</td>
+                <td>لا (خلف الكواليس)</td>
+              </tr>
+              <tr>
+                <td><strong>Multi-App</strong></td>
+                <td>من app واحد</td>
+                <td>يمكن (activities من apps مختلفة)</td>
+                <td>من app واحد</td>
+              </tr>
+              <tr>
+                <td><strong>يموت عند</strong></td>
+                <td>finish(), Back</td>
+                <td>Clear من Recent Apps</td>
+                <td>Low Memory, Force Stop</td>
+              </tr>
+              <tr>
+                <td><strong>State Saving</strong></td>
+                <td>onSaveInstanceState</td>
+                <td>System يحفظ Stack</td>
+                <td>لا (كل شيء يختفي)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>العلاقة بينهم:</h3>
+
+          <div dir="ltr">
+            <pre>Relationship:
+
+Process (PID: 12345):
+├─ Task 1 (TaskID: 100):
+│  ├─ Activity A (running in this Process)
+│  ├─ Activity B (running in this Process)
+│  └─ Activity C (running in this Process)
+│
+└─ Task 2 (TaskID: 101):
+   └─ Activity D (running in this Process)
+
+Another Process (PID: 67890):
+└─ Task 1 (TaskID: 100):  ← Same Task!
+   └─ Activity E (different app, same Task!)
+
+Key Insights:
+• ONE Process can have Activities in multiple Tasks
+• ONE Task can have Activities from multiple Processes
+• Activities, Tasks, Processes are independent!
+
+Example: Share Intent
+Your App (Process 12345):
+├─ MainActivity
+└─ DetailActivity → User clicks Share
+
+System creates:
+Task (Your Task):
+├─ MainActivity
+├─ DetailActivity
+└─ ShareActivity ← From Android System (different Process!)
+
+All in same Task, different Processes!</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة معقدة من الواقع 💡</h2>
+
+          <h3>مثال 1: Email App Navigation</h3>
+
+          <div dir="ltr">
+            <pre>Gmail-like Navigation:
+
+Inbox (singleTask):
+┌──────────────────────┐
+│      Inbox           │ ← Root, singleTask
+└──────────────────────┘
+
+User opens email 1:
+┌──────────────────────┐
+│    Email Detail 1    │ ← standard
+├──────────────────────┤
+│      Inbox           │
+└──────────────────────┘
+
+User clicks notification (email 2):
+Intent with CLEAR_TOP | SINGLE_TOP:
+┌──────────────────────┐
+│    Email Detail 2    │ ← New instance
+├──────────────────────┤
+│      Inbox           │
+└──────────────────────┘
+(Email Detail 1 destroyed)
+
+User presses Back:
+┌──────────────────────┐
+│      Inbox           │ ← Back to inbox
+└──────────────────────┘
+
+Why this works:
+• Inbox = singleTask (always one instance)
+• Email Details = standard (can have many)
+• Notifications use CLEAR_TOP (clean navigation)
+• Result: Predictable UX ✓</pre>
+          </div>
+
+          <h3>مثال 2: Deep Linking</h3>
+
+          <div dir="ltr">
+            <pre>Scenario: User clicks link in Chrome
+
+Link: https://yourapp.com/product/12345
+
+Current State:
+Task 1 (Chrome):
+┌──────────────────────┐
+│   Web Page           │
+└──────────────────────┘
+
+Task 2 (Your App - if exists):
+┌──────────────────────┐
+│   DetailActivity     │
+├──────────────────────┤
+│   MainActivity       │
+└──────────────────────┘
+
+Deep Link Handler:
+<activity android:name=".ProductActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https"
+              android:host="yourapp.com"
+              android:pathPrefix="/product/" />
+    </intent-filter>
+</activity>
+
+Behavior Options:
+
+Option 1: FLAG_ACTIVITY_NEW_TASK (default)
+Result:
+Task 2 (Your App):
+┌──────────────────────┐
+│ ProductActivity 12345│ ← New Task or existing Task
+├──────────────────────┤
+│   DetailActivity     │
+├──────────────────────┤
+│   MainActivity       │
+└──────────────────────┘
+
+Option 2: CLEAR_TOP | NEW_TASK
+Result:
+Task 2:
+┌──────────────────────┐
+│ ProductActivity 12345│ ← Top of stack
+└──────────────────────┘
+(DetailActivity, MainActivity cleared)
+
+Option 3: CLEAR_TASK | NEW_TASK
+Result:
+Task 2:
+┌──────────────────────┐
+│ ProductActivity 12345│ ← Only activity
+└──────────────────────┘
+(Everything cleared, fresh start)
+
+Best practice: CLEAR_TOP | NEW_TASK
+• Brings app to front
+• Clears back stack to target
+• Predictable navigation ✓</pre>
+          </div>
+
+          <h3>مثال 3: Multi-Window Split Screen</h3>
+
+          <div dir="ltr">
+            <pre>Split Screen Scenario:
+
+User opens Your App in split screen:
+
+Screen (divided):
+┌─────────────────┬─────────────────┐
+│                 │                 │
+│   Your App      │   Chrome        │
+│   (Task 1)      │   (Task 2)      │
+│                 │                 │
+│ MainActivity    │  Web Page       │
+│                 │                 │
+└─────────────────┴─────────────────┘
+
+Both Tasks FOREGROUND simultaneously!
+• Your App: onPause → onResume (visible but not focused)
+• Chrome: onPause → onResume (visible but not focused)
+
+When user focuses Your App:
+• Your App: onResume (gets focus)
+• Chrome: onPause (loses focus)
+
+Process Implications:
+• Both Processes: High priority (visible!)
+• Both protected from killing
+• OOM Adj: -600 (visible, not foreground)
+
+Task Affinity Use Case:
+If you want independent windows:
+<activity android:name=".ChatActivity"
+          android:taskAffinity="com.yourapp.chat" />
+
+Result: User can open Chat in one window,
+        Main in another window!</pre>
+          </div>
+
+          <h3>مثال 4: Process Death + Deep Stack Recovery</h3>
+
+          <div dir="ltr">
+            <pre>Complex Scenario:
+
+User navigates deep into app:
+A → B → C → D → E (E visible)
+
+Stack: [A, B, C, D, E]
+All saved state in System
+
+User goes to background:
+• All Activities: onStop()
+• System: Saves state for all 5
+
+Process killed (Low Memory):
+• Process: ☠️
+• All Activities: Gone
+• But System remembers: [A, B, C, D, E] structure
+
+User returns to app:
+System must recreate entire stack!
+
+Naive recreation (Wrong!):
+1. Create A → onCreate(savedState A)
+2. Immediately create B on top
+3. Then C, then D, then E
+Result: A created but never visible (waste!)
+
+Smart recreation (Android's way):
+1. Create E ONLY (top of stack)
+   └─→ onCreate(savedState E)
+   └─→ onStart()
+   └─→ onResume()
+2. User sees E immediately! ✓
+3. A, B, C, D: NOT created yet (lazy!)
+
+When user presses Back (E → D):
+1. Destroy E
+2. NOW create D
+   └─→ onCreate(savedState D)
+   └─→ onStart()
+   └─→ onResume()
+
+Continue pattern for C, B, A
+
+Benefits:
+✓ Fast startup (only top Activity)
+✓ Memory efficient (don't create all)
+✓ Progressive restoration
+
+This is why:
+• onCreate(savedInstanceState) critical!
+• State must be comprehensive
+• Each Activity stands alone</pre>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة والنصائح العملية 🎓</h2>
+
+          <h3>ملخص Process Death:</h3>
+
+          <div dir="ltr">
+            <pre>Process Death Summary:
+
+What Dies:
+☠️ Process (PID gone)
+☠️ Application instance
+☠️ All Activities
+☠️ All Services
+☠️ All Threads
+☠️ Static variables
+☠️ Singletons
+☠️ In-memory data
+
+What Survives:
+✓ Task structure (Activity stack)
+✓ savedInstanceState Bundles
+✓ Files on disk
+✓ SharedPreferences
+✓ Databases
+
+How to Handle:
+1. Save state in onSaveInstanceState()
+2. Restore in onCreate(savedInstanceState)
+3. Use ViewModel for complex data
+4. Save important data in onStop()
+5. Test with "Don't keep activities"
+6. Test with adb shell am kill</pre>
+          </div>
+
+          <h3>ملخص Tasks & Back Stack:</h3>
+
+          <div dir="ltr">
+            <pre>Tasks & Back Stack Summary:
+
+Task:
+• Stack of Activities
+• User-facing (Recent Apps)
+• Survives Process Death
+• Can contain Activities from multiple apps
+
+Back Stack:
+• LIFO (Last In, First Out)
+• Back button pops from stack
+• Top Activity = visible
+• Others = stopped (but alive)
+
+Launch Modes:
+• standard: Always new instance
+• singleTop: Reuse if on top
+• singleTask: One per Task, clear above
+• singleInstance: Alone in own Task (rare!)
+
+Intent Flags:
+• NEW_TASK: Start in new/existing Task
+• CLEAR_TOP: Destroy everything above
+• CLEAR_TASK: Clear entire Task (with NEW_TASK)
+• SINGLE_TOP: Reuse if on top
+• REORDER_TO_FRONT: Move existing to top</pre>
+          </div>
+
+          <h3>Golden Rules:</h3>
+
+          <div class="success">
+            <strong>✅ القواعد الذهبية:</strong><br />
+            <br />
+            <strong>Process Death:</strong><br />
+            ✓ يحدث بدون تحذير (SIGKILL)<br />
+            ✓ onDestroy() لا يُستدعى!<br />
+            ✓ احفظ State في onSaveInstanceState()<br />
+            ✓ احفظ Data في onStop()<br />
+            ✓ استخدم ViewModel للبيانات المعقدة<br />
+            ✓ اختبر مع "Don't keep activities" دائماً!<br />
+            <br />
+            <strong>Tasks:</strong><br />
+            ✓ Task ≠ Process (منفصلان!)<br />
+            ✓ Task يعيش بعد Process Death<br />
+            ✓ Task يمكن أن يحتوي apps متعددة<br />
+            ✓ Recent Apps = Tasks (ليس Processes)<br />
+            <br />
+            <strong>Back Stack:</strong><br />
+            ✓ LIFO Stack (آخر داخل، أول خارج)<br />
+            ✓ Activities في Stack: stopped (ليس destroyed)<br />
+            ✓ Back = Pop من Stack<br />
+            ✓ System يعيد بناء Stack بعد Process Death<br />
+            <br />
+            <strong>Launch Modes:</strong><br />
+            ✓ standard للـ معظم Activities<br />
+            ✓ singleTop للـ Notifications<br />
+            ✓ singleTask للـ Main Activity (نادراً)<br />
+            ✓ singleInstance نادر جداً (لا تستخدمه إلا للضرورة)<br />
+            <br />
+            <strong>Testing:</strong><br />
+            ✓ "Don't keep activities" قبل كل Release<br />
+            ✓ اختبر Deep stacks (A→B→C→D→E)<br />
+            ✓ اختبر Notifications + Deep links<br />
+            ✓ اختبر Rotation + Process death<br />
+            ✓ اختبر على Low-end devices
+          </div>
+
+          <h3>Common Mistakes:</h3>
+
+          <div class="warning">
+            <strong>❌ أخطاء شائعة:</strong><br />
+            <br />
+            <strong>1. إهمال Process Death:</strong><br />
+            • عدم حفظ State<br />
+            • الاعتماد على Singletons<br />
+            • الاعتماد على Static variables<br />
+            • عدم الاختبار<br />
+            <br />
+            <strong>2. سوء استخدام Launch Modes:</strong><br />
+            • singleTask لكل Activity<br />
+            • singleInstance بدون فهم<br />
+            • تجاهل التأثير على Back Stack<br />
+            <br />
+            <strong>3. إهمال savedInstanceState:</strong><br />
+            • حفظ كل شيء في ViewModel فقط<br />
+            • نسيان super.onSaveInstanceState()<br />
+            • حفظ objects معقدة (Parcelable خطأ)<br />
+            <br />
+            <strong>4. عدم الاختبار:</strong><br />
+            • عدم تفعيل "Don't keep activities"<br />
+            • عدم اختبار Deep navigation<br />
+            • عدم اختبار على أجهزة ضعيفة
+          </div>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>لا يعرف عن Process Death</td>
+                <td>يصمم للـ Process Death من البداية</td>
+              </tr>
+              <tr>
+                <td>يعتمد على Singletons للـ State</td>
+                <td>يستخدم savedInstanceState + ViewModel</td>
+              </tr>
+              <tr>
+                <td>لا يختبر "Don't keep activities"</td>
+                <td>يختبر دائماً قبل Release</td>
+              </tr>
+              <tr>
+                <td>لا يفهم الفرق بين Task و Process</td>
+                <td>يفهم الهرمية: Activity < Task < Process</td>
+              </tr>
+              <tr>
+                <td>يستخدم singleTask لكل شيء</td>
+                <td>يختار Launch Mode المناسب</td>
+              </tr>
+              <tr>
+                <td>يتجاهل onSaveInstanceState()</td>
+                <td>يحفظ كل State الضروري</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>خاتمة 🏁</h2>
+
+          <blockquote>
+            <strong>Process Death ليس Bug، بل Feature</strong><br />
+            <br />
+            هو <strong>ضرورة</strong> لنظام Android:<br />
+            • يحافظ على Memory<br />
+            • يحافظ على Battery<br />
+            • يحافظ على Performance<br />
+            <br />
+            <strong>عندما تفهم Process Death و Tasks:</strong><br />
+            ✓ تصمم Apps تنجو من القتل<br />
+            ✓ تحفظ State بشكل صحيح<br />
+            ✓ تفهم Back Stack behavior<br />
+            ✓ تختار Launch Modes المناسبة<br />
+            ✓ تبني UX سلس ومتوقع<br />
+            ✓ Users لا يلاحظون شيئاً! ✓<br />
+            <br />
+            <strong>Tasks = وحدة التنقل من منظور User</strong><br />
+            <strong>Process = وحدة التنفيذ من منظور System</strong><br />
+            <strong>→ فهم الفرق = مفتاح Android Mastery! 🎯</strong>
+          </blockquote>
+
+          <div class="info">
+            <strong>💡 الخطوة التالية:</strong><br />
+            1. افتح Developer Options<br />
+            2. فعّل "Don't keep activities"<br />
+            3. شغّل تطبيقك<br />
+            4. Navigate: A → B → C → D<br />
+            5. املأ Forms، Scroll lists<br />
+            6. اضغط Back من D → C<br />
+            7. تأكد كل State محفوظ<br />
+            8. إذا أي شيء ضاع → FIX NOW!<br />
+            <br />
+            <strong>ثم:</strong><br />
+            9. اختبر مع ADB kill<br />
+            10. اختبر Rotation + Process death<br />
+            11. اختبر Deep linking<br />
+            12. اختبر Notifications<br />
+            <br />
+            <strong>→ Process Death testing = غير قابل للتفاوض! ☠️</strong>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

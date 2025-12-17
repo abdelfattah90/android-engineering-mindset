@@ -1,49 +1,43 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <title>Android Engineering Mindset</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
 
     <style>
       body {
-        margin: 50px 0;
+        margin: 0;
         font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
-        background: #f4f6f8;
+        background: #f6f7f9;
         color: #1f2933;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
 
       .container {
-        background: #ffffff;
-        padding: 32px 36px;
-        border-radius: 14px;
-        width: 520px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        max-width: 760px;
+        margin: 70px auto;
+        padding: 0 24px;
       }
 
       h1 {
-        margin-top: 0;
-        margin-bottom: 10px;
         text-align: center;
-        font-size: 26px;
+        font-size: 32px;
+        margin-bottom: 8px;
       }
 
       .subtitle {
         text-align: center;
-        color: #5f6c7b;
-        font-size: 14px;
-        margin-bottom: 28px;
-        line-height: 1.6;
+        font-size: 15px;
+        color: #6b7280;
+        line-height: 1.8;
+        margin-bottom: 48px;
       }
 
       ul {
@@ -53,174 +47,175 @@
       }
 
       li {
-        margin-bottom: 14px;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       a {
-        display: block;
-        padding: 16px 18px;
-        border-radius: 10px;
-        background: #f9fafb;
-        color: #1f2933;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 18px 8px;
         text-decoration: none;
-        transition: box-shadow 0.2s ease, transform 0.1s ease;
-        border: 1px solid #e5e7eb;
+        color: inherit;
+        transition: background 0.15s ease;
       }
 
       a:hover {
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
+        background: #f0f2f5;
+      }
+
+      .index {
+        font-size: 18px;
+        font-weight: 700;
+        color: #9aa1aa;
+        min-width: 44px;
+        text-align: left;
       }
 
       .title {
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 600;
-        margin-bottom: 6px;
+        line-height: 1.6;
       }
 
-      .description {
-        font-size: 14px;
-        color: #4b5563;
-        line-height: 1.6;
+      @media (max-width: 600px) {
+        .index {
+          font-size: 16px;
+          min-width: 34px;
+        }
+
+        .title {
+          font-size: 16px;
+        }
       }
     </style>
   </head>
+
   <body>
     <div class="container">
       <h1>Android Engineering Mindset</h1>
       <div class="subtitle">
-        شرح أساسيات التفكير البرمجي وكيف يعمل البرنامج داخليًا، بعيدًا عن أي لغة
-        برمجة، مع الحفاظ على المصطلحات الأساسية بالإنجليزية
+        فهرس تعليمي يشرح التفكير البرمجي وكيف يعمل البرنامج داخليًا، من منظور
+        هندسي
       </div>
 
       <ul>
         <li>
           <a href="program_logical_thinking.html">
-            <div class="title">ما هو البرنامج؟ (Program Logical Thinking)</div>
-            <div class="description">
-              فهم البرنامج كمنظومة منطقية لحل المشكلات، وكيف يحول العقل البشري
-              الأفكار إلى خطوات قابلة للتنفيذ.
-            </div>
+            <div class="index">01</div>
+            <div class="title">Program Logical Thinking</div>
           </a>
         </li>
 
         <li>
           <a href="control_flow.html">
-            <div class="title">كيف يعمل Control Flow داخل البرنامج؟</div>
-            <div class="description">
-              شرح مسار تنفيذ الكود، وكيف تتحكم الشروط (Conditions) والتكرار
-              (Loops) في اتخاذ القرارات.
-            </div>
+            <div class="index">02</div>
+            <div class="title">Control Flow</div>
           </a>
         </li>
 
         <li>
           <a href="call_stack_guide.html">
-            <div class="title">ما هي وظيفة Call Stack؟</div>
-            <div class="description">
-              فهم آلية استدعاء الدوال، ولماذا ترتيب التنفيذ مهم، وكيف تؤدي
-              الأخطاء إلى Stack Overflow.
-            </div>
+            <div class="index">03</div>
+            <div class="title">Call Stack</div>
           </a>
         </li>
 
         <li>
           <a href="stack-vs-heap-android.html">
+            <div class="index">04</div>
             <div class="title">Stack vs Heap</div>
-            <div class="description">
-              الفرق الجوهري بينهما من ناحية التفكير البرمجي، وليس من ناحية
-              اللغة، وكيف يؤثر ذلك على الأداء والذاكرة.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="reference_vs_value.html">
+            <div class="index">05</div>
             <div class="title">Reference vs Value</div>
-            <div class="description">
-              لماذا تمرير البيانات أحيانًا يسبب سلوكًا غير متوقع، وكيف تنشأ
-              الأخطاء الخفية بسبب مشاركة نفس المرجع.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="mutability_immutability.html">
+            <div class="index">06</div>
             <div class="title">Mutability vs Immutability</div>
-            <div class="description">
-              كيف يؤثر تغيير البيانات أو ثباتها على استقرار البرامج، ولماذا
-              تعتبر Immutability أساسًا في الأنظمة الآمنة.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="operating_system_mindset.html">
+            <div class="index">07</div>
             <div class="title">Operating System Mindset</div>
-            <div class="description">
-              فهم دور نظام التشغيل كمدير للموارد، وكيف يتعامل مع البرامج،
-              الذاكرة، والـ CPU من منظور منطقي.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="process_vs_thread.html">
+            <div class="index">08</div>
             <div class="title">Process vs Thread</div>
-            <div class="description">
-              الفرق بين العملية (Process) والخيط (Thread)، ولماذا يؤثر هذا الفرق
-              على الأداء والتزامن.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="context_switching.html">
+            <div class="index">09</div>
             <div class="title">Context Switching</div>
-            <div class="description">
-              كيف ينتقل الـ CPU بين المهام المختلفة، ولماذا تعتبر هذه العملية
-              مكلفة رغم أنها غير مرئية للمبرمج.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="cpu_vs_gpu_android.html">
-            <div class="title">CPU vs GPU في Android</div>
-            <div class="description">
-              متى يستخدم النظام الـ CPU ومتى يعتمد على الـ GPU، وكيف يؤثر ذلك
-              على الأداء وتجربة المستخدم.
-            </div>
+            <div class="index">10</div>
+            <div class="title">CPU vs GPU (Android)</div>
           </a>
         </li>
 
         <li>
           <a href="memory_management.html">
+            <div class="index">11</div>
             <div class="title">Memory Management</div>
-            <div class="description">
-              كيف يتم إدارة الذاكرة داخل النظام، ولماذا سوء إدارة الذاكرة يؤدي
-              إلى تسريبات (Memory Leaks) وعدم استقرار البرامج.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="process_killing.html">
+            <div class="index">12</div>
             <div class="title">Process Killing</div>
-            <div class="description">
-              لماذا يقوم نظام التشغيل بإنهاء العمليات، وكيف يتخذ قرارات الإغلاق
-              للحفاظ على استقرار النظام.
-            </div>
           </a>
         </li>
 
         <li>
           <a href="android-errors-debugging.html">
+            <div class="index">13</div>
             <div class="title">Android Errors & Debugging</div>
-            <div class="description">
-              فهم الأخطاء من منظور سببي، وليس حفظ الحلول، وبناء عقلية Debugging
-              صحيحة.
-            </div>
+          </a>
+        </li>
+
+        <li>
+          <a href="kotlin-fundamentals-.html">
+            <div class="index">14</div>
+            <div class="title">Kotlin Fundamentals -</div>
+          </a>
+        </li>
+
+        <li>
+          <a href="kotlin-fundamentals-.html">
+            <div class="index">15</div>
+            <div class="title">Kotlin Fundamentals -</div>
+          </a>
+        </li>
+
+        <li>
+          <a href="android_lifecycle_context.html">
+            <div class="index">16</div>
+            <div class="title">Android Lifecycle Context</div>
+          </a>
+        </li>
+
+        <li>
+          <a href="process_death_tasks.html">
+            <div class="index">17</div>
+            <div class="title">Process Death Tasks</div>
           </a>
         </li>
       </ul>

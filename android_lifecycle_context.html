@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Android Lifecycle & Context - دورة الحياة الحقيقية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    .info {
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #1e40af;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>Android Lifecycle & Context الحقيقي 🔄</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - الـ Lifecycle الحقيقي (ليس المخطط البسيط!)<br />
+            2 - التشبيه الواقعي: المسرح والممثلين<br />
+            3 - Activity Lifecycle بالتفصيل<br />
+            4 - Fragment Lifecycle المعقد<br />
+            5 - Process Lifecycle (الأهم!)<br />
+            6 - ما هو Context؟<br />
+            7 - Application Context vs Activity Context<br />
+            8 - متى تستخدم أي Context؟<br />
+            9 - Context Leaks: الكابوس!<br />
+            10 - ViewModel وعلاقته بـ Lifecycle<br />
+            11 - Lifecycle-Aware Components<br />
+            12 - Configuration Changes<br />
+            13 - أمثلة عملية من الواقع<br />
+            14 - الخلاصة والنصائح العملية
+          </p>
+
+          <hr />
+
+          <h2>الـ Lifecycle الحقيقي (ليس المخطط البسيط!) 🎭</h2>
+
+          <h3>المخطط الذي يعلمونك إياه:</h3>
+
+          <div dir="ltr">
+            <pre>Simple Lifecycle (من المقالات):
+
+onCreate() → onStart() → onResume() → Running
+                              ↓
+                          onPause()
+                              ↓
+                          onStop()
+                              ↓
+                         onDestroy()
+
+"بسيط، صح؟" 🤔</pre>
+          </div>
+
+          <h3>الـ Lifecycle الحقيقي (في الواقع):</h3>
+
+          <div dir="ltr">
+            <pre>Real Lifecycle (ما يحدث فعلاً):
+
+┌─────────────────────────────────────────────────┐
+│ App Launch (Cold Start):                        │
+│ ┌─────────────────────────────────────────────┐ │
+│ │ 1. Zygote forks Process (~100-200ms)        │ │
+│ │ 2. Application.onCreate() ⚡ CRITICAL!      │ │
+│ │ 3. ActivityThread.main() starts             │ │
+│ │ 4. Inflation begins (XML → Objects)         │ │
+│ │ 5. Activity.onCreate() ← You are here       │ │
+│ │ 6. Activity.onStart()                       │ │
+│ │ 7. Activity.onResume()                      │ │
+│ │ 8. View.onAttachedToWindow()                │ │
+│ │ 9. View.onMeasure() (multiple times!)       │ │
+│ │ 10. View.onLayout() (multiple times!)       │ │
+│ │ 11. View.onDraw() ← First frame             │ │
+│ │ 12. Choreographer schedules next frame      │ │
+│ └─────────────────────────────────────────────┘ │
+│ Total time: 500ms - 2000ms (Visible to user!)  │
+└─────────────────────────────────────────────────┘
+
+User presses Home:
+┌─────────────────────────────────────────────────┐
+│ 1. onPause() ← Input events stop               │
+│ 2. ActivityManagerService notified             │
+│ 3. Window animation starts                     │
+│ 4. onStop() ← Activity not visible             │
+│ 5. Process state: Background (OOM Adj = 400)   │
+│ 6. onSaveInstanceState() ← MAY BE CALLED       │
+│ 7. Waiting... (might be killed anytime!)       │
+└─────────────────────────────────────────────────┘
+
+System kills Process (Low Memory):
+┌─────────────────────────────────────────────────┐
+│ 1. SIGKILL received                             │
+│ 2. Process dies instantly (< 100ms)             │
+│ 3. onDestroy() NOT CALLED! ☠️                   │
+│ 4. Memory reclaimed                             │
+│ 5. Process removed from memory                  │
+└─────────────────────────────────────────────────┘
+
+User returns to App (Warm/Cold Start):
+┌─────────────────────────────────────────────────┐
+│ IF Process alive:                               │
+│ └─→ onRestart() → onStart() → onResume()       │
+│     (Fast! ~100ms)                              │
+│                                                 │
+│ IF Process killed:                              │
+│ └─→ Full recreation (~500-2000ms)              │
+│     1. New Process                              │
+│     2. Application.onCreate()                   │
+│     3. Activity.onCreate(savedInstanceState)    │
+│        ↑ Restore state here!                    │
+│     4. onStart() → onResume()                   │
+└─────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <blockquote>
+            <strong>🎯 النقاط الحرجة:</strong><br />
+            <br />
+            <strong>1. Application.onCreate() يُستدعى مرة واحدة فقط</strong><br />
+            • عند إنشاء Process<br />
+            • قبل أي Activity<br />
+            • مكان ممتاز للـ Initialization<br />
+            <br />
+            <strong>2. onDestroy() ليس مضموناً!</strong><br />
+            • Process قد يُقتل بـ SIGKILL<br />
+            • onDestroy() لا يُستدعى<br />
+            • احفظ State في onStop()، ليس onDestroy()<br />
+            <br />
+            <strong>3. Configuration Change = Full Recreation</strong><br />
+            • Rotation → onCreate() مرة أخرى<br />
+            • لكن Process نفسه (لا Application.onCreate())<br />
+            <br />
+            <strong>4. onSaveInstanceState() قد لا يُستدعى</strong><br />
+            • يُستدعى فقط إذا System يحتاج إعادة إنشاء<br />
+            • لا يُستدعى عند Back button<br />
+            • لا يُستدعى عند finish()
+          </blockquote>
+
+          <hr />
+
+          <h2>التشبيه الواقعي: المسرح والممثلين 🎭</h2>
+
+          <h3>تخيل Android App كمسرحية:</h3>
+
+          <div dir="ltr">
+            <pre>┌──────────────────────────────────────────────────────┐
+│                    Theater (Android)                 │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  Theater Building (Process):                         │
+│  • المبنى الفيزيائي (RAM space)                      │
+│  • يُبنى عند أول عرض (App launch)                   │
+│  • يبقى قائماً بين العروض (Process cached)          │
+│  • قد يُهدم للتوفير (Process killed)                 │
+│                                                      │
+│  Theater Management (Application):                   │
+│  • الإدارة الدائمة                                   │
+│  • موجودة طول عمر المبنى                             │
+│  • تُنشأ مرة واحدة (Application.onCreate())         │
+│  • Global resources, Singletons                      │
+│                                                      │
+│  Stage (Activity):                                   │
+│  • المسرح نفسه                                       │
+│  • ممثل واحد يعمل في كل مرة (Foreground Activity)   │
+│  • يتغير حسب المشهد (Activity navigation)           │
+│  • له ستارة (Window)                                │
+│                                                      │
+│  Actor (Fragment):                                   │
+│  • الممثلون على المسرح                               │
+│  • متعددون على نفس المسرح                            │
+│  • يدخلون ويخرجون (FragmentTransaction)             │
+│  • يعتمدون على المسرح (Activity Context)             │
+│                                                      │
+│  Props (Views):                                      │
+│  • الديكور والأدوات                                  │
+│  • تُحضر عند الحاجة (inflation)                      │
+│  • تُزال عند تغيير المشهد (destroy)                  │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+
+Scenarios:
+
+1. First Show (Cold Start):
+   • Build theater (Create Process) - Expensive! ⏱
+   • Setup management (Application.onCreate())
+   • Prepare stage (Activity.onCreate())
+   • Actors enter (Fragment.onCreate())
+   • Show begins (onResume())
+
+2. Intermission (Home button):
+   • Curtain closes (onPause())
+   • Actors wait backstage (onStop())
+   • Theater stays open (Process cached)
+   • Management still there (Application alive)
+
+3. Theater Demolished (Process killed):
+   • Building destroyed (SIGKILL)
+   • Everything gone instantly! ☠️
+   • Actors have no chance to pack (no onDestroy)
+   • Management lost (Application gone)
+
+4. Show Resumes (Warm/Cold Start):
+   • If theater exists: Quick resume ✓
+   • If demolished: Rebuild everything 💰
+
+5. Scene Change (Configuration Change):
+   • Tear down stage (Activity destroyed)
+   • Rebuild stage (Activity recreated)
+   • Theater stays (Process same)
+   • Management same (Application same)</pre>
+          </div>
+
+          <blockquote>
+            <strong>🎯 الدروس:</strong><br />
+            1. <strong>Process = Theater Building</strong> (أطول عمر)<br />
+            2. <strong>Application = Management</strong> (يعيش مع Process)<br />
+            3. <strong>Activity = Stage</strong> (يتغير كثيراً)<br />
+            4. <strong>Fragment = Actor</strong> (أقصر عمر)<br />
+            5. <strong>View = Props</strong> (يُخلق ويُدمر باستمرار)<br />
+            <br />
+            <strong>→ فهم الهرمية = مفتاح Android development!</strong>
+          </blockquote>
+
+          <hr />
+
+          <h2>Activity Lifecycle بالتفصيل 📱</h2>
+
+          <h3>الـ States الأساسية:</h3>
+
+          <div dir="ltr">
+            <pre>Activity States:
+
+┌─────────────────────────────────────────────┐
+│ LAUNCHED (قبل onCreate)                     │
+│ • Activity object created                   │
+│ • Constructor called                        │
+│ • Members initialized                       │
+└─────────────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────────────┐
+│ CREATED (بعد onCreate)                      │
+│ • setContentView() called                   │
+│ • Views inflated                            │
+│ • findViewById() works                      │
+│ • Invisible to user                         │
+└─────────────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────────────┐
+│ STARTED (بعد onStart)                       │
+│ • Activity visible                          │
+│ • But not focused (can't interact)          │
+│ • Example: Dialog in front                  │
+└─────────────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────────────┐
+│ RESUMED (بعد onResume) ✓ ACTIVE            │
+│ • Fully visible                             │
+│ • Has focus (user can interact)             │
+│ • Receives input events                     │
+│ • Drawing to screen                         │
+└─────────────────────────────────────────────┘
+              ↓ (User presses Home)
+┌─────────────────────────────────────────────┐
+│ PAUSED (بعد onPause)                        │
+│ • Still visible (partially)                 │
+│ • Lost focus (no input events)              │
+│ • Can still draw                            │
+│ • Example: PiP, Multi-window                │
+└─────────────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────────────┐
+│ STOPPED (بعد onStop)                        │
+│ • Not visible                               │
+│ • Process cached in background              │
+│ • Can be killed by system!                  │
+└─────────────────────────────────────────────┘
+              ↓ (System kills Process)
+┌─────────────────────────────────────────────┐
+│ DESTROYED (بعد onDestroy... maybe)          │
+│ • Activity finished                         │
+│ • Memory released                           │
+│ • Or killed without onDestroy!              │
+└─────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>كل Callback بالتفصيل:</h3>
+
+          <h4>onCreate(Bundle savedInstanceState):</h4>
+
+          <div dir="ltr">
+            <pre>onCreate():
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • First time Activity created              │
+│ • After configuration change (rotation)    │
+│ • After process recreation                 │
+│                                            │
+│ What to do:                                │
+│ ✓ setContentView()                         │
+│ ✓ findViewById() / ViewBinding             │
+│ ✓ Initialize ViewModel                     │
+│ ✓ Setup RecyclerView adapters             │
+│ ✓ Restore state from savedInstanceState   │
+│                                            │
+│ What NOT to do:                            │
+│ ❌ Start animations (not visible yet!)     │
+│ ❌ Access camera/location (no permission)  │
+│ ❌ Heavy computation (blocks UI)           │
+│ ❌ Network requests on Main Thread         │
+│                                            │
+│ savedInstanceState:                        │
+│ • null: First time                         │
+│ • Bundle: Restoring state                  │
+└────────────────────────────────────────────┘
+
+Example:
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: MainViewModel by viewModels()
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // 1. Inflate layout
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // 2. Setup UI
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = MyAdapter()
+        }
+        
+        // 3. Observe data
+        viewModel.data.observe(this) { data ->
+            // Update UI
+        }
+        
+        // 4. Restore state (if needed)
+        savedInstanceState?.let {
+            val position = it.getInt("scroll_position")
+            binding.recyclerView.scrollToPosition(position)
+        }
+        
+        // Called once per creation ✓
+    }
+}</pre>
+          </div>
+
+          <h4>onStart() & onStop():</h4>
+
+          <div dir="ltr">
+            <pre>onStart():
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • After onCreate()                         │
+│ • After onRestart() (coming back)          │
+│ • Activity becoming visible                │
+│                                            │
+│ What to do:                                │
+│ ✓ Register BroadcastReceivers              │
+│ ✓ Start lightweight animations             │
+│ ✓ Acquire resources (if cheap)             │
+│                                            │
+│ Note: Can be called MANY times!            │
+│ (onCreate once, onStart multiple)          │
+└────────────────────────────────────────────┘
+
+onStop():
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • Activity no longer visible               │
+│ • Home pressed                             │
+│ • Another activity in front                │
+│                                            │
+│ What to do:                                │
+│ ✓ Unregister BroadcastReceivers            │
+│ ✓ Stop animations                          │
+│ ✓ Release heavy resources                  │
+│ ✓ Save data to database/SharedPrefs        │
+│   (DON'T wait for onDestroy!)              │
+│                                            │
+│ CRITICAL: onDestroy() might NOT be called! │
+│ → Save state HERE, not in onDestroy()      │
+└────────────────────────────────────────────┘
+
+Example:
+class MainActivity : AppCompatActivity() {
+    private lateinit var locationReceiver: BroadcastReceiver
+    
+    override fun onStart() {
+        super.onStart()
+        
+        // Register receiver (when visible)
+        val filter = IntentFilter(ACTION_LOCATION_UPDATE)
+        registerReceiver(locationReceiver, filter)
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        
+        // Unregister receiver (not visible)
+        unregisterReceiver(locationReceiver)
+        
+        // Save important data NOW!
+        viewModel.saveData()  // Don't wait for onDestroy
+    }
+}</pre>
+          </div>
+
+          <h4>onResume() & onPause():</h4>
+
+          <div dir="ltr">
+            <pre>onResume():
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • Activity in foreground                   │
+│ • User can interact                        │
+│ • Receives input events                    │
+│                                            │
+│ What to do:                                │
+│ ✓ Start camera preview                     │
+│ ✓ Resume video playback                    │
+│ ✓ Start sensor listening                   │
+│ ✓ Resume animations                        │
+│                                            │
+│ Called MANY times! (very frequent)         │
+└────────────────────────────────────────────┘
+
+onPause():
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • Lost focus (but might still be visible!) │
+│ • Dialog appeared                          │
+│ • PiP mode                                 │
+│ • Multi-window partially covered           │
+│                                            │
+│ What to do:                                │
+│ ✓ Pause camera preview                     │
+│ ✓ Pause video playback                     │
+│ ✓ Stop sensor listening                    │
+│ ✓ Pause animations                         │
+│                                            │
+│ What NOT to do:                            │
+│ ❌ Heavy operations (blocks transition!)   │
+│ ❌ Save to database (too slow!)            │
+│    → Do it in onStop() instead             │
+│                                            │
+│ Rule: Keep it FAST! (< 50ms)               │
+└────────────────────────────────────────────┘
+
+Example:
+class CameraActivity : AppCompatActivity() {
+    private lateinit var camera: Camera
+    
+    override fun onResume() {
+        super.onResume()
+        
+        // User back to this Activity - resume camera
+        camera.startPreview()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        
+        // Lost focus - stop camera immediately
+        // (Battery, privacy!)
+        camera.stopPreview()
+        
+        // Keep it fast! 🏃
+    }
+}</pre>
+          </div>
+
+          <h4>onSaveInstanceState() & onRestoreInstanceState():</h4>
+
+          <div dir="ltr">
+            <pre>onSaveInstanceState(Bundle outState):
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • BEFORE onStop()                          │
+│ • IF system MIGHT recreate Activity        │
+│                                            │
+│ Called when:                               │
+│ ✓ Configuration change (rotation)          │
+│ ✓ Home button (might be killed)            │
+│ ✓ Recent apps switch                       │
+│                                            │
+│ NOT called when:                           │
+│ ❌ Back button (user finishing)            │
+│ ❌ finish() called explicitly              │
+│                                            │
+│ What to save:                              │
+│ • Transient UI state                       │
+│ • User input not yet committed             │
+│ • Scroll positions                         │
+│ • Selected items                           │
+│                                            │
+│ What NOT to save:                          │
+│ • Large objects (> 1 MB)                   │
+│ • Bitmaps (use ViewModel)                  │
+│ • Complex objects (use ViewModel)          │
+│                                            │
+│ Size limit: ~1 MB (TransactionTooLarge!)   │
+└────────────────────────────────────────────┘
+
+Example:
+class MainActivity : AppCompatActivity() {
+    private var userInput: String = ""
+    private var scrollPosition: Int = 0
+    
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        
+        // Save UI state
+        outState.putString("user_input", userInput)
+        outState.putInt("scroll_position", scrollPosition)
+        
+        // Small data only! ✓
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Restore state
+        savedInstanceState?.let {
+            userInput = it.getString("user_input", "")
+            scrollPosition = it.getInt("scroll_position", 0)
+        }
+    }
+    
+    // Or use this (called after onStart):
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        
+        // Same as onCreate, but cleaner
+        userInput = savedInstanceState.getString("user_input", "")
+        scrollPosition = savedInstanceState.getInt("scroll_position", 0)
+    }
+}</pre>
+          </div>
+
+          <h3>Common Mistakes:</h3>
+
+          <div class="warning">
+            <strong>❌ أخطاء شائعة في Lifecycle:</strong><br />
+            <br />
+            <strong>1. إهمال onStop():</strong><br />
+            • حفظ البيانات في onDestroy() فقط<br />
+            • onDestroy() قد لا يُستدعى!<br />
+            • النتيجة: فقدان بيانات User<br />
+            <br />
+            <strong>2. عمل بطيء في onPause():</strong><br />
+            • Database write في onPause()<br />
+            • يعطل الانتقال (lag ملحوظ)<br />
+            • افعلها في onStop() بدلاً منه<br />
+            <br />
+            <strong>3. نسيان Unregister:</strong><br />
+            • Register في onCreate()<br />
+            • نسيان Unregister في onDestroy()<br />
+            • النتيجة: Memory leak!<br />
+            <br />
+            <strong>4. إساءة استخدام savedInstanceState:</strong><br />
+            • حفظ Bitmap كبير (Crash!)<br />
+            • حفظ كائنات معقدة<br />
+            • TransactionTooLargeException<br />
+            <br />
+            <strong>5. تجاهل Configuration Changes:</strong><br />
+            • Store references في Static<br />
+            • Activity leak عند Rotation<br />
+            • استخدم ViewModel بدلاً منه!
+          </div>
+
+          <hr />
+
+          <h2>Fragment Lifecycle المعقد 🧩</h2>
+
+          <h3>لماذا Fragment Lifecycle معقد؟</h3>
+
+          <blockquote>
+            <strong>Fragment Lifecycle = Activity Lifecycle + Extra Steps</strong><br />
+            <br />
+            Fragment يعتمد على Activity:<br />
+            • لا يمكن أن يعيش بمفرده<br />
+            • يمر بـ Lifecycle خاص به<br />
+            • ثم يتبع Activity Lifecycle<br />
+            <br />
+            <strong>→ Lifecycle متداخل = تعقيد!</strong>
+          </blockquote>
+
+          <h3>Fragment States:</h3>
+
+          <div dir="ltr">
+            <pre>Fragment Lifecycle (Full):
+
+1. onAttach(Context)
+   ↓ Fragment attached to Activity
+2. onCreate(Bundle)
+   ↓ Fragment created
+3. onCreateView(LayoutInflater, ViewGroup, Bundle)
+   ↓ Inflate layout, return View
+4. onViewCreated(View, Bundle)
+   ↓ View ready, can access child views
+5. onActivityCreated(Bundle) [Deprecated!]
+   ↓ Activity's onCreate finished
+6. onStart()
+   ↓ Fragment visible
+7. onResume()
+   ↓ Fragment active (can interact)
+
+   ─── User presses Home ───
+
+8. onPause()
+   ↓ Lost focus
+9. onStop()
+   ↓ Not visible
+10. onDestroyView()
+    ↓ View destroyed (but Fragment still exists!)
+11. onDestroy()
+    ↓ Fragment destroyed
+12. onDetach()
+    ↓ Fragment detached from Activity
+
+Key Difference from Activity:
+• onCreateView() → onCreate() equivalent for Views
+• onViewCreated() → Best place to access Views
+• onDestroyView() → Views destroyed, Fragment still alive!
+  (Important for View cleanup)</pre>
+          </div>
+
+          <h3>Fragment vs Activity Lifecycle:</h3>
+
+          <div dir="ltr">
+            <pre>When Activity goes through Lifecycle:
+
+Activity.onCreate()
+├─→ Fragment.onAttach()
+├─→ Fragment.onCreate()
+├─→ Fragment.onCreateView()
+├─→ Fragment.onViewCreated()
+└─→ Fragment.onActivityCreated()
+
+Activity.onStart()
+└─→ Fragment.onStart()
+
+Activity.onResume()
+└─→ Fragment.onResume()
+
+─── User presses Home ───
+
+Activity.onPause()
+└─→ Fragment.onPause()
+
+Activity.onStop()
+└─→ Fragment.onStop()
+
+Activity.onDestroy()
+├─→ Fragment.onDestroyView()
+├─→ Fragment.onDestroy()
+└─→ Fragment.onDetach()
+
+Note: Fragment lifecycle is SYNCHRONIZED with Activity!</pre>
+          </div>
+
+          <h3>Fragment Transactions (التعقيد الحقيقي!):</h3>
+
+          <div dir="ltr">
+            <pre>Fragment Transactions affect Lifecycle:
+
+1. add():
+   ┌────────────────────────────────────┐
+   │ onAttach → onCreate → onCreateView │
+   │ → onViewCreated → onStart → onResume│
+   └────────────────────────────────────┘
+
+2. replace():
+   ┌────────────────────────────────────┐
+   │ Old Fragment:                      │
+   │ onPause → onStop → onDestroyView   │
+   │ → onDestroy → onDetach             │
+   │                                    │
+   │ New Fragment:                      │
+   │ onAttach → onCreate → ...          │
+   └────────────────────────────────────┘
+
+3. replace() + addToBackStack():
+   ┌────────────────────────────────────┐
+   │ Old Fragment:                      │
+   │ onPause → onStop → onDestroyView   │
+   │ (but NOT onDestroy!) ⚠️            │
+   │ Fragment kept in BackStack         │
+   │                                    │
+   │ When Back pressed:                 │
+   │ onCreateView → onViewCreated       │
+   │ → onStart → onResume               │
+   └────────────────────────────────────┘
+
+4. hide():
+   ┌────────────────────────────────────┐
+   │ Fragment: setVisibility(GONE)      │
+   │ No Lifecycle callbacks!            │
+   │ Fragment still RESUMED!            │
+   └────────────────────────────────────┘
+
+5. detach():
+   ┌────────────────────────────────────┐
+   │ onPause → onStop → onDestroyView   │
+   │ (but NOT onDestroy!)               │
+   │ Fragment exists without View       │
+   └────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>ViewLifecycleOwner (الجديد والمهم!):</h3>
+
+          <div dir="ltr">
+            <pre>Fragment has TWO Lifecycles:
+
+1. Fragment Lifecycle (this.lifecycle):
+   • Lives from onAttach to onDetach
+   • Survives BackStack
+   • Longer lifetime
+
+2. View Lifecycle (viewLifecycleOwner.lifecycle):
+   • Lives from onCreateView to onDestroyView
+   • Destroyed when Fragment in BackStack!
+   • Shorter lifetime
+
+Problem with Fragment lifecycle:
+// ❌ Wrong! Memory leak if Fragment in BackStack
+viewModel.data.observe(this) { data ->  // 'this' = Fragment
+    textView.text = data  // textView is null after onDestroyView!
+}
+
+Solution with ViewLifecycleOwner:
+// ✅ Correct! Automatically unsubscribed
+viewModel.data.observe(viewLifecycleOwner) { data ->
+    textView.text = data  // Safe! ✓
+}
+
+Rule: Always use viewLifecycleOwner in Fragment!</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ Fragment Lifecycle Pitfalls:</strong><br />
+            <br />
+            <strong>1. Accessing Views after onDestroyView:</strong><br />
+            • Fragment still exists<br />
+            • But Views = null!<br />
+            • Crash: NullPointerException<br />
+            <br />
+            <strong>2. Using 'this' instead of 'viewLifecycleOwner':</strong><br />
+            • Observer not removed after onDestroyView<br />
+            • Memory leak<br />
+            • Crash when accessing destroyed Views<br />
+            <br />
+            <strong>3. Fragment in BackStack confusion:</strong><br />
+            • onDestroy() NOT called<br />
+            • Fragment still in memory<br />
+            • Views destroyed (onDestroyView called)<br />
+            <br />
+            <strong>4. Nested Fragments:</strong><br />
+            • Parent Fragment destroyed<br />
+            • Child Fragments also destroyed<br />
+            • Use childFragmentManager carefully!
+          </div>
+
+          <hr />
+
+          <h2>Process Lifecycle (الأهم!) ⚙️</h2>
+
+          <h3>لماذا Process Lifecycle أهم من Activity Lifecycle؟</h3>
+
+          <blockquote>
+            <strong>الحقيقة القاسية:</strong><br />
+            Activity Lifecycle = وهم نسبي<br />
+            Process Lifecycle = الواقع المطلق<br />
+            <br />
+            • Activity قد يُدمر ويُعاد بناؤه (rotation)<br />
+            • لكن Process يبقى حياً<br />
+            • Application object يبقى حياً<br />
+            • Singletons تبقى حية<br />
+            • Static variables تبقى حية<br />
+            <br />
+            <strong>→ Process Lifecycle يحدد متى يُمسح كل شيء فعلاً!</strong>
+          </blockquote>
+
+          <h3>Process States:</h3>
+
+          <div dir="ltr">
+            <pre>Process Lifecycle:
+
+┌─────────────────────────────────────────────┐
+│ 1. NOT CREATED                              │
+│    • App never launched                     │
+│    • Or killed and cleared from memory      │
+└─────────────────────────────────────────────┘
+              ↓ User launches App
+┌─────────────────────────────────────────────┐
+│ 2. CREATED (Cold Start)                     │
+│    • Zygote forks new Process               │
+│    • Application.onCreate() called ⚡       │
+│    • Takes 500-2000ms                       │
+│    • User sees splash/blank screen          │
+└─────────────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────────────┐
+│ 3. FOREGROUND (High Priority)               │
+│    • User interacting with App              │
+│    • OOM Adj: -800                          │
+│    • Won't be killed (unless desperate)     │
+│    • Full CPU, Memory access                │
+└─────────────────────────────────────────────┘
+              ↓ User presses Home
+┌─────────────────────────────────────────────┐
+│ 4. BACKGROUND (Medium Priority)             │
+│    • App not visible                        │
+│    • OOM Adj: 400-900                       │
+│    • Can be killed anytime!                 │
+│    • CPU throttled, Network restricted      │
+│    • Service: 5-minute time limit           │
+└─────────────────────────────────────────────┘
+              ↓ Not used for 30 min
+┌─────────────────────────────────────────────┐
+│ 5. CACHED (Low Priority)                    │
+│    • Empty Process (no active components)   │
+│    • OOM Adj: 900-1000                      │
+│    • Kept for fast restart                  │
+│    • Killed immediately if RAM needed       │
+└─────────────────────────────────────────────┘
+              ↓ Low Memory
+┌─────────────────────────────────────────────┐
+│ 6. KILLED                                   │
+│    • SIGKILL received                       │
+│    • Process dies instantly                 │
+│    • Application.onTerminate() NOT called!  │
+│    • All memory released                    │
+└─────────────────────────────────────────────┘
+              ↓ User returns
+┌─────────────────────────────────────────────┐
+│ 7. RECREATED (Cold Start again)             │
+│    • New Process created                    │
+│    • Application.onCreate() called again    │
+│    • Activity.onCreate(savedInstanceState)  │
+│    • Feels slower to user                   │
+└─────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>Application.onCreate() - النقطة الحرجة:</h3>
+
+          <div dir="ltr">
+            <pre>Application.onCreate():
+┌────────────────────────────────────────────┐
+│ When called:                               │
+│ • Once per Process lifetime                │
+│ • Before any Activity                      │
+│ • Before any Service                       │
+│ • On Main Thread!                          │
+│                                            │
+│ What to do:                                │
+│ ✓ Initialize global objects                │
+│ ✓ Setup crash reporting (Firebase)        │
+│ ✓ Initialize analytics                     │
+│ ✓ Setup DI framework (Dagger/Koin/Hilt)   │
+│ ✓ Initialize libraries (Glide, Timber)    │
+│                                            │
+│ What NOT to do:                            │
+│ ❌ Heavy computation (blocks UI!)          │
+│ ❌ Synchronous network (ANR!)              │
+│ ❌ Large file I/O (slow!)                  │
+│ ❌ Database migrations (move to background)│
+│                                            │
+│ Keep it FAST! (< 100ms ideal)              │
+│ Every ms here = app launch delay           │
+└────────────────────────────────────────────┘
+
+Example:
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        
+        // Fast initialization only!
+        Timber.plant(Timber.DebugTree())
+        
+        // Heavy work: move to background
+        GlobalScope.launch(Dispatchers.IO) {
+            initializeHeavyLibrary()
+        }
+        
+        // Setup DI
+        startKoin {
+            androidContext(this@MyApp)
+            modules(appModule)
+        }
+    }
+}
+
+Application.onTerminate():
+┌────────────────────────────────────────────┐
+│ NEVER CALLED on real devices!              │
+│ Only in emulator during shutdown           │
+│ Don't rely on it!                          │
+│                                            │
+│ → No cleanup happens on Process kill       │
+│ → Everything just disappears (SIGKILL)     │
+└────────────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>ما هو Context؟ 🎯</h2>
+
+          <h3>التعريف الحقيقي:</h3>
+
+          <blockquote>
+            <strong>Context:</strong><br />
+            "بوابة الوصول إلى موارد Android و System Services"<br />
+            <br />
+            بدون Context، لا يمكنك:<br />
+            • الوصول لـ Resources (strings, drawables, colors)<br />
+            • إنشاء Views<br />
+            • Start Activities/Services<br />
+            • Access System Services (LocationManager, NotificationManager)<br />
+            • Access SharedPreferences, Databases<br />
+            • Send Broadcasts<br />
+            <br />
+            <strong>→ Context = المفتاح لكل شيء في Android!</strong>
+          </blockquote>
+
+          <h3>Context Hierarchy:</h3>
+
+          <div dir="ltr">
+            <pre>Context Inheritance:
+
+                    Context (abstract)
+                        ↑
+                        │
+                ContextWrapper (abstract)
+                        ↑
+        ┌───────────────┴───────────────┐
+        │                               │
+    Application                     ContextThemeWrapper
+    (Singleton)                             ↑
+                                            │
+                                        Activity
+                                        (Multiple)
+
+What this means:
+• Application IS-A Context (via ContextWrapper)
+• Activity IS-A Context (via ContextThemeWrapper)
+• Service IS-A Context (via ContextWrapper)
+
+But:
+• Fragment is NOT a Context!
+  • Fragment.requireContext() → Activity Context
+  • Fragment.requireActivity() → Activity
+
+• View is NOT a Context!
+  • View.getContext() → Activity Context (usually)</pre>
+          </div>
+
+          <h3>ماذا يحتوي Context؟</h3>
+
+          <div dir="ltr">
+            <pre>Context capabilities:
+
+1. Resources:
+   ┌────────────────────────────────────┐
+   │ getString(R.string.app_name)       │
+   │ getDrawable(R.drawable.icon)       │
+   │ getColor(R.color.primary)          │
+   │ getDimension(R.dimen.padding)      │
+   └────────────────────────────────────┘
+
+2. System Services:
+   ┌────────────────────────────────────┐
+   │ getSystemService(LAYOUT_INFLATER)  │
+   │ getSystemService(LOCATION_SERVICE) │
+   │ getSystemService(NOTIFICATION_...)│
+   │ getSystemService(ALARM_SERVICE)    │
+   └────────────────────────────────────┘
+
+3. Application Info:
+   ┌────────────────────────────────────┐
+   │ getPackageName()                   │
+   │ getApplicationInfo()               │
+   │ getApplicationContext()            │
+   └────────────────────────────────────┘
+
+4. File System:
+   ┌────────────────────────────────────┐
+   │ getFilesDir()                      │
+   │ getCacheDir()                      │
+   │ openFileInput()                    │
+   │ openFileOutput()                   │
+   └────────────────────────────────────┘
+
+5. Database:
+   ┌────────────────────────────────────┐
+   │ getDatabasePath()                  │
+   │ openOrCreateDatabase()             │
+   └────────────────────────────────────┘
+
+6. SharedPreferences:
+   ┌────────────────────────────────────┐
+   │ getSharedPreferences()             │
+   └────────────────────────────────────┘
+
+7. Components:
+   ┌────────────────────────────────────┐
+   │ startActivity(Intent)              │
+   │ startService(Intent)               │
+   │ sendBroadcast(Intent)              │
+   │ bindService()                      │
+   └────────────────────────────────────┘
+
+8. Permissions:
+   ┌────────────────────────────────────┐
+   │ checkPermission()                  │
+   │ checkSelfPermission()              │
+   └────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>Application Context vs Activity Context 🔀</h2>
+
+          <h3>الفرق الأساسي:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الجانب</th>
+                <th>Application Context</th>
+                <th>Activity Context</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Lifetime</strong></td>
+                <td>Process lifetime (طويل جداً)</td>
+                <td>Activity lifetime (قصير)</td>
+              </tr>
+              <tr>
+                <td><strong>عدد الـ Instances</strong></td>
+                <td>واحد فقط (Singleton)</td>
+                <td>متعدد (كل Activity مختلف)</td>
+              </tr>
+              <tr>
+                <td><strong>Theme Support</strong></td>
+                <td>لا ❌ (No Theme)</td>
+                <td>نعم ✓ (Has Theme)</td>
+              </tr>
+              <tr>
+                <td><strong>UI Creation</strong></td>
+                <td>محدود (يمكن لكن غير مستحسن)</td>
+                <td>نعم ✓ (المكان الصحيح)</td>
+              </tr>
+              <tr>
+                <td><strong>Start Activity</strong></td>
+                <td>نعم (لكن يحتاج FLAG_ACTIVITY_NEW_TASK)</td>
+                <td>نعم ✓ (مباشر)</td>
+              </tr>
+              <tr>
+                <td><strong>الوصول</strong></td>
+                <td>applicationContext أو getApplicationContext()</td>
+                <td>this في Activity</td>
+              </tr>
+              <tr>
+                <td><strong>Memory Leak Risk</strong></td>
+                <td>منخفض (يعيش طويلاً)</td>
+                <td>عالي! (قد يُحتفظ به بالخطأ)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Application Context بالتفصيل:</h3>
+
+          <div dir="ltr">
+            <pre>Application Context:
+
+Characteristics:
+┌────────────────────────────────────────────┐
+│ • Singleton (one per Process)              │
+│ • Lives entire Process lifetime            │
+│ • Same object everywhere:                  │
+│   activity.applicationContext === app      │
+│   service.applicationContext === app       │
+│ • No Theme attached                        │
+│ • Survives Activity recreation             │
+│ • Survives Configuration changes           │
+└────────────────────────────────────────────┘
+
+When to use:
+✓ Singletons (no Activity reference!)
+✓ Registering BroadcastReceivers (application-wide)
+✓ Accessing SharedPreferences
+✓ Accessing databases
+✓ Starting Services
+✓ Long-lived objects (cache, repository)
+
+When NOT to use:
+❌ Creating UI (no Theme!)
+❌ Showing Dialogs (needs Activity!)
+❌ Inflating Layouts (Theme issues)
+❌ Starting Activity without FLAG_ACTIVITY_NEW_TASK
+
+Example:
+class Repository(private val context: Context) {
+    // ✅ Use Application Context for DB
+    private val db = Room.databaseBuilder(
+        context.applicationContext,  // Not Activity!
+        AppDatabase::class.java,
+        "database"
+    ).build()
+    
+    // ✅ Safe! DB lives entire app lifetime
+}</pre>
+          </div>
+
+          <h3>Activity Context بالتفصيل:</h3>
+
+          <div dir="ltr">
+            <pre>Activity Context:
+
+Characteristics:
+┌────────────────────────────────────────────┐
+│ • Multiple instances (one per Activity)    │
+│ • Lives only during Activity lifetime      │
+│ • Has Theme (for styling)                  │
+│ • Destroyed on rotation/recreation         │
+│ • Different object after recreation!       │
+└────────────────────────────────────────────┘
+
+When to use:
+✓ Creating Views (needs Theme!)
+✓ Showing Dialogs
+✓ Inflating Layouts
+✓ Starting Activities
+✓ Accessing Activity-specific resources
+✓ Getting WindowManager
+✓ Anything UI-related
+
+When NOT to use:
+❌ Storing in Singletons (Memory leak!)
+❌ Storing in static fields (Memory leak!)
+❌ Passing to background threads (Memory leak!)
+❌ Long-lived objects (Memory leak!)
+
+Example - Memory Leak:
+// ❌ MEMORY LEAK!
+class DataManager {
+    companion object {
+        private var context: Context? = null
+        
+        fun init(context: Context) {
+            this.context = context  // ☠️ Leak!
+        }
+    }
+}
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        DataManager.init(this)  // ❌ Activity leaked!
+        // After rotation, old Activity can't be GC'd
+    }
+}
+
+
+// ✅ Fixed: Use Application Context
+class DataManager {
+    companion object {
+        private var context: Context? = null
+        
+        fun init(context: Context) {
+            this.context = context.applicationContext  // ✓ Safe!
+        }
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>متى تستخدم أي Context؟ 🤔</h2>
+
+          <h3>Decision Tree:</h3>
+
+          <div dir="ltr">
+            <pre>Which Context to use?
+
+┌────────────────────────────────────────┐
+│ Do you need to create UI?              │
+│ (View, Dialog, Layout inflation)       │
+└────────────────────────────────────────┘
+         │
+    ┌────┴────┐
+    │ YES     │ NO
+    ↓         ↓
+┌────────┐  ┌────────────────────────────┐
+│Activity│  │ Is this a Singleton or     │
+│Context │  │ long-lived object?         │
+│✓       │  └────────────────────────────┘
+└────────┘           │
+              ┌──────┴──────┐
+              │ YES         │ NO
+              ↓             ↓
+       ┌──────────┐    ┌──────────┐
+       │Application│    │ Either   │
+       │Context    │    │ works    │
+       │✓          │    │ (prefer  │
+       └──────────┘    │ Activity)│
+                       └──────────┘</pre>
+          </div>
+
+          <h3>Examples:</h3>
+
+          <div dir="ltr">
+            <pre>Scenario-based Examples:
+
+1. Creating a Toast:
+   Toast.makeText(this, "Hello", Toast.LENGTH_SHORT)
+   // 'this' = Activity Context ✓
+   // Or applicationContext (works but not ideal)
+
+2. Starting an Activity:
+   startActivity(Intent(this, MainActivity::class.java))
+   // 'this' = Activity Context ✓ (best)
+   // applicationContext needs FLAG_ACTIVITY_NEW_TASK
+
+3. Showing a Dialog:
+   AlertDialog.Builder(this)  // MUST be Activity!
+   // ❌ applicationContext → Crash!
+
+4. Inflating a Layout:
+   LayoutInflater.from(this).inflate(R.layout.item, parent, false)
+   // 'this' = Activity Context ✓ (for correct Theme)
+
+5. Accessing SharedPreferences:
+   getSharedPreferences("prefs", MODE_PRIVATE)
+   // Either works
+   // Prefer applicationContext (survives rotation)
+
+6. Creating Database:
+   Room.databaseBuilder(applicationContext, ...)
+   // ✓ Application Context (singleton nature)
+
+7. Registering BroadcastReceiver (global):
+   applicationContext.registerReceiver(receiver, filter)
+   // ✓ Application Context (lives entire app)
+
+8. Getting System Service:
+   val notificationManager = getSystemService(
+       Context.NOTIFICATION_SERVICE
+   ) as NotificationManager
+   // Either works (same result)
+
+9. Singleton initialization:
+   object ImageLoader {
+       fun init(context: Context) {
+           appContext = context.applicationContext  // ✓
+       }
+   }
+
+10. Repository pattern:
+    class UserRepository(context: Context) {
+        private val appContext = context.applicationContext
+        // ✓ Store Application Context, not Activity
+    }</pre>
+          </div>
+
+          <h3>Golden Rules:</h3>
+
+          <div class="success">
+            <strong>✅ قواعد Context الذهبية:</strong><br />
+            <br />
+            <strong>1. UI = Activity Context</strong><br />
+            • Views, Dialogs, Layouts<br />
+            • Anything visual<br />
+            <br />
+            <strong>2. Singletons = Application Context</strong><br />
+            • Database, Repository, Cache<br />
+            • Long-lived objects<br />
+            <br />
+            <strong>3. لا تخزن Activity Context في:</strong><br />
+            • Static fields<br />
+            • Singletons<br />
+            • Long-lived objects<br />
+            • Background threads<br />
+            <br />
+            <strong>4. إذا شككت:</strong><br />
+            • استخدم Application Context<br />
+            • أكثر أماناً (no leaks)<br />
+            <br />
+            <strong>5. Fragment:</strong><br />
+            • requireContext() → Activity Context<br />
+            • requireActivity().applicationContext → App Context
+          </div>
+
+          <hr />
+
+          <h2>Context Leaks: الكابوس! 💀</h2>
+
+          <h3>ما هو Context Leak؟</h3>
+
+          <blockquote>
+            <strong>Context Leak:</strong> الاحتفاظ بـ reference لـ Activity Context بعد destroy<br />
+            <br />
+            النتيجة:<br />
+            • Activity لا يمكن garbage collection<br />
+            • كل Views، Bitmaps، Resources تبقى في Memory<br />
+            • Memory leak: 50-100 MB per Activity!<br />
+            • بعد عدة Rotations → OutOfMemoryError<br />
+            <br />
+            <strong>→ Context Leak أخطر leak في Android!</strong>
+          </blockquote>
+
+          <h3>أمثلة Context Leaks:</h3>
+
+          <h4>Leak 1: Static Reference:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ MASSIVE LEAK!
+class LeakyActivity : AppCompatActivity() {
+    companion object {
+        var activity: Activity? = null  // ☠️
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity = this  // Leaking Activity!
+    }
+}
+
+// User rotates screen 10 times
+// → 10 Activity instances in memory!
+// → 10 * 50 MB = 500 MB leak!
+
+
+// ✅ Fixed: Don't store Activity in static
+// If you really need it:
+companion object {
+    var activity: WeakReference<Activity>? = null
+    
+    fun setActivity(activity: Activity) {
+        this.activity = WeakReference(activity)
+    }
+}</pre>
+          </div>
+
+          <h4>Leak 2: Singleton with Activity Context:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ LEAK!
+object ImageCache {
+    private lateinit var context: Context
+    private val cache = LruCache<String, Bitmap>(...)
+    
+    fun init(context: Context) {
+        this.context = context  // ☠️ If Activity Context
+    }
+    
+    fun loadImage(url: String): Bitmap {
+        // Uses context...
+    }
+}
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ImageCache.init(this)  // ❌ Leaking Activity!
+    }
+}
+
+
+// ✅ Fixed: Use Application Context
+object ImageCache {
+    private lateinit var context: Context
+    
+    fun init(context: Context) {
+        this.context = context.applicationContext  // ✓
+    }
+}</pre>
+          </div>
+
+          <h4>Leak 3: Background Thread:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ LEAK!
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        Thread {
+            Thread.sleep(10000)  // 10 seconds
+            
+            // 'this' captures Activity!
+            runOnUiThread {
+                textView.text = "Done"  // ☠️
+            }
+        }.start()
+        
+        // User rotates after 1 second
+        // Thread keeps old Activity alive for 9 more seconds!
+    }
+}
+
+
+// ✅ Fixed: WeakReference
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        val activityRef = WeakReference(this)
+        
+        Thread {
+            Thread.sleep(10000)
+            
+            activityRef.get()?.runOnUiThread {
+                textView.text = "Done"
+            } // ✓ Returns null if Activity destroyed
+        }.start()
+    }
+}
+
+
+// ✅ أفضل: Coroutines + Lifecycle
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        lifecycleScope.launch {
+            delay(10000)
+            textView.text = "Done"
+        }
+        // Automatically cancelled on destroy! ✓
+    }
+}</pre>
+          </div>
+
+          <h4>Leak 4: Inner Class:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ LEAK!
+class MainActivity : AppCompatActivity() {
+    
+    private val handler = Handler(Looper.getMainLooper())
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Inner class holds implicit reference to Activity!
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                textView.text = "Updated"  // ☠️
+                handler.postDelayed(this, 1000)  // Repeat
+            }
+        }, 1000)
+        
+        // Runnable keeps Activity alive forever!
+    }
+}
+
+
+// ✅ Fixed: Static inner class + WeakReference
+class MainActivity : AppCompatActivity() {
+    
+    private val handler = Handler(Looper.getMainLooper())
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        handler.postDelayed(UpdateRunnable(this), 1000)
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)  // ✓ Clean up!
+    }
+    
+    // Static inner class - no implicit reference
+    private class UpdateRunnable(activity: MainActivity) : Runnable {
+        private val activityRef = WeakReference(activity)
+        
+        override fun run() {
+            val activity = activityRef.get()
+            if (activity != null && !activity.isFinishing) {
+                activity.textView.text = "Updated"
+                activity.handler.postDelayed(this, 1000)
+            }
+        }
+    }
+}</pre>
+          </div>
+
+          <h3>كيف تكتشف Context Leaks؟</h3>
+
+          <div dir="ltr">
+            <pre>Detection Tools:
+
+1. LeakCanary (Best!):
+   dependencies {
+       debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+   }
+   
+   // Automatically detects leaks!
+   // Shows notification with leak trace
+   // Points to exact line causing leak ✓
+
+2. Android Studio Profiler:
+   • Run app
+   • Rotate screen 5-10 times
+   • Force GC (garbage collect) button
+   • Heap Dump
+   • Search for Activity instances
+   • Should be 1, not 10! ⚠️
+
+3. Manual check:
+   override fun onDestroy() {
+       super.onDestroy()
+       Log.d("Lifecycle", "Activity destroyed: $this")
+   }
+   
+   // Rotate screen
+   // Check logs: should see destroy messages
+   // If not destroyed after rotation → Leak!</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ Common Leak Sources:</strong><br />
+            1. Static references to Activity<br />
+            2. Singletons storing Activity Context<br />
+            3. Background threads with Activity reference<br />
+            4. Inner classes (implicit reference)<br />
+            5. Listeners not unregistered<br />
+            6. Handlers with Message/Runnable<br />
+            7. AsyncTask (deprecated, but still used)<br />
+            8. Large Bitmaps in Activity
+          </div>
+
+          <hr />
+
+          <h2>ViewModel وعلاقته بـ Lifecycle 🏗️</h2>
+
+          <h3>لماذا ViewModel حل سحري؟</h3>
+
+          <blockquote>
+            <strong>ViewModel:</strong> يعيش أطول من Activity!<br />
+            <br />
+            • ينجو من Configuration Changes (rotation)<br />
+            • يُدمر فقط عند Activity.finish()<br />
+            • لا يحتوي على Context (No leaks!)<br />
+            • مكان مثالي للبيانات والـ Logic<br />
+            <br />
+            <strong>→ ViewModel = نهاية مشاكل Rotation!</strong>
+          </blockquote>
+
+          <h3>ViewModel Lifecycle:</h3>
+
+          <div dir="ltr">
+            <pre>ViewModel vs Activity Lifecycle:
+
+Activity Lifecycle:
+┌────────────────────────────────────────────┐
+│ onCreate() ────┐                           │
+│ onStart()      │                           │
+│ onResume()     │  Activity Active          │
+│ onPause()      │                           │
+│ onStop()       │                           │
+│ onDestroy() ───┘                           │
+│                                            │
+│ [Rotation] 🔄                              │
+│                                            │
+│ onCreate() ────┐                           │
+│ onStart()      │                           │
+│ onResume()     │  Activity Recreated       │
+│ ...            │                           │
+└────────────────────────────────────────────┘
+
+ViewModel Lifecycle:
+┌────────────────────────────────────────────┐
+│ Created ───────────────────────────────────┤
+│                                            │
+│ ViewModel ALIVE                            │ ← Survives rotation!
+│ (Unchanged!)                               │
+│                                            │
+├────────────────────────────────────────────┤
+│ onCleared() ← Called ONLY when             │
+│               Activity.finish()            │
+└────────────────────────────────────────────┘
+
+Timeline:
+Activity 1 → onCreate
+          → ViewModel created
+Activity 1 → onDestroy (rotation)
+          → ViewModel STILL ALIVE! ✓
+Activity 2 → onCreate (recreation)
+          → Same ViewModel instance! ✓
+Activity 2 → finish()
+          → ViewModel.onCleared()
+          → ViewModel destroyed</pre>
+          </div>
+
+          <h3>ViewModel Best Practices:</h3>
+
+          <div dir="ltr">
+            <pre>// ✅ Correct ViewModel usage
+class UserViewModel : ViewModel() {
+    // ✓ LiveData/StateFlow for data
+    private val _users = MutableLiveData<List<User>>()
+    val users: LiveData<List<User>> = _users
+    
+    // ✓ Repository (uses Application Context)
+    private val repository = UserRepository(getApplication())
+    
+    init {
+        loadUsers()
+    }
+    
+    fun loadUsers() {
+        viewModelScope.launch {
+            val data = repository.getUsers()
+            _users.value = data
+        }
+    }
+    
+    override fun onCleared() {
+        super.onCleared()
+        // Clean up resources
+        repository.cleanup()
+    }
+}
+
+// In Activity:
+class MainActivity : AppCompatActivity() {
+    private val viewModel: UserViewModel by viewModels()
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Observer setup - safe from rotation!
+        viewModel.users.observe(this) { users ->
+            updateUI(users)
+        }
+        
+        // After rotation: SAME ViewModel instance ✓
+        // No need to reload data!
+    }
+}
+
+
+// ❌ Common mistakes:
+class BadViewModel(
+    private val context: Context  // ❌ LEAK if Activity Context!
+) : ViewModel() {
+    private val textView: TextView? = null  // ❌ LEAK!
+    
+    fun doSomething() {
+        context.startActivity(...)  // ❌ Leaked context!
+    }
+}
+
+// ✅ If you need Context:
+class GoodViewModel(
+    application: Application  // ✓ Safe! (use AndroidViewModel)
+) : AndroidViewModel(application) {
+    
+    private val appContext = application.applicationContext
+    
+    fun doSomething() {
+        // Use appContext safely ✓
+    }
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>Configuration Changes 🔄</h2>
+
+          <h3>ما هو Configuration Change؟</h3>
+
+          <blockquote>
+            <strong>Configuration Change:</strong> تغيير في إعدادات الجهاز يتطلب إعادة بناء UI<br />
+            <br />
+            <strong>أمثلة:</strong><br />
+            • Screen rotation (أكثرها شيوعاً)<br />
+            • Language change<br />
+            • Dark mode toggle<br />
+            • Screen size change (fold/unfold)<br />
+            • Keyboard availability<br />
+            <br />
+            <strong>Default behavior:</strong> Activity تُدمر وتُعاد بناؤها!
+          </blockquote>
+
+          <h3>ما يحدث عند Rotation:</h3>
+
+          <div dir="ltr">
+            <pre>Configuration Change Timeline:
+
+T=0ms: User rotates device 🔄
+       └─→ System detects rotation
+
+T=10ms: Start destroying Activity
+        ├─→ onPause()
+        ├─→ onStop()
+        ├─→ onSaveInstanceState(outState)  ⚡ Save state!
+        ├─→ onDestroy()
+        └─→ Activity object destroyed
+
+T=50ms: ViewModel survives! ✓
+        (Not destroyed, same instance)
+
+T=100ms: Start creating new Activity
+         ├─→ onCreate(savedInstanceState)  ⚡ Restore state!
+         ├─→ setContentView() with new orientation layout
+         ├─→ onStart()
+         └─→ onResume()
+
+T=200ms: UI ready with new orientation
+
+Result:
+• Old Activity: destroyed (GC'd)
+• New Activity: created (different instance)
+• ViewModel: same instance! ✓
+• Process: same (no restart)
+• Application: same (no onCreate)</pre>
+          </div>
+
+          <h3>كيف تتعامل مع Configuration Changes؟</h3>
+
+          <h4>Option 1: Handle it (Default - Recommended):</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ Best practice: Let Android handle it
+
+1. Save state in onSaveInstanceState:
+override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putString("user_input", editText.text.toString())
+    outState.putInt("scroll_pos", recyclerView.scrollY)
+}
+
+2. Restore in onCreate:
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+    
+    savedInstanceState?.let {
+        editText.setText(it.getString("user_input"))
+        recyclerView.scrollY = it.getInt("scroll_pos")
+    }
+}
+
+3. Use ViewModel for complex data:
+class MainViewModel : ViewModel() {
+    val users = liveData {
+        emit(repository.getUsers())  // Survives rotation ✓
+    }
+}
+
+Benefits:
+• Proper resource handling (different layouts for orientations)
+• System-managed
+• No configuration in manifest needed
+• Best for most cases ✓</pre>
+          </div>
+
+          <h4>Option 2: Handle yourself (Not Recommended):</h4>
+
+          <div dir="ltr">
+            <pre>// ⚠️ Prevent recreation (use sparingly!)
+
+// In AndroidManifest.xml:
+<activity
+    android:name=".MainActivity"
+    android:configChanges="orientation|screenSize|keyboardHidden" />
+
+// In Activity:
+override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    
+    // Handle configuration change manually
+    when (newConfig.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            // Update UI for landscape
+        }
+        Configuration.ORIENTATION_PORTRAIT -> {
+            // Update UI for portrait
+        }
+    }
+}
+
+Drawbacks:
+❌ You must handle ALL orientation logic manually
+❌ Can't use different layouts per orientation
+❌ More complex to maintain
+❌ Easy to mess up
+
+Use only when:
+• Camera preview (shouldn't restart)
+• Video player (shouldn't interrupt)
+• Games (complex state)</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة عملية من الواقع 💡</h2>
+
+          <h3>مثال 1: Login Screen</h3>
+
+          <div dir="ltr">
+            <pre>// Complete lifecycle handling
+
+class LoginActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityLoginBinding
+    private val viewModel: LoginViewModel by viewModels()
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // Observe login state (survives rotation)
+        viewModel.loginState.observe(this) { state ->
+            when (state) {
+                is LoginState.Loading -> showLoading()
+                is LoginState.Success -> navigateToMain()
+                is LoginState.Error -> showError(state.message)
+            }
+        }
+        
+        // Restore user input after rotation
+        savedInstanceState?.let {
+            binding.emailEditText.setText(it.getString("email"))
+        }
+        
+        binding.loginButton.setOnClickListener {
+            val email = binding.emailEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+            viewModel.login(email, password)
+        }
+    }
+    
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save email (not password for security!)
+        outState.putString("email", binding.emailEditText.text.toString())
+    }
+}
+
+class LoginViewModel(
+    application: Application  // ✓ Safe context
+) : AndroidViewModel(application) {
+    
+    private val repository = AuthRepository(application.applicationContext)
+    
+    private val _loginState = MutableLiveData<LoginState>()
+    val loginState: LiveData<LoginState> = _loginState
+    
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _loginState.value = LoginState.Loading
+            
+            try {
+                val result = repository.login(email, password)
+                _loginState.value = LoginState.Success(result)
+            } catch (e: Exception) {
+                _loginState.value = LoginState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+}
+
+Benefits:
+• Email preserved across rotation ✓
+• Login state survives rotation ✓
+• No memory leaks ✓
+• Clean separation of concerns ✓</pre>
+          </div>
+
+          <h3>مثال 2: Complex Fragment Communication</h3>
+
+          <div dir="ltr">
+            <pre>// Shared ViewModel between Fragments
+
+class SharedViewModel : ViewModel() {
+    private val _selectedItem = MutableLiveData<Item>()
+    val selectedItem: LiveData<Item> = _selectedItem
+    
+    fun selectItem(item: Item) {
+        _selectedItem.value = item
+    }
+}
+
+// Fragment 1: List
+class ListFragment : Fragment() {
+    // Activity-scoped ViewModel (shared!)
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        adapter.onItemClick = { item ->
+            sharedViewModel.selectItem(item)  // ✓
+        }
+        
+        // Use viewLifecycleOwner (not 'this')!
+        sharedViewModel.selectedItem.observe(viewLifecycleOwner) { item ->
+            // Update UI
+        }
+    }
+}
+
+// Fragment 2: Detail
+class DetailFragment : Fragment() {
+    // Same ViewModel instance! ✓
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        // Observe selected item
+        sharedViewModel.selectedItem.observe(viewLifecycleOwner) { item ->
+            displayItem(item)  // ✓
+        }
+    }
+}
+
+Benefits:
+• Fragments communicate without tight coupling ✓
+• Survives configuration changes ✓
+• Automatic lifecycle management ✓
+• No memory leaks (viewLifecycleOwner) ✓</pre>
+          </div>
+
+          <h3>مثال 3: Service Communication</h3>
+
+          <div dir="ltr">
+            <pre>// Service accessing Application safely
+
+class MyService : Service() {
+    
+    // ✓ Service IS-A Context (ContextWrapper)
+    // But should use Application Context for long-lived objects
+    
+    private lateinit var repository: DataRepository
+    
+    override fun onCreate() {
+        super.onCreate()
+        
+        // ✓ Use Application Context for repository
+        repository = DataRepository(applicationContext)
+        
+        // ✓ Service context is safe here (Service lifecycle)
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE)
+    }
+    
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Do work...
+        
+        // ✓ Safe: Service lives long enough
+        repository.syncData()
+        
+        return START_STICKY
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.cleanup()
+    }
+}
+
+class DataRepository(
+    private val context: Context  // Application Context passed in
+) {
+    private val database = context.getDatabasePath("mydb")
+    
+    // ✓ Safe: Application Context lives entire process
+}</pre>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة والنصائح العملية 🎓</h2>
+
+          <h3>ملخص Lifecycle:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المكون</th>
+                <th>Lifetime</th>
+                <th>متى يُدمر؟</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Process</strong></td>
+                <td>طويل جداً (hours/days)</td>
+                <td>Low memory, Force stop</td>
+              </tr>
+              <tr>
+                <td><strong>Application</strong></td>
+                <td>= Process lifetime</td>
+                <td>= Process killed</td>
+              </tr>
+              <tr>
+                <td><strong>ViewModel</strong></td>
+                <td>Activity finish</td>
+                <td>finish(), not rotation</td>
+              </tr>
+              <tr>
+                <td><strong>Activity</strong></td>
+                <td>قصير (minutes)</td>
+                <td>finish(), rotation, back</td>
+              </tr>
+              <tr>
+                <td><strong>Fragment</strong></td>
+                <td>≤ Activity lifetime</td>
+                <td>Transaction, Activity destroyed</td>
+              </tr>
+              <tr>
+                <td><strong>View</strong></td>
+                <td>≤ Activity/Fragment</td>
+                <td>UI recreation</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Context Decision Matrix:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الحالة</th>
+                <th>استخدم</th>
+                <th>السبب</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>UI (View, Dialog, Toast)</td>
+                <td>Activity Context</td>
+                <td>Needs Theme</td>
+              </tr>
+              <tr>
+                <td>Singleton, Repository</td>
+                <td>Application Context</td>
+                <td>Avoid leaks</td>
+              </tr>
+              <tr>
+                <td>Database, SharedPrefs</td>
+                <td>Application Context</td>
+                <td>Long lifetime</td>
+              </tr>
+              <tr>
+                <td>Start Activity</td>
+                <td>Activity Context</td>
+                <td>Task stack</td>
+              </tr>
+              <tr>
+                <td>System Service</td>
+                <td>Either (prefer Activity)</td>
+                <td>Same result</td>
+              </tr>
+              <tr>
+                <td>BroadcastReceiver (global)</td>
+                <td>Application Context</td>
+                <td>App-wide scope</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Golden Rules:</h3>
+
+          <div dir="ltr">
+            <pre>✓ Application.onCreate() = Process lifetime (once)
+✓ Activity.onCreate() = Screen lifetime (many times)
+✓ onDestroy() NOT guaranteed → save in onStop()
+✓ onSaveInstanceState() for transient UI state
+✓ ViewModel for data that survives rotation
+✓ Application Context for Singletons (no leaks)
+✓ Activity Context for UI (needs Theme)
+✓ Fragment: use viewLifecycleOwner (not 'this')
+✓ Never store Activity Context in static/Singleton
+✓ Configuration Change = Activity recreation (default)
+✓ Process = Theater, Application = Management, Activity = Stage</pre>
+          </div>
+
+          <h3>Best Practices:</h3>
+
+          <div class="success">
+            <strong>✅ النصائح العملية:</strong><br />
+            <br />
+            <strong>1. Lifecycle Awareness:</strong><br />
+            • احفظ State في onSaveInstanceState()<br />
+            • احفظ Data في onStop() (ليس onDestroy!)<br />
+            • استخدم ViewModel للبيانات المعقدة<br />
+            • استخدم lifecycleScope للـ Coroutines<br />
+            <br />
+            <strong>2. Context Management:</strong><br />
+            • UI = Activity Context<br />
+            • Singletons = Application Context<br />
+            • لا تخزن Activity Context في Static<br />
+            • استخدم context.applicationContext للـ long-lived objects<br />
+            <br />
+            <strong>3. Memory Leak Prevention:</strong><br />
+            • استخدم LeakCanary (debug builds)<br />
+            • لا Inner classes (implicit reference)<br />
+            • WeakReference للـ Activity في threads<br />
+            • Unregister listeners في onDestroy()<br />
+            <br />
+            <strong>4. Fragment Best Practices:</strong><br />
+            • viewLifecycleOwner للـ Observers<br />
+            • onViewCreated() للـ View access<br />
+            • activityViewModels() للـ Shared data<br />
+            • Clean up في onDestroyView()<br />
+            <br />
+            <strong>5. Configuration Changes:</strong><br />
+            • دع Android يديرها (default)<br />
+            • ViewModel + savedInstanceState<br />
+            • لا تمنع Recreation إلا للضرورة<br />
+            • اختبر Rotation دائماً!
+          </div>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>يحفظ في onDestroy() فقط</td>
+                <td>يحفظ في onStop() + onSaveInstanceState</td>
+              </tr>
+              <tr>
+                <td>لا يفهم الفرق بين Application و Activity Context</td>
+                <td>يختار Context المناسب لكل حالة</td>
+              </tr>
+              <tr>
+                <td>يخزن Activity في Static</td>
+                <td>يستخدم Application Context أو WeakReference</td>
+              </tr>
+              <tr>
+                <td>لا يختبر Rotation</td>
+                <td>يختبر Rotation قبل كل Release</td>
+              </tr>
+              <tr>
+                <td>لا يستخدم ViewModel</td>
+                <td>ViewModel لكل Screen</td>
+              </tr>
+              <tr>
+                <td>Fragment: يستخدم 'this' للـ Observe</td>
+                <td>Fragment: يستخدم 'viewLifecycleOwner'</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>خاتمة 🏁</h2>
+
+          <blockquote>
+            <strong>Lifecycle ليس مجرد Callbacks</strong><br />
+            <br />
+            هو <strong>فهم عميق</strong> لكيفية عمل Android:<br />
+            • Process = المبنى الفيزيائي (الأساس)<br />
+            • Application = الإدارة الدائمة<br />
+            • Activity = المسرح المتغير<br />
+            • Fragment = الممثلون<br />
+            • View = الديكور<br />
+            <br />
+            <strong>عندما تفهم Lifecycle:</strong><br />
+            ✓ تفهم متى يُخلق ويُدمر كل شيء<br />
+            ✓ تحفظ State بشكل صحيح<br />
+            ✓ تتجنب Memory Leaks<br />
+            ✓ تختار Context المناسب<br />
+            ✓ تتعامل مع Rotation بسلاسة<br />
+            ✓ تبني تطبيقات تنجو من Process Death<br />
+            <br />
+            <strong>المهندس المحترف يفهم: Lifecycle هو القلب النابض لـ Android. 💓</strong>
+          </blockquote>
+
+          <div class="info">
+            <strong>💡 الخطوة التالية:</strong><br />
+            1. افتح تطبيقك<br />
+            2. Developer Options → "Don't keep activities"<br />
+            3. اختبر كل Screen<br />
+            4. تأكد State يُحفظ ويُسترجع<br />
+            5. اختبر Rotation (Ctrl+F11/F12 في Emulator)<br />
+            6. استخدم LeakCanary<br />
+            7. Profile Memory بعد 10 Rotations<br />
+            8. Search "Activity" في Heap dump → Should be 1!<br />
+            <br />
+            <strong>→ Lifecycle mastery = Android mastery! 🎯</strong>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
