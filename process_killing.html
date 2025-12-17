@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Process Killing - متى ولماذا يقتل OS التطبيقات؟</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    .info {
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #1e40af;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>متى ولماذا يقتل OS التطبيقات؟ ☠️</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - الفلسفة الأساسية: عدم الثقة<br />
+            2 - التشبيه الواقعي: الحارس والزوار<br />
+            3 - أسباب القتل: متى ولماذا؟<br />
+            4 - Low Memory Killer في Android<br />
+            5 - OOM Killer في Linux<br />
+            6 - ANR: Application Not Responding<br />
+            7 - Crash Handling<br />
+            8 - Background Restrictions<br />
+            9 - Battery Optimization<br />
+            10 - Security: Malicious Apps<br />
+            11 - كيف تحمي تطبيقك من القتل؟<br />
+            12 - Process Lifecycle في Android<br />
+            13 - أمثلة عملية من الواقع<br />
+            14 - الخلاصة والنصائح العملية
+          </p>
+
+          <hr />
+
+          <h2>الفلسفة الأساسية: عدم الثقة 🛡️</h2>
+
+          <h3>لماذا OS لا يثق بالتطبيقات؟</h3>
+
+          <blockquote>
+            <strong>القاعدة الذهبية في تصميم OS:</strong><br />
+            <strong>"لا تثق بأي تطبيق، أبداً!"</strong><br />
+            <br />
+            لماذا؟<br />
+            • التطبيق قد يكون <strong>buggy</strong> (مليء بالأخطاء)<br />
+            • التطبيق قد يكون <strong>malicious</strong> (خبيث)<br />
+            • المبرمج قد يكون <strong>inexperienced</strong> (مبتدئ)<br />
+            • التطبيق قد يكون <strong>poorly designed</strong> (سيء التصميم)<br />
+            <br />
+            <strong>→ OS مسؤول عن حماية:</strong><br />
+            1. النظام من الانهيار<br />
+            2. التطبيقات الأخرى من التدخل<br />
+            3. المستخدم من تجربة سيئة<br />
+            4. البطارية من الاستنزاف<br />
+            5. الذاكرة من النفاد<br />
+            <br />
+            <strong>→ لذا، OS لديه صلاحية مطلقة لقتل أي Process!</strong>
+          </blockquote>
+
+          <h3>عقلية OS (Kernel Mindset):</h3>
+
+          <div class="info">
+            <strong>🧠 كيف يفكر نظام التشغيل؟</strong><br />
+            <br />
+            <strong>OS يرى التطبيقات كـ:</strong><br />
+            • <strong>Tenants</strong> (مستأجرين) وليس Owners<br />
+            • <strong>Guests</strong> (ضيوف) وليس Hosts<br />
+            • <strong>Workers</strong> (عمال) وليس Managers<br />
+            <br />
+            <strong>OS هو المالك الحقيقي:</strong><br />
+            • يملك كل الموارد (CPU, RAM, Disk, Battery)<br />
+            • يقرر من يحصل على ماذا<br />
+            • يراقب كل شيء<br />
+            • يقتل من يسيء التصرف<br />
+            <br />
+            <strong>→ تطبيقك = Guest في فندق OS، ليس مالك البيت!</strong>
+          </div>
+
+          <h3>Trust Boundaries (حدود الثقة):</h3>
+
+          <div dir="ltr">
+            <pre>Trust Levels in OS:
+
+┌─────────────────────────────────────────────┐
+│ Level 0: Kernel (Trusted 100%)              │
+│ • Full hardware access                      │
+│ • Can do anything                           │
+│ • Bugs = System crash                       │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ Level 1: System Services (Highly Trusted)   │
+│ • ActivityManagerService                    │
+│ • WindowManagerService                      │
+│ • PackageManagerService                     │
+│ • Bugs = System instability                 │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ Level 2: System Apps (Trusted)              │
+│ • Phone, Contacts, Settings                 │
+│ • Privileged permissions                    │
+│ • Bugs = App crash (isolated)               │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ Level 3: User Apps (NOT TRUSTED!)           │
+│ • Your app is here!                         │
+│ • Sandboxed, isolated                       │
+│ • Limited permissions                       │
+│ • Bugs = Kill without mercy                 │
+│ • Malicious = Kill + Uninstall              │
+└─────────────────────────────────────────────┘
+
+Key Point: OS treats user apps as UNTRUSTED by default!</pre>
+          </div>
+
+          <hr />
+
+          <h2>التشبيه الواقعي: الحارس والزوار 🏛️</h2>
+
+          <h3>تخيل OS كحارس متحف:</h3>
+
+          <div dir="ltr">
+            <pre>┌──────────────────────────────────────────────────────┐
+│                   Museum (Device)                    │
+│              Security Guard (Operating System)       │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  Visitors (Apps):                                    │
+│  👤 App A - Well-behaved                             │
+│  👤 App B - Touching exhibits (misbehaving)          │
+│  👤 App C - Blocking doorway (hogging resources)     │
+│  👤 App D - Stealing (malicious)                     │
+│  👤 App E - Sleeping (idle)                          │
+│                                                      │
+│  Security Guard Rules:                               │
+│  ─────────────────────────────────────────────      │
+│  1. Monitor all visitors constantly                  │
+│  2. Remove anyone blocking flow                      │
+│  3. Eject troublemakers immediately                  │
+│  4. Wake up sleeping visitors or ask them to leave   │
+│  5. Prioritize VIP visitors (foreground apps)        │
+│  6. Limit crowd size (memory management)             │
+│                                                      │
+│  Actions Taken:                                      │
+│  ────────────────────────────────────────────        │
+│  App B touching exhibits:                            │
+│  └─→ Warning (onTrimMemory)                          │
+│      └─→ If continues → Ejection (Kill!)             │
+│                                                      │
+│  App C blocking doorway:                             │
+│  └─→ Immediate ejection (ANR Kill!)                  │
+│                                                      │
+│  App D stealing:                                     │
+│  └─→ Permanent ban (Uninstall + Block)               │
+│                                                      │
+│  Too many visitors (Low Memory):                     │
+│  └─→ Ask least important to leave                    │
+│      (Kill background apps first)                    │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+
+Lesson: OS = Security guard with ZERO tolerance
+        Apps = Visitors who can be ejected anytime</pre>
+          </div>
+
+          <blockquote>
+            <strong>🎯 الدروس:</strong><br />
+            1. <strong>Constant Monitoring:</strong> OS يراقب كل تطبيق كل الوقت<br />
+            2. <strong>Zero Tolerance:</strong> أي سوء تصرف = قتل فوري<br />
+            3. <strong>Limited Resources:</strong> عدد محدود من "الزوار" مسموح<br />
+            4. <strong>Priority System:</strong> VIPs (foreground) لهم الأولوية<br />
+            5. <strong>Preemptive Action:</strong> OS يقتل قبل ما تحدث مشكلة كبيرة<br />
+            6. <strong>No Appeal:</strong> القرار نهائي، لا استئناف!
+          </blockquote>
+
+          <hr />
+
+          <h2>أسباب القتل: متى ولماذا؟ ⚰️</h2>
+
+          <h3>السيناريوهات الرئيسية للقتل:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>السبب</th>
+                <th>متى يحدث؟</th>
+                <th>السرعة</th>
+                <th>يمكن تجنبه؟</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Low Memory</strong></td>
+                <td>RAM < 100 MB</td>
+                <td>فوري (< 1s)</td>
+                <td>جزئياً (قلل استهلاك)</td>
+              </tr>
+              <tr>
+                <td><strong>ANR</strong></td>
+                <td>Main Thread block > 5s</td>
+                <td>فوري (dialog → kill)</td>
+                <td>نعم ✓ (لا تعطل UI)</td>
+              </tr>
+              <tr>
+                <td><strong>Crash</strong></td>
+                <td>Unhandled Exception</td>
+                <td>فوري (< 100ms)</td>
+                <td>نعم ✓ (fix bugs)</td>
+              </tr>
+              <tr>
+                <td><strong>Background Limit</strong></td>
+                <td>App في background طويلاً</td>
+                <td>تدريجي (دقائق)</td>
+                <td>نعم ✓ (WorkManager)</td>
+              </tr>
+              <tr>
+                <td><strong>Battery Saver</strong></td>
+                <td>Battery < 15%</td>
+                <td>تدريجي</td>
+                <td>جزئياً (Foreground Service)</td>
+              </tr>
+              <tr>
+                <td><strong>Force Stop</strong></td>
+                <td>User action</td>
+                <td>فوري</td>
+                <td>لا ❌</td>
+              </tr>
+              <tr>
+                <td><strong>Security</strong></td>
+                <td>Malicious behavior</td>
+                <td>فوري + uninstall</td>
+                <td>لا ❌ (لا تكن خبيث!)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>هرمية الأولويات (من يُقتل أولاً):</h3>
+
+          <div dir="ltr">
+            <pre>Android Process Priority (OOM Adj Score):
+
+Higher Score = Higher chance of being killed
+
+┌────────────────────────────────────────────┐
+│ -1000: System Servers (NEVER KILLED)      │
+│        • ActivityManagerService            │
+│        • WindowManagerService              │
+│        • System UI                         │
+└────────────────────────────────────────────┘
+          ↑ Untouchable
+
+┌────────────────────────────────────────────┐
+│ -900: Persistent Apps                      │
+│       • Phone app                          │
+│       • Launcher                           │
+└────────────────────────────────────────────┘
+          ↑ Almost never killed
+
+┌────────────────────────────────────────────┐
+│ -800: Foreground App (Active)              │
+│       • User currently interacting         │
+│       • Visible on screen                  │
+└────────────────────────────────────────────┘
+          ↑ Protected (only if desperate)
+
+┌────────────────────────────────────────────┐
+│ -700: Perceptible App                      │
+│       • Playing music                      │
+│       • PiP video                          │
+└────────────────────────────────────────────┘
+          ↑ High priority
+
+┌────────────────────────────────────────────┐
+│ -600: Visible App (Not focused)            │
+│       • Dialog in front                    │
+│       • Multi-window visible               │
+└────────────────────────────────────────────┘
+          ↑ Medium-high priority
+
+┌────────────────────────────────────────────┐
+│ 0: Service                                 │
+│    • Background service running            │
+│    • Foreground Service (with notification)│
+└────────────────────────────────────────────┘
+          ↑ Medium priority
+
+┌────────────────────────────────────────────┐
+│ 200: Home App                              │
+│      • Launcher (when not visible)         │
+└────────────────────────────────────────────┘
+          ↑ Low-medium priority
+
+┌────────────────────────────────────────────┐
+│ 400-900: Background/Cached Apps            │
+│          • Recently used apps              │
+│          • Sorted by last used time        │
+└────────────────────────────────────────────┘
+          ↑ First to be killed!
+
+┌────────────────────────────────────────────┐
+│ 900+: Empty Processes                      │
+│       • No components running              │
+│       • Just cached for fast restart       │
+└────────────────────────────────────────────┘
+          ↑ Killed immediately!</pre>
+          </div>
+
+          <hr />
+
+          <h2>Low Memory Killer في Android 🔪</h2>
+
+          <h3>كيف يعمل LMK؟</h3>
+
+          <div dir="ltr">
+            <pre>Low Memory Killer (LMK) Algorithm:
+
+Trigger: Free RAM < Threshold
+
+Thresholds (typical on 4 GB device):
+┌──────────────────────────────────────┐
+│ Critical: < 50 MB   → Kill Cached    │
+│ Low:      < 100 MB  → Kill Background│
+│ Medium:   < 150 MB  → Kill Services  │
+│ High:     < 200 MB  → Monitor        │
+└──────────────────────────────────────┘
+
+Decision Process:
+┌──────────────────────────────────────────────┐
+│ 1. Check free RAM                            │
+│    └─→ 80 MB (Critical!)                     │
+│                                              │
+│ 2. List all processes sorted by OOM Adj     │
+│    ┌─────────────────────────────────────┐  │
+│    │ PID  │ Name        │ OOM │ RAM      │  │
+│    ├──────┼─────────────┼─────┼──────────┤  │
+│    │ 1234 │ Foreground  │-800 │ 150 MB   │  │
+│    │ 2345 │ Music       │-700 │ 50 MB    │  │
+│    │ 3456 │ Service     │  0  │ 30 MB    │  │
+│    │ 4567 │ Background  │ 400 │ 80 MB    │  │
+│    │ 5678 │ Cached      │ 900 │ 120 MB   │  │
+│    │ 6789 │ Empty       │ 1000│ 40 MB    │  │
+│    └─────────────────────────────────────┘  │
+│                                              │
+│ 3. Select victim (highest OOM Adj)           │
+│    └─→ PID 6789 (Empty, OOM=1000)            │
+│                                              │
+│ 4. Kill process                              │
+│    └─→ SIGKILL (instant death, no cleanup)  │
+│                                              │
+│ 5. Reclaim memory                            │
+│    └─→ Free: 80 MB + 40 MB = 120 MB ✓       │
+│                                              │
+│ 6. Still low? Repeat!                        │
+│    └─→ Next victim: PID 5678 (Cached)       │
+│                                              │
+└──────────────────────────────────────────────┘
+
+Result:
+• Background apps killed silently
+• No notification to user
+• No cleanup (onDestroy NOT called!)
+• Process just disappears</pre>
+          </div>
+
+          <h3>OOM Adj Score Calculation:</h3>
+
+          <div dir="ltr">
+            <pre>How Android calculates OOM Adj:
+
+Base Score:
+• Foreground Activity visible: -800
+• Service running: 0
+• Cached: 900
+
+Adjustments:
+┌──────────────────────────────────────────┐
+│ + Has recent Activity: -100              │
+│ + Playing audio: -700                    │
+│ + Foreground Service: -100               │
+│ + Bound by foreground app: -200          │
+│ + Heavy computation: +100                │
+│ + Memory hog: +200                       │
+└──────────────────────────────────────────┘
+
+Example Calculation:
+App A:
+• Base: Cached (900)
+• Has recent activity: -100
+• Total: 800
+→ Will be killed after Empty (1000+)
+
+App B:
+• Base: Service (0)
+• Foreground Service: -100
+• Playing audio: -700
+• Total: -800
+→ Same as Foreground App! Protected ✓
+
+Key: Lower score = Higher priority = Less likely to die</pre>
+          </div>
+
+          <h3>مراحل القتل (Killing Stages):</h3>
+
+          <div dir="ltr">
+            <pre>Memory Pressure Stages:
+
+Stage 1: Comfortable (RAM > 500 MB)
+┌────────────────────────────────────┐
+│ • No killing                       │
+│ • Background apps run freely       │
+│ • System smooth                    │
+└────────────────────────────────────┘
+
+Stage 2: Moderate (200-500 MB)
+┌────────────────────────────────────┐
+│ • onTrimMemory(TRIM_MEMORY_MODERATE)│
+│ • Apps should release caches       │
+│ • No killing yet (warning only)    │
+└────────────────────────────────────┘
+
+Stage 3: Low (100-200 MB)
+┌────────────────────────────────────┐
+│ • onTrimMemory(TRIM_MEMORY_LOW)    │
+│ • Kill Empty processes             │
+│ • Kill old Cached apps             │
+└────────────────────────────────────┘
+
+Stage 4: Critical (< 100 MB)
+┌────────────────────────────────────┐
+│ • onTrimMemory(TRIM_MEMORY_CRITICAL)│
+│ • Kill ALL Cached apps             │
+│ • Kill Background services         │
+│ • Consider killing Visible apps    │
+└────────────────────────────────────┘
+
+Stage 5: Desperate (< 50 MB)
+┌────────────────────────────────────┐
+│ • Kill everything except Foreground│
+│ • System may become unstable       │
+│ • User sees "Device is slow"       │
+└────────────────────────────────────┘</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ نقطة حرجة:</strong><br />
+            <strong>LMK لا يستدعي onDestroy()!</strong><br />
+            <br />
+            عند القتل بواسطة LMK:<br />
+            • SIGKILL يُرسل مباشرة<br />
+            • Process يموت فوراً (< 100ms)<br />
+            • لا Lifecycle callbacks<br />
+            • لا فرصة للتنظيف<br />
+            <br />
+            <strong>→ لذا، احفظ State باستمرار، ليس فقط في onDestroy!</strong><br />
+            <strong>→ استخدم onSaveInstanceState(), ViewModel, Persistent Storage</strong>
+          </div>
+
+          <hr />
+
+          <h2>OOM Killer في Linux 💀</h2>
+
+          <h3>الفرق بين LMK (Android) و OOM Killer (Linux):</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الجانب</th>
+                <th>Android LMK</th>
+                <th>Linux OOM Killer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>الهدف</strong></td>
+                <td>Proactive: منع نفاد RAM</td>
+                <td>Reactive: الذاكرة نفدت فعلاً!</td>
+              </tr>
+              <tr>
+                <td><strong>متى يعمل؟</strong></td>
+                <td>RAM < Threshold (مبكر)</td>
+                <td>RAM = 0، Allocation فشل</td>
+              </tr>
+              <tr>
+                <td><strong>من يُقتل؟</strong></td>
+                <td>Background apps (OOM Adj)</td>
+                <td>أي Process (OOM Score)</td>
+              </tr>
+              <tr>
+                <td><strong>التكرار</strong></td>
+                <td>يحدث كثيراً (يومياً)</td>
+                <td>نادر (emergency فقط)</td>
+              </tr>
+              <tr>
+                <td><strong>الخطورة</strong></td>
+                <td>عادي، متوقع</td>
+                <td>خطير، علامة على مشكلة</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Linux OOM Killer Algorithm:</h3>
+
+          <div dir="ltr">
+            <pre>OOM Killer (Desktop/Server Linux):
+
+Trigger: Kernel can't allocate memory
+
+OOM Score Calculation:
+┌────────────────────────────────────────┐
+│ Score = (RAM_used / RAM_total) * 1000 │
+│                                        │
+│ Adjustments:                           │
+│ + Root processes: -300                 │
+│ + Long-running: -100                   │
+│ + Recently started: +200               │
+│ + High memory consumer: +500           │
+└────────────────────────────────────────┘
+
+Example (Desktop):
+┌──────────────────────────────────────┐
+│ Process    │ RAM    │ Score │ Action │
+├────────────┼────────┼───────┼────────┤
+│ systemd    │ 10 MB  │  -300 │ Skip   │
+│ Xorg       │ 200 MB │   100 │ Skip   │
+│ Chrome     │ 2 GB   │   900 │ Kill!  │
+│ Firefox    │ 1.5 GB │   800 │ Next   │
+└──────────────────────────────────────┘
+
+Result:
+• Chrome killed (biggest RAM consumer)
+• User loses all tabs (no save!)
+• System message: "Process was killed"
+
+Difference from Android:
+• Android: Kills BEFORE RAM is full (smart!)
+• Linux: Kills AFTER RAM is full (emergency!)
+• Android: User-friendly (background apps)
+• Linux: Chaotic (might kill important process!)</pre>
+          </div>
+
+          <hr />
+
+          <h2>ANR: Application Not Responding 🚫</h2>
+
+          <h3>ما هو ANR؟</h3>
+
+          <blockquote>
+            <strong>ANR:</strong> عندما Main Thread معطّل لفترة طويلة جداً<br />
+            <br />
+            <strong>Thresholds:</strong><br />
+            • Input Event: <strong>5 seconds</strong> (من touch إلى response)<br />
+            • Broadcast Receiver: <strong>10 seconds</strong> (onReceive)<br />
+            • Service: <strong>20 seconds</strong> (onCreate, onStartCommand)<br />
+            <br />
+            <strong>→ OS يفترض: App crashed أو infinite loop!</strong>
+          </blockquote>
+
+          <h3>كيف يُكتشف ANR؟</h3>
+
+          <div dir="ltr">
+            <pre>ANR Detection Mechanism:
+
+User touches screen:
+┌────────────────────────────────────────┐
+│ T=0ms: Touch event arrives             │
+│        └─→ OS starts timer (5s)        │
+│                                        │
+│ T=10ms: Event dispatched to App        │
+│         └─→ onTouchEvent() called      │
+│                                        │
+│ App doing something...                 │
+│ ├─ Heavy computation (blocking!)       │
+│ ├─ Network request (blocking!)         │
+│ └─ Database query (blocking!)          │
+│                                        │
+│ T=5000ms: Timer expired!               │
+│           └─→ Main Thread still busy   │
+│               └─→ ANR DETECTED! 🚨      │
+│                                        │
+│ OS Response:                           │
+│ 1. Dump thread traces                  │
+│ 2. Show ANR dialog to user             │
+│    "App isn't responding"              │
+│    [Wait] [Close app]                  │
+│ 3. If user clicks [Close]:             │
+│    └─→ SIGKILL (instant death)         │
+│                                        │
+└────────────────────────────────────────┘
+
+What causes ANR:
+❌ Thread.sleep() on Main Thread
+❌ Heavy computation (100ms+ loop)
+❌ Synchronous network call
+❌ Synchronous database query
+❌ File I/O on Main Thread
+❌ Bitmap decoding large image
+❌ Deadlock (waiting for lock forever)</pre>
+          </div>
+
+          <h3>ANR Traces (ما يحدث خلف الكواليس):</h3>
+
+          <div dir="ltr">
+            <pre>When ANR detected, OS dumps stack traces:
+
+/data/anr/traces.txt:
+
+"main" prio=5 tid=1 Sleeping
+  | group="main" sCount=1 dsCount=0 flags=1 obj=0x74b0d080
+  | sysTid=12345 nice=-10 cgrp=default sched=0/0
+  | state=S schedstat=( 1234567890 0 123 ) utm=100 stm=20
+  | held mutexes=
+  at java.lang.Thread.sleep(Native Method)
+  at com.example.app.MainActivity.onCreate(MainActivity.kt:42)
+  at android.app.Activity.performCreate(Activity.java:7224)
+  ...
+
+"RenderThread" prio=7 tid=4 Native
+  | group="main" sCount=1 dsCount=0 flags=1 obj=0x12d000a0
+  | sysTid=12347 nice=-10 cgrp=default sched=0/0
+  | state=S schedstat=( 987654321 0 50 ) utm=80 stm=10
+  | held mutexes=
+  at android.graphics.Canvas.nDrawBitmap(Native Method)
+  ...
+
+"Background Thread" prio=5 tid=15 Waiting
+  | group="main" sCount=1 dsCount=0 flags=1 obj=0x13a00110
+  | sysTid=12360 nice=10 cgrp=background sched=0/0
+  | state=S schedstat=( 123456789 0 30 ) utm=10 stm=2
+  | held mutexes=
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x0ab12345> (a java.lang.Object)
+  ...
+
+Analysis:
+• Main Thread: Sleeping (BAD!)
+• Line: MainActivity.kt:42
+• Fix: Move to background thread!</pre>
+          </div>
+
+          <h3>أمثلة ANR شائعة:</h3>
+
+          <h4>مثال 1: Network على Main Thread:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ ANR في 100% من الحالات!
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Main Thread!
+        val response = URL("https://api.example.com/data")
+            .readText()  // Network I/O - blocks for 2-10 seconds!
+        
+        textView.text = response
+        // ANR Dialog appears! 💥
+    }
+}
+
+
+// ✅ الحل: Background thread
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = URL("https://api.example.com/data")
+                .readText()  // على Background thread ✓
+            
+            withContext(Dispatchers.Main) {
+                textView.text = response
+            }
+        }
+    }
+}</pre>
+          </div>
+
+          <h4>مثال 2: Heavy Computation:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ ANR عند Large data
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Main Thread!
+        val numbers = (1..10_000_000).toList()
+        val sum = numbers.sum()  // Takes 5+ seconds!
+        
+        textView.text = "Sum: $sum"
+        // ANR! 💥
+    }
+}
+
+
+// ✅ الحل: Background + Progress
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        lifecycleScope.launch {
+            showProgress()
+            
+            val sum = withContext(Dispatchers.Default) {
+                (1..10_000_000).sum()  // CPU-intensive work ✓
+            }
+            
+            hideProgress()
+            textView.text = "Sum: $sum"
+        }
+    }
+}</pre>
+          </div>
+
+          <h4>مثال 3: Synchronous Database:</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ ANR مع Large database
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Main Thread!
+        val users = database.userDao().getAllUsers()  // Blocks!
+        displayUsers(users)
+        // ANR! 💥
+    }
+}
+
+
+// ✅ الحل: Room + Coroutines
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users")
+    suspend fun getAllUsers(): List<User>  // suspend = coroutine
+}
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        lifecycleScope.launch {
+            val users = withContext(Dispatchers.IO) {
+                database.userDao().getAllUsers()  // Background ✓
+            }
+            displayUsers(users)
+        }
+    }
+}</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ ANR = User Frustration!</strong><br />
+            <br />
+            عندما يرى User dialog "App isn't responding":<br />
+            • 95% يضغطون [Close app]<br />
+            • Bad review على Play Store<br />
+            • Uninstall<br />
+            <br />
+            <strong>Google Play Console:</strong><br />
+            • يراقب ANR rate<br />
+            • ANR rate > 0.47% → تحذير<br />
+            • ANR rate > 1% → App مرفوض من Featured!<br />
+            <br />
+            <strong>→ ANR = كارثة لتطبيقك!</strong>
+          </div>
+
+          <hr />
+
+          <h2>Crash Handling 💥</h2>
+
+          <h3>ما يحدث عند Crash:</h3>
+
+          <div dir="ltr">
+            <pre>Crash Sequence:
+
+App executing:
+┌────────────────────────────────────────┐
+│ fun processData(data: String) {        │
+│     val parts = data.split(",")        │
+│     val value = parts[5].toInt()       │
+│     // ☠️ ArrayIndexOutOfBoundsException!│
+│ }                                      │
+└────────────────────────────────────────┘
+              ↓
+┌────────────────────────────────────────┐
+│ Exception Thrown                       │
+│ • No catch block                       │
+│ • Propagates to top                    │
+│ • Reaches Thread.UncaughtExceptionHandler│
+└────────────────────────────────────────┘
+              ↓
+┌────────────────────────────────────────┐
+│ OS/Runtime catches it:                 │
+│ 1. Log exception to logcat             │
+│ 2. Call ActivityManager.handleAppCrash│
+│ 3. Show "App has stopped" dialog       │
+│ 4. SIGKILL process (instant death)     │
+└────────────────────────────────────────┘
+              ↓
+┌────────────────────────────────────────┐
+│ User sees:                             │
+│ "Unfortunately, App has stopped"       │
+│ [OK]                                   │
+│                                        │
+│ App disappears from Recent Apps        │
+└────────────────────────────────────────┘
+
+Process killed immediately:
+• onDestroy() NOT called
+• No cleanup
+• State lost (unless saved in onSaveInstanceState)</pre>
+          </div>
+
+          <h3>Crash Reporting:</h3>
+
+          <div dir="ltr">
+            <pre>Custom Crash Handler:
+
+// Global exception handler
+class CrashHandler : Thread.UncaughtExceptionHandler {
+    private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+    
+    override fun uncaughtException(thread: Thread, exception: Throwable) {
+        try {
+            // Log to file
+            val stackTrace = exception.stackTraceToString()
+            File("/sdcard/crash.log").writeText(stackTrace)
+            
+            // Send to server (if network available)
+            sendCrashReport(stackTrace)
+            
+            // Show custom message
+            showCrashDialog()
+            
+        } finally {
+            // Let OS handle it (kill process)
+            defaultHandler?.uncaughtException(thread, exception)
+        }
+    }
+}
+
+// Setup in Application
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler())
+    }
+}
+
+
+// Better: Use crash reporting library
+dependencies {
+    implementation 'com.google.firebase:firebase-crashlytics:18.6.0'
+}
+
+// Automatic crash reporting!
+// → Stack traces sent to Firebase
+// → Grouped by similar crashes
+// → Priority based on affected users</pre>
+          </div>
+
+          <h3>أنواع Crashes:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>النوع</th>
+                <th>السبب</th>
+                <th>مثال</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>NullPointerException</strong></td>
+                <td>Null reference</td>
+                <td>textView.text = "Hi" // textView = null</td>
+              </tr>
+              <tr>
+                <td><strong>OutOfMemoryError</strong></td>
+                <td>Heap full</td>
+                <td>Load 100 large images</td>
+              </tr>
+              <tr>
+                <td><strong>StackOverflowError</strong></td>
+                <td>Infinite recursion</td>
+                <td>fun f() { f() } // No base case</td>
+              </tr>
+              <tr>
+                <td><strong>SecurityException</strong></td>
+                <td>No permission</td>
+                <td>Access location without permission</td>
+              </tr>
+              <tr>
+                <td><strong>ClassCastException</strong></td>
+                <td>Wrong type cast</td>
+                <td>val x = obj as String // obj is Int</td>
+              </tr>
+              <tr>
+                <td><strong>Native Crash</strong></td>
+                <td>JNI/NDK error</td>
+                <td>Segmentation fault in C++ code</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>Background Restrictions 🚧</h2>
+
+          <h3>Android Background Execution Limits:</h3>
+
+          <div dir="ltr">
+            <pre>Evolution of Background Restrictions:
+
+Android 6 (Marshmallow):
+• Doze Mode: deep sleep when idle
+• App Standby: unused apps limited
+
+Android 7 (Nougat):
+• Doze on the go: even when moving
+• Background services limited
+
+Android 8 (Oreo): 🔨 MAJOR CHANGE!
+┌────────────────────────────────────────┐
+│ Background Execution Limits:           │
+│ • Service can't run in background      │
+│ • Must use Foreground Service          │
+│   (with notification)                  │
+│ • Or use JobScheduler/WorkManager      │
+│                                        │
+│ If violated:                           │
+│ └─→ IllegalStateException              │
+│     └─→ Crash! 💥                      │
+└────────────────────────────────────────┘
+
+Android 9 (Pie):
+• Battery Saver more aggressive
+• App Standby Buckets introduced
+
+Android 10 (Q):
+• Background location limited
+• Scoped Storage enforced
+
+Android 11 (R):
+• Background Service killed after 5 min
+• Must use WorkManager
+
+Android 12+ (S+):
+• Exact Alarms need permission
+• Foreground Service types required</pre>
+          </div>
+
+          <h3>Background Service Killing:</h3>
+
+          <div dir="ltr">
+            <pre>Scenario: Background Service
+
+App goes to background:
+┌────────────────────────────────────────┐
+│ T=0s: User presses Home                │
+│       └─→ App state: Background        │
+│           Service still running        │
+│                                        │
+│ T=1min: OS checks:                     │
+│         Is this Foreground Service?    │
+│         └─→ No: Regular service        │
+│             └─→ Mark for killing       │
+│                                        │
+│ T=5min: Service still running?         │
+│         └─→ Yes: Kill it! 🔪           │
+│             └─→ onDestroy() NOT called │
+│                                        │
+│ App tries to restart Service:          │
+│ └─→ startService() called              │
+│     └─→ IllegalStateException! 💥      │
+│         "Not allowed to start service"│
+└────────────────────────────────────────┘
+
+
+❌ Wrong approach:
+class BackgroundService : Service() {
+    override fun onStartCommand(...): Int {
+        thread {
+            while (true) {
+                syncData()  // Runs forever
+                Thread.sleep(60000)
+            }
+        }
+        return START_STICKY
+    }
+}
+// Killed after 5 minutes in background!
+
+
+✅ Correct approach:
+class SyncWorker(context: Context, params: WorkerParameters)
+    : CoroutineWorker(context, params) {
+    
+    override suspend fun doWork(): Result {
+        syncData()
+        return Result.success()
+    }
+}
+
+// Schedule with WorkManager
+val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+    repeatInterval = 15,
+    repeatIntervalTimeUnit = TimeUnit.MINUTES
+).setConstraints(
+    Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .build()
+).build()
+
+WorkManager.getInstance(context).enqueue(workRequest)
+
+// OS manages scheduling, battery optimization ✓</pre>
+          </div>
+
+          <h3>Foreground Service (النجاة من القتل):</h3>
+
+          <div dir="ltr">
+            <pre>Foreground Service: Protected from killing
+
+Requirements:
+1. Must show notification (mandatory!)
+2. Must declare type in manifest
+3. User must be aware it's running
+
+Example: Music Player
+
+class MusicService : Service() {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Create notification
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Playing: Song Name")
+            .setContentText("Artist Name")
+            .setSmallIcon(R.drawable.ic_music)
+            .build()
+        
+        // Promote to Foreground Service
+        startForeground(NOTIFICATION_ID, notification)
+        
+        // Now protected from killing! ✓
+        playMusic()
+        
+        return START_STICKY
+    }
+}
+
+// In manifest:
+<service android:name=".MusicService"
+         android:foregroundServiceType="mediaPlayback" />
+
+Benefits:
+• OOM Adj Score: -800 (same as Foreground App!)
+• Won't be killed unless desperate
+• Can run indefinitely
+• User knows it's running (notification)
+
+Drawbacks:
+• Must show notification (can't hide)
+• User can swipe notification → Service stops
+• Drains battery if not careful</pre>
+          </div>
+
+          <hr />
+
+          <h2>Battery Optimization ⚡</h2>
+
+          <h3>Battery Saver Mode:</h3>
+
+          <div dir="ltr">
+            <pre>Battery Levels & Restrictions:
+
+Battery: 100% - 20%
+┌────────────────────────────────────┐
+│ Normal operation                   │
+│ • All features work                │
+│ • Background apps run normally     │
+└────────────────────────────────────┘
+
+Battery: 20% - 15%
+┌────────────────────────────────────┐
+│ Low battery warning                │
+│ • Notification shown               │
+│ • User can enable Battery Saver    │
+└────────────────────────────────────┘
+
+Battery: < 15%
+┌────────────────────────────────────┐
+│ Battery Saver Auto-Enabled         │
+│ Restrictions:                      │
+│ • Background sync stopped          │
+│ • Location services limited        │
+│ • Vibration disabled               │
+│ • Visual effects reduced           │
+│ • CPU throttled                    │
+│ • Background apps killed more!     │
+└────────────────────────────────────┘
+
+Battery: < 5%
+┌────────────────────────────────────┐
+│ Extreme Battery Saver              │
+│ • Only Phone & SMS work            │
+│ • Almost all apps killed           │
+│ • Only Foreground app survives     │
+└────────────────────────────────────┘</pre>
+          </div>
+
+          <h3>Doze Mode (Deep Sleep):</h3>
+
+          <div dir="ltr">
+            <pre>Doze Mode: Aggressive battery saving
+
+Activation: Device idle (screen off, stationary, unplugged)
+
+Timeline:
+┌────────────────────────────────────────────┐
+│ Screen OFF                                 │
+│ T=0min:  Normal (apps can run)             │
+│                                            │
+│ T=30min: Light Doze                        │
+│          • Network access delayed          │
+│          • Wakelocks ignored               │
+│                                            │
+│ T=1hr:   Deep Doze 😴                      │
+│          ┌─────────────────────────────┐  │
+│          │ MAINTENANCE WINDOW (5 min)  │  │
+│          │ • Apps can sync             │  │
+│          │ • Pending work executed     │  │
+│          └─────────────────────────────┘  │
+│                                            │
+│ T=2hr:   Deep Doze (longer)                │
+│          ┌─────────────────────────────┐  │
+│          │ MAINTENANCE WINDOW (5 min)  │  │
+│          └─────────────────────────────┘  │
+│                                            │
+│ T=4hr:   Deep Doze (even longer)           │
+│          • Maintenance windows get         │
+│            further apart                   │
+│                                            │
+└────────────────────────────────────────────┘
+
+During Deep Doze:
+❌ Network access blocked
+❌ Wakelocks ignored
+❌ Alarms deferred
+❌ GPS/Wi-Fi scans disabled
+❌ JobScheduler deferred
+❌ Background sync stopped
+
+Exemptions:
+✓ High-priority FCM messages
+✓ Foreground Services (still work!)
+✓ Exact alarms (with permission)
+
+Exit Doze:
+• Screen ON
+• Device moved
+• Device charging</pre>
+          </div>
+
+          <h3>App Standby Buckets:</h3>
+
+          <div dir="ltr">
+            <pre>Android categorizes apps into buckets:
+
+Active (Bucket 0):
+┌────────────────────────────────────┐
+│ • Currently in use                 │
+│ • No restrictions                  │
+│ • Full network, jobs, alarms       │
+└────────────────────────────────────┘
+
+Working Set (Bucket 10):
+┌────────────────────────────────────┐
+│ • Used regularly (daily)           │
+│ • Minor restrictions               │
+│ • Jobs run frequently              │
+└────────────────────────────────────┘
+
+Frequent (Bucket 20):
+┌────────────────────────────────────┐
+│ • Used often (every few days)      │
+│ • Moderate restrictions            │
+│ • Jobs run less often              │
+└────────────────────────────────────┘
+
+Rare (Bucket 30):
+┌────────────────────────────────────┐
+│ • Rarely used (once a week or less)│
+│ • Heavy restrictions               │
+│ • Jobs run very rarely             │
+│ • More likely to be killed         │
+└────────────────────────────────────┘
+
+Never (Bucket 50):
+┌────────────────────────────────────┐
+│ • Never used or just installed     │
+│ • Severe restrictions              │
+│ • Almost no background activity    │
+│ • Killed aggressively              │
+└────────────────────────────────────┘
+
+Bucket determines:
+• Job execution frequency
+• Network access timing
+• Alarm delivery
+• Killing priority</pre>
+          </div>
+
+          <hr />
+
+          <h2>Security: Malicious Apps 🦠</h2>
+
+          <h3>كيف يكتشف OS التطبيقات الخبيثة؟</h3>
+
+          <div dir="ltr">
+            <pre>Security Monitoring:
+
+Google Play Protect (on-device scanner):
+┌────────────────────────────────────────┐
+│ 1. App Install                         │
+│    └─→ Scan APK for known malware      │
+│        └─→ Block if malicious          │
+│                                        │
+│ 2. Daily Scans                         │
+│    └─→ All installed apps scanned      │
+│        └─→ 50+ billion apps/day        │
+│                                        │
+│ 3. Behavior Monitoring                 │
+│    └─→ Unusual permission use          │
+│    └─→ High network activity           │
+│    └─→ Crypto mining patterns          │
+│    └─→ Phishing attempts               │
+│                                        │
+│ 4. Cloud Analysis                      │
+│    └─→ ML models detect new threats    │
+└────────────────────────────────────────┘
+
+Malicious Behaviors Detected:
+❌ Excessive background activity
+❌ Requesting dangerous permissions
+❌ Accessing contacts without reason
+❌ Sending SMS to premium numbers
+❌ Crypto mining (high CPU usage)
+❌ Keylogging attempts
+❌ Screen recording without permission
+❌ Accessibility abuse
+
+Actions Taken:
+1. Warning notification
+2. Disable app
+3. Uninstall automatically
+4. Report to Google
+5. Block developer</pre>
+          </div>
+
+          <h3>أمثلة سلوك خبيث:</h3>
+
+          <div dir="ltr">
+            <pre>Example 1: Crypto Miner
+
+Behavior detected:
+• CPU usage: 100% constantly
+• Battery drain: severe
+• Device gets hot
+• Happens in background
+
+OS Response:
+└─→ Classify as malicious
+    └─→ Kill process
+        └─→ Show warning
+            └─→ Suggest uninstall
+
+
+Example 2: Spyware
+
+Behavior detected:
+• Accessing contacts every 5 minutes
+• Reading SMS messages
+• Recording audio without user action
+• Uploading data to unknown server
+
+OS Response:
+└─→ Immediate kill
+    └─→ Disable app
+        └─→ Notify user
+            └─→ Report to Play Protect
+
+
+Example 3: Adware
+
+Behavior detected:
+• Showing ads outside app
+• Opening browser automatically
+• Installing other apps
+• Requesting overlay permission abuse
+
+OS Response:
+└─→ Kill + Uninstall
+    └─→ Block developer
+        └─→ Remove from Play Store</pre>
+          </div>
+
+          <hr />
+
+          <h2>كيف تحمي تطبيقك من القتل؟ 🛡️</h2>
+
+          <h3>الاستراتيجيات الأساسية:</h3>
+
+          <h4>1. استخدم Lifecycle بشكل صحيح:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ Save state constantly
+class MainActivity : AppCompatActivity() {
+    private val viewModel: MyViewModel by viewModels()
+    
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        
+        // Save UI state (always called before kill!)
+        outState.putString("user_input", editText.text.toString())
+        outState.putInt("scroll_position", recyclerView.scrollY)
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Restore state
+        savedInstanceState?.let {
+            val userInput = it.getString("user_input", "")
+            val scrollPos = it.getInt("scroll_position", 0)
+            
+            editText.setText(userInput)
+            recyclerView.scrollY = scrollPos
+        }
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        
+        // Save to persistent storage
+        viewModel.saveDataToDatabase()
+    }
+}</pre>
+          </div>
+
+          <h4>2. استخدم Foreground Service للعمل المهم:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ Protected from killing
+class DownloadService : Service() {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notification = createNotification("Downloading...")
+        startForeground(NOTIFICATION_ID, notification)
+        
+        // Now protected! ✓
+        downloadFiles()
+        
+        return START_NOT_STICKY  // Don't restart if killed
+    }
+    
+    private fun downloadFiles() {
+        GlobalScope.launch(Dispatchers.IO) {
+            files.forEach { file ->
+                download(file)
+                updateNotification("Downloading ${file.name}...")
+            }
+            stopForeground(true)
+            stopSelf()
+        }
+    }
+}
+
+// Manifest:
+<service android:name=".DownloadService"
+         android:foregroundServiceType="dataSync" /></pre>
+          </div>
+
+          <h4>3. استخدم WorkManager للعمل الخلفي:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ Battery-efficient, respects Doze
+class SyncWorker(context: Context, params: WorkerParameters)
+    : CoroutineWorker(context, params) {
+    
+    override suspend fun doWork(): Result {
+        return try {
+            syncData()
+            Result.success()
+        } catch (e: Exception) {
+            if (runAttemptCount < 3) {
+                Result.retry()  // OS will retry later
+            } else {
+                Result.failure()
+            }
+        }
+    }
+}
+
+// Schedule intelligently
+val constraints = Constraints.Builder()
+    .setRequiredNetworkType(NetworkType.CONNECTED)
+    .setRequiresBatteryNotLow(true)  // Don't drain battery
+    .build()
+
+val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+    repeatInterval = 1,
+    repeatIntervalTimeUnit = TimeUnit.HOURS
+)
+    .setConstraints(constraints)
+    .setBackoffCriteria(
+        BackoffPolicy.EXPONENTIAL,
+        10, TimeUnit.MINUTES
+    )
+    .build()
+
+WorkManager.getInstance(context).enqueue(workRequest)</pre>
+          </div>
+
+          <h4>4. استجب لـ Memory Pressure:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ Be a good citizen
+class MainActivity : AppCompatActivity() {
+    private val imageCache = LruCache<String, Bitmap>(...)
+    
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        
+        when (level) {
+            TRIM_MEMORY_RUNNING_LOW -> {
+                // Moderate pressure: trim 25% of cache
+                imageCache.trimToSize(imageCache.size() * 3 / 4)
+            }
+            
+            TRIM_MEMORY_RUNNING_CRITICAL -> {
+                // Critical: clear all non-essential caches
+                imageCache.evictAll()
+                clearAllCaches()
+            }
+            
+            TRIM_MEMORY_BACKGROUND -> {
+                // App in background: clear everything
+                imageCache.evictAll()
+                releaseHeavyResources()
+            }
+        }
+    }
+}</pre>
+          </div>
+
+          <h4>5. تجنب ANR:</h4>
+
+          <div dir="ltr">
+            <pre>// ✅ Never block Main Thread
+class MainActivity : AppCompatActivity() {
+    
+    // ✅ Rule 1: All I/O on background
+    private suspend fun loadData() = withContext(Dispatchers.IO) {
+        database.loadData()
+    }
+    
+    // ✅ Rule 2: Heavy computation on background
+    private suspend fun processImage(bitmap: Bitmap) = 
+        withContext(Dispatchers.Default) {
+            // CPU-intensive work
+            applyFilters(bitmap)
+        }
+    
+    // ✅ Rule 3: Network on background
+    private suspend fun fetchData() = withContext(Dispatchers.IO) {
+        api.getData()
+    }
+    
+    // ✅ Rule 4: Use structured concurrency
+    fun loadUserData() {
+        lifecycleScope.launch {
+            try {
+                showLoading()
+                val data = loadData()  // suspend, doesn't block
+                displayData(data)      // Main Thread safe
+            } catch (e: Exception) {
+                showError(e)
+            } finally {
+                hideLoading()
+            }
+        }
+    }
+}</pre>
+          </div>
+
+          <h3>ما لا يجب فعله:</h3>
+
+          <div class="warning">
+            <strong>❌ محاولات فاشلة لتجنب القتل:</strong><br />
+            <br />
+            <strong>1. Persistent Service with START_STICKY:</strong><br />
+            • OS يقتله بعد 5 دقائق في background<br />
+            • لا يُعاد تشغيله في Doze Mode<br />
+            <br />
+            <strong>2. Wakelocks:</strong><br />
+            • تُتجاهل في Doze Mode<br />
+            • تستنزف البطارية → User uninstall<br />
+            <br />
+            <strong>3. Alarm Manager للعمل الدوري:</strong><br />
+            • Alarms تُؤجل في Doze<br />
+            • لا تعمل بدقة<br />
+            <br />
+            <strong>4. Hidden Foreground Service (notification invisible):</strong><br />
+            • Google Play يرفض App<br />
+            • User يشعر بالخداع<br />
+            <br />
+            <strong>5. Multiple Processes:</strong><br />
+            • كلهم سيُقتلون في النهاية<br />
+            • يزيد Memory usage → قتل أسرع!<br />
+            <br />
+            <strong>→ الحل الوحيد: احترم النظام واستخدم APIs الصحيحة!</strong>
+          </div>
+
+          <hr />
+
+          <h2>Process Lifecycle في Android 🔄</h2>
+
+          <h3>دورة الحياة الكاملة:</h3>
+
+          <div dir="ltr">
+            <pre>Process Lifecycle with Killing Points:
+
+1. App Launch:
+   ┌────────────────────────────────────┐
+   │ OS creates new process             │
+   │ └─→ Zygote fork                    │
+   │     └─→ Load app code              │
+   │         └─→ onCreate() called      │
+   └────────────────────────────────────┘
+
+2. Foreground (Active):
+   ┌────────────────────────────────────┐
+   │ Priority: -800 (High)              │
+   │ • User interacting                 │
+   │ • UI responsive                    │
+   │ • Full resources                   │
+   │ Kill probability: < 1% ✓           │
+   └────────────────────────────────────┘
+
+3. Visible (Partially covered):
+   ┌────────────────────────────────────┐
+   │ Priority: -600 (Medium-High)       │
+   │ • Dialog in front                  │
+   │ • Multi-window visible             │
+   │ Kill probability: < 5%             │
+   └────────────────────────────────────┘
+
+4. Service Running:
+   ┌────────────────────────────────────┐
+   │ Priority: 0 (Medium)               │
+   │ • Background service               │
+   │ • No UI visible                    │
+   │ Kill probability: 20-30%           │
+   │                                    │
+   │ ⏱ Timer: 5 minutes                │
+   │ └─→ If still running: KILL! 🔪     │
+   └────────────────────────────────────┘
+
+5. Background (Cached):
+   ┌────────────────────────────────────┐
+   │ Priority: 400-900 (Low)            │
+   │ • User pressed Home/Back           │
+   │ • onStop() called                  │
+   │ • Process cached for fast restart  │
+   │ Kill probability: 60-80%           │
+   │                                    │
+   │ Triggers for kill:                 │
+   │ • Low memory                       │
+   │ • Not used for 30 min              │
+   │ • Too many cached processes        │
+   └────────────────────────────────────┘
+
+6. Empty (No components):
+   ┌────────────────────────────────────┐
+   │ Priority: 1000 (Lowest)            │
+   │ • All activities destroyed         │
+   │ • Process kept for fast restart    │
+   │ Kill probability: 95%              │
+   │                                    │
+   │ Killed when:                       │
+   │ • Memory needed                    │
+   │ • Immediately if RAM low           │
+   └────────────────────────────────────┘
+
+7. Process Death:
+   ┌────────────────────────────────────┐
+   │ SIGKILL received                   │
+   │ • Instant termination              │
+   │ • No onDestroy() callback          │
+   │ • All state lost (unless saved)    │
+   │ • Removed from memory              │
+   └────────────────────────────────────┘
+
+8. Cold Start (if user returns):
+   ┌────────────────────────────────────┐
+   │ Create new process (slow!)         │
+   │ • 500ms - 2s startup               │
+   │ • Restore savedInstanceState       │
+   │ • Load from Database/SharedPrefs   │
+   └────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة عملية من الواقع 💡</h2>
+
+          <h3>مثال 1: Music Player Survival</h3>
+
+          <div dir="ltr">
+            <pre>// Music player must survive!
+
+class MusicPlayerService : Service() {
+    private lateinit var mediaPlayer: MediaPlayer
+    
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_PLAY -> {
+                // 1. Create notification
+                val notification = createMusicNotification()
+                
+                // 2. Promote to Foreground Service
+                startForeground(NOTIFICATION_ID, notification)
+                // Now OOM Adj = -800 (protected!) ✓
+                
+                // 3. Play music
+                mediaPlayer.start()
+            }
+            
+            ACTION_PAUSE -> {
+                mediaPlayer.pause()
+                // Stay in foreground (notification persists)
+            }
+            
+            ACTION_STOP -> {
+                mediaPlayer.stop()
+                stopForeground(true)  // Remove notification
+                stopSelf()  // Allow killing
+            }
+        }
+        
+        return START_STICKY  // Restart if killed
+    }
+    
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        // User swiped away from Recents
+        // Decision: Stop music or continue?
+        
+        if (preferences.getBoolean("continue_on_swipe", false)) {
+            // Continue playing (some users want this)
+        } else {
+            stopSelf()  // Stop service
+        }
+    }
+}
+
+Result:
+• Foreground Service = protected from LMK
+• Notification = user awareness
+• Can play for hours without killing ✓
+• Battery: managed by user (can swipe notification)</pre>
+          </div>
+
+          <h3>مثال 2: Download Manager Resilience</h3>
+
+          <div dir="ltr">
+            <pre>// Download must complete even if killed
+
+class DownloadManager(private val context: Context) {
+    
+    fun startDownload(url: String, filename: String) {
+        // Don't use Service! Use WorkManager
+        
+        val data = Data.Builder()
+            .putString("url", url)
+            .putString("filename", filename)
+            .build()
+        
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+        
+        val downloadWork = OneTimeWorkRequestBuilder<DownloadWorker>()
+            .setInputData(data)
+            .setConstraints(constraints)
+            .setBackoffCriteria(
+                BackoffPolicy.EXPONENTIAL,
+                10, TimeUnit.SECONDS
+            )
+            .build()
+        
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(
+                "download_$filename",
+                ExistingWorkPolicy.KEEP,
+                downloadWork
+            )
+    }
+}
+
+class DownloadWorker(context: Context, params: WorkerParameters)
+    : CoroutineWorker(context, params) {
+    
+    override suspend fun doWork(): Result {
+        val url = inputData.getString("url") ?: return Result.failure()
+        val filename = inputData.getString("filename") ?: return Result.failure()
+        
+        return try {
+            // Set foreground (shows notification)
+            setForeground(createForegroundInfo())
+            
+            // Download with resume support
+            downloadWithResume(url, filename)
+            
+            Result.success()
+            
+        } catch (e: Exception) {
+            if (runAttemptCount < 3) {
+                Result.retry()  // OS will retry later
+            } else {
+                Result.failure()
+            }
+        }
+    }
+    
+    private suspend fun downloadWithResume(url: String, filename: String) {
+        val file = File(context.filesDir, filename)
+        val existingSize = if (file.exists()) file.length() else 0L
+        
+        // HTTP Range header for resume
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.setRequestProperty("Range", "bytes=$existingSize-")
+        
+        // Download remaining bytes
+        connection.inputStream.use { input ->
+            file.outputStream().use { output ->
+                output.channel.position(existingSize)  // Resume
+                input.copyTo(output)
+            }
+        }
+    }
+}
+
+Benefits:
+• WorkManager = OS manages scheduling
+• Survives process death ✓
+• Respects Doze Mode
+• Retries on failure
+• Resume support
+• Battery-friendly</pre>
+          </div>
+
+          <h3>مثال 3: Banking App Security</h3>
+
+          <div dir="ltr">
+            <pre>// Banking app: Security-first approach
+
+class BankingActivity : AppCompatActivity() {
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Session timeout: 5 minutes
+        startSessionTimer()
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        
+        // App going to background
+        // Security decision: Lock or allow?
+        
+        if (preferences.getBoolean("lock_on_background", true)) {
+            // Clear sensitive data
+            clearSensitiveData()
+            
+            // Lock session
+            SessionManager.lock()
+            
+            // Next time onStart: require authentication
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        
+        // Might not be called (if killed by LMK)!
+        // So we clear data in onStop too
+    }
+    
+    private fun clearSensitiveData() {
+        // Clear from memory
+        balanceTextView.text = "****"
+        accountNumber = null
+        
+        // Clear from ViewModel
+        viewModel.clearSession()
+        
+        // Don't save to savedInstanceState
+        // (user must re-authenticate)
+    }
+    
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        
+        // Don't save sensitive data!
+        // Only save: which screen user was on
+        outState.putString("last_screen", "home")
+        // NOT balance, NOT account number
+    }
+    
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        
+        // Check if session still valid
+        if (!SessionManager.isValid()) {
+            // Require re-authentication
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+    }
+}
+
+Result:
+• Security first: data cleared on background
+• Process kill = automatic lock ✓
+• User must re-authenticate
+• No sensitive data in savedInstanceState
+• Compliant with banking regulations</pre>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة والنصائح العملية 🎓</h2>
+
+          <h3>ملخص أسباب القتل:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>السبب</th>
+                <th>متى؟</th>
+                <th>كيف تتجنبه؟</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Low Memory</strong></td>
+                <td>RAM نفد</td>
+                <td>قلل استهلاك، استجب onTrimMemory</td>
+              </tr>
+              <tr>
+                <td><strong>ANR</strong></td>
+                <td>UI معطل 5s+</td>
+                <td>لا تعطل Main Thread أبداً!</td>
+              </tr>
+              <tr>
+                <td><strong>Crash</strong></td>
+                <td>Exception غير معالج</td>
+                <td>Handle errors، test جيداً</td>
+              </tr>
+              <tr>
+                <td><strong>Background</strong></td>
+                <td>App في background طويلاً</td>
+                <td>WorkManager، Foreground Service</td>
+              </tr>
+              <tr>
+                <td><strong>Battery</strong></td>
+                <td>Battery Saver نشط</td>
+                <td>قلل Background work</td>
+              </tr>
+              <tr>
+                <td><strong>User</strong></td>
+                <td>Force Stop</td>
+                <td>لا يمكن تجنبه (حق User)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>القواعد الذهبية:</h3>
+
+          <div dir="ltr">
+            <pre>✓ OS لا يثق بأي تطبيق → يراقب كل شيء
+✓ Process = Guest في فندق OS، ليس مالك
+✓ LMK يقتل Background apps بصمت (no onDestroy)
+✓ ANR = UI معطل 5s → User frustration → Kill
+✓ Foreground Service = Protected (must show notification)
+✓ WorkManager = Battery-efficient background work
+✓ Save state في onStop، ليس onDestroy
+✓ onDestroy قد لا يُستدعى أبداً!
+
+✓ Lower OOM Adj = Higher priority = Less killing
+✓ Doze Mode = Deep sleep → Background work blocked
+✓ Battery Saver = Aggressive killing
+✓ Malicious behavior = Instant kill + uninstall
+
+✓ احترم Lifecycle، احترم Battery، احترم User
+✓ كن "Good Citizen" في نظام Android</pre>
+          </div>
+
+          <h3>Best Practices:</h3>
+
+          <div class="success">
+            <strong>✅ النصائح العملية:</strong><br />
+            <br />
+            <strong>1. احفظ State باستمرار:</strong><br />
+            • onSaveInstanceState() لكل Activity/Fragment<br />
+            • ViewModel للبيانات المؤقتة<br />
+            • Database/SharedPrefs للبيانات الدائمة<br />
+            • لا تعتمد على onDestroy()<br />
+            <br />
+            <strong>2. لا تعطل Main Thread:</strong><br />
+            • كل I/O على Background (Dispatchers.IO)<br />
+            • كل Heavy computation على Background<br />
+            • استخدم Coroutines/RxJava<br />
+            • Profile ANR rate في Play Console<br />
+            <br />
+            <strong>3. استخدم APIs الصحيحة:</strong><br />
+            • WorkManager للـ Background work<br />
+            • Foreground Service للـ Long-running tasks<br />
+            • JobScheduler للـ Scheduled work<br />
+            • لا تستخدم Service عادي في Background!<br />
+            <br />
+            <strong>4. احترم Battery:</strong><br />
+            • استجب لـ Battery Saver Mode<br />
+            • قلل Background work<br />
+            • استخدم Constraints في WorkManager<br />
+            • لا Wakelocks غير ضرورية<br />
+            <br />
+            <strong>5. راقب Crashes & ANRs:</strong><br />
+            • Firebase Crashlytics<br />
+            • Play Console Vitals<br />
+            • Fix issues فوراً<br />
+            • Test على Low-end devices<br />
+            <br />
+            <strong>6. كن "Good Citizen":</strong><br />
+            • قلل Memory usage<br />
+            • استجب onTrimMemory()<br />
+            • نظف Resources في onStop()<br />
+            • لا تسيء استخدام Permissions
+          </div>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>يعتمد على onDestroy() للحفظ</td>
+                <td>يحفظ في onStop() + onSaveInstanceState</td>
+              </tr>
+              <tr>
+                <td>يستخدم Service للـ Background work</td>
+                <td>يستخدم WorkManager + Foreground Service</td>
+              </tr>
+              <tr>
+                <td>يعطل Main Thread بـ Network/DB</td>
+                <td>كل I/O على Background threads</td>
+              </tr>
+              <tr>
+                <td>لا يعرف لماذا App يُقتل</td>
+                <td>يفهم LMK, OOM Adj, Priority system</td>
+              </tr>
+              <tr>
+                <td>يحاول "منع" القتل بـ Hacks</td>
+                <td>يقبل القتل ويصمم للبقاء (Resilience)</td>
+              </tr>
+              <tr>
+                <td>لا يستجيب onTrimMemory()</td>
+                <td>يحرر Caches عند Memory pressure</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>أسئلة شائعة (FAQ) 💭</h2>
+
+          <h3>س1: كيف أمنع Android من قتل تطبيقي؟</h3>
+          <p>
+            <strong>الإجابة القصيرة: لا يمكنك!</strong><br />
+            <br />
+            OS له الصلاحية المطلقة. لكن يمكنك:<br />
+            • استخدم Foreground Service (مع notification)<br />
+            • قلل Memory usage<br />
+            • استجب onTrimMemory()<br />
+            • استخدم WorkManager بدلاً من Background Service<br />
+            <br />
+            <strong>→ الهدف ليس "منع" القتل، بل "البقاء حياً بعد القتل" (State preservation)</strong>
+          </p>
+
+          <h3>س2: لماذا onDestroy() لا يُستدعى دائماً؟</h3>
+          <p>
+            <strong>لأن LMK يستخدم SIGKILL!</strong><br />
+            <br />
+            SIGKILL = instant termination (< 100ms)<br />
+            • لا Lifecycle callbacks<br />
+            • لا فرصة للتنظيف<br />
+            <br />
+            <strong>→ احفظ State في onStop()، ليس onDestroy()!</strong>
+          </p>
+
+          <h3>س3: ما الفرق بين Service و Foreground Service؟</h3>
+          <p>
+            <strong>Service:</strong><br />
+            • يُقتل بعد 5 دقائق في Background<br />
+            • OOM Adj = 0 (medium priority)<br />
+            • لا notification<br />
+            <br />
+            <strong>Foreground Service:</strong><br />
+            • محمي من القتل (إلا في حالات طارئة)<br />
+            • OOM Adj = -800 (high priority!)<br />
+            • Must show notification<br />
+            <br />
+            <strong>→ استخدم Foreground Service للعمل المهم فقط!</strong>
+          </p>
+
+          <h3>س4: كيف أتعامل مع Doze Mode؟</h3>
+          <p>
+            <strong>لا تحاربه، اعمل معه!</strong><br />
+            <br />
+            • استخدم WorkManager (يحترم Doze)<br />
+            • High-priority FCM messages تخترق Doze<br />
+            • Foreground Service يعمل في Doze<br />
+            • لا تستخدم Wakelocks (تُتجاهل)<br />
+            <br />
+            <strong>→ Doze = Battery saver، احترمه!</strong>
+          </p>
+
+          <h3>س5: متى أستخدم START_STICKY vs START_NOT_STICKY؟</h3>
+          <p>
+            <strong>START_STICKY:</strong> OS يعيد تشغيل Service بعد القتل<br />
+            • مثال: Music player (User يريد استمرار)<br />
+            <br />
+            <strong>START_NOT_STICKY:</strong> لا restart بعد القتل<br />
+            • مثال: One-time task (Download finished)<br />
+            <br />
+            <strong>→ معظم الحالات: استخدم WorkManager بدلاً من Service!</strong>
+          </p>
+
+          <hr />
+
+          <h2>خاتمة 🏁</h2>
+
+          <blockquote>
+            <strong>OS لا يثق بك، ولا يجب أن تتوقع غير ذلك</strong><br />
+            <br />
+            هذا ليس <strong>عداءً</strong>، بل <strong>حماية</strong>:<br />
+            • حماية النظام من الانهيار<br />
+            • حماية التطبيقات الأخرى من التأثير<br />
+            • حماية المستخدم من تجربة سيئة<br />
+            • حماية البطارية من الاستنزاف<br />
+            <br />
+            <strong>عندما تفهم فلسفة "عدم الثقة":</strong><br />
+            ✓ تصمم للـ Resilience، ليس للـ Immortality<br />
+            ✓ تحفظ State باستمرار، لا في آخر لحظة<br />
+            ✓ تستخدم APIs الصحيحة للـ Background work<br />
+            ✓ تحترم Battery و Memory limits<br />
+            ✓ تبني تطبيقات تعيش مع القتل، ليس ضده<br />
+            <br />
+            <strong>المهندس المحترف يعرف: OS هو الملك، وتطبيقه مجرد رعية. 👑</strong>
+          </blockquote>
+
+          <div class="info">
+            <strong>💡 الخطوة التالية:</strong><br />
+            1. افتح تطبيقك<br />
+            2. اذهب Developer Options → "Don't keep activities"<br />
+            3. اختبر تطبيقك (كل Activity تُقتل فوراً!)<br />
+            4. تأكد أن State يُحفظ ويُسترجع<br />
+            5. اختبر ANR: ضع Thread.sleep(10000) في onCreate()<br />
+            6. راقب Play Console → Vitals → ANRs & Crashes<br />
+            <br />
+            <strong>→ اختبر للقتل قبل ما User يختبره! ☠️</strong>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
