@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Context Switching - لماذا هو مكلف وكيف يؤثر على الأداء؟</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    .info {
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #1e40af;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>ما هو Context Switching ولماذا هو مكلف؟ ⚡</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - المفهوم الأساسي: ما هو Context Switching؟<br />
+            2 - التشبيه الواقعي: المطبخ والطهاة<br />
+            3 - ما الذي يحدث خلال Context Switch؟<br />
+            4 - لماذا Context Switching مكلف؟<br />
+            5 - Process Context Switch vs Thread Context Switch<br />
+            6 - تأثير Context Switching على الأداء<br />
+            7 - Context Switching في Android<br />
+            8 - كيف تقلل من تكلفة Context Switching؟<br />
+            9 - أمثلة عملية من الواقع<br />
+            10 - القياس والتحليل<br />
+            11 - الخلاصة والنصائح العملية
+          </p>
+
+          <hr />
+
+          <h2>المفهوم الأساسي: ما هو Context Switching؟ 🎯</h2>
+
+          <h3>التعريف من منظور عقلي:</h3>
+
+          <blockquote>
+            <strong>Context Switching</strong> = عملية إيقاف تنفيذ Process/Thread وتشغيل آخر<br />
+            <br />
+            تخيل أنك تقرأ كتابًا، ثم يأتي شخص ويقاطعك لتجيب على سؤال، ثم تعود للكتاب:<br />
+            • يجب أن تحفظ الصفحة التي وصلت إليها (Save State)<br />
+            • تترك الكتاب وتجيب على السؤال (Switch)<br />
+            • تعود وتبحث عن الصفحة مرة أخرى (Restore State)<br />
+            <br />
+            <strong>→ هذا هو Context Switching!</strong>
+          </blockquote>
+
+          <h3>التعريف التقني:</h3>
+
+          <div class="info">
+            <strong>🎯 Context Switching:</strong><br />
+            عملية حفظ حالة Process/Thread الحالي (Context) واستعادة حالة Process/Thread آخر، حتى يتمكن CPU من التبديل بينهم.<br />
+            <br />
+            <strong>Context يشمل:</strong><br />
+            • CPU Registers (PC, SP, General Purpose Registers)<br />
+            • Process/Thread State (Running, Ready, Blocked)<br />
+            • Memory Management Info (Page Tables, TLB)<br />
+            • I/O Status (Open Files, Network Connections)<br />
+            • Priority & Scheduling Info
+          </div>
+
+          <h3>المعادلة الأساسية:</h3>
+
+          <div dir="ltr">
+            <pre>Context Switch = Save Current State + Load Next State + Overhead
+
+Time Cost:
+┌────────────────────────────────────────────────┐
+│  Thread Context Switch:   1-5 microseconds     │
+│  Process Context Switch:  10-100 microseconds  │
+└────────────────────────────────────────────────┘
+
+Why so expensive?
+• CPU Register Save/Restore
+• Memory Cache Invalidation (Cache Miss)
+• TLB Flush (Translation Lookaside Buffer)
+• Pipeline Flush (Instruction Pipeline)
+• OS Scheduler Overhead</pre>
+          </div>
+
+          <hr />
+
+          <h2>التشبيه الواقعي: المطبخ والطهاة 👨‍🍳</h2>
+
+          <h3>تخيل مطبخ مطعم مزدحم:</h3>
+
+          <div dir="ltr">
+            <pre>┌─────────────────────────────────────────────────────┐
+│              المطبخ (CPU)                           │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  📍 Chef 1 يطبخ Burger:                            │
+│     ├─ ينظر في الوصفة (Read Instruction)           │
+│     ├─ يمسك مقلاة (Load Register)                  │
+│     ├─ يضع اللحم (Execute)                         │
+│     └─ [يُقاطع!] 🔔 طلب جديد أكثر أولوية!         │
+│                                                     │
+│  💾 Context Switch يحدث الآن:                      │
+│     1. Chef 1 يوقف عمله                            │
+│     2. يحفظ حالته:                                 │
+│        └─ "كنت عند الخطوة 3 في الوصفة"             │
+│        └─ "اللحم على حرارة 180°"                   │
+│        └─ "بقى 5 دقائق"                            │
+│     3. ينظف يديه ويغير الأدوات                     │
+│     4. يأخذ وصفة الطلب الجديد (Pizza)              │
+│     5. يتذكر أين وصل في Pizza (Restore State)      │
+│     6. يبدأ العمل على Pizza                        │
+│                                                     │
+│  ⏱ الوقت المهدور:                                 │
+│     • حفظ حالة Burger: 2 ثانية                     │
+│     • تنظيف وتبديل: 3 ثواني                        │
+│     • استعادة حالة Pizza: 2 ثانية                  │
+│     ────────────────────────                       │
+│     Total Overhead: 7 ثواني = لا يوجد طبخ حقيقي!  │
+│                                                     │
+└─────────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <blockquote>
+            <strong>🏭 الدرس:</strong><br />
+            كلما زاد عدد مرات التبديل → زاد الوقت المهدور على الإدارة، وقل الوقت الفعلي للعمل!<br />
+            <br />
+            في CPU:<br />
+            • كل Context Switch = وقت مهدور بدون إنتاج<br />
+            • كثرة Context Switching = تباطؤ ملحوظ في الأداء
+          </blockquote>
+
+          <hr />
+
+          <h2>ما الذي يحدث خلال Context Switch؟ ⚙️</h2>
+
+          <h3>الخطوات التفصيلية:</h3>
+
+          <div dir="ltr">
+            <pre>Context Switch Sequence (Thread → Thread):
+
+T = 0μs: Thread A يعمل على CPU
+┌──────────────────────────────────────────────┐
+│ CPU Executing Thread A                       │
+│ ├─ PC = 0x4000  (Program Counter)            │
+│ ├─ SP = 0x8000  (Stack Pointer)              │
+│ ├─ R1-R15 = active values                    │
+│ └─ Cache: filled with Thread A data          │
+└──────────────────────────────────────────────┘
+
+T = 1μs: Interrupt! (Timer or I/O)
+└─→ CPU توقف فورًا!
+
+T = 2μs: Save Thread A Context
+┌──────────────────────────────────────────────┐
+│ OS Kernel Mode                               │
+│ ├─ Save PC to Thread A's PCB                 │
+│ ├─ Save SP to Thread A's PCB                 │
+│ ├─ Save all Registers (R0-R15)               │
+│ ├─ Save FPU State (Floating Point)           │
+│ ├─ Mark Thread A as "Ready" (not Running)    │
+│ └─ Update Thread A's statistics              │
+└──────────────────────────────────────────────┘
+
+T = 3μs: Scheduler Decision
+┌──────────────────────────────────────────────┐
+│ Which Thread to run next?                    │
+│ ├─ Check Priority                            │
+│ ├─ Check Wait Time                           │
+│ ├─ Check CPU Affinity                        │
+│ └─ Decision: Thread B!                       │
+└──────────────────────────────────────────────┘
+
+T = 4μs: Load Thread B Context
+┌──────────────────────────────────────────────┐
+│ Restore Thread B's state from PCB            │
+│ ├─ Load PC from Thread B's saved state       │
+│ ├─ Load SP from Thread B's saved state       │
+│ ├─ Restore all Registers (R0-R15)            │
+│ ├─ Restore FPU State                         │
+│ ├─ Switch Stack (SP now points to Thread B)  │
+│ └─ Mark Thread B as "Running"                │
+└──────────────────────────────────────────────┘
+
+T = 5μs: Cache & TLB Effects
+┌──────────────────────────────────────────────┐
+│ 💥 Problem: Cache is "cold"                  │
+│ ├─ Cache filled with Thread A's data         │
+│ ├─ Thread B needs different data             │
+│ ├─ Cache Miss → fetch from RAM (100+ cycles) │
+│ └─ TLB Miss → page table walk (50+ cycles)   │
+└──────────────────────────────────────────────┘
+
+T = 10μs: Thread B Starts Executing
+└─→ Actual work resumes!
+
+Total Cost: 10 microseconds of pure overhead!</pre>
+          </div>
+
+          <h3>PCB (Process Control Block):</h3>
+
+          <div dir="ltr">
+            <pre>┌─────────────────────────────────────────────┐
+│       Process Control Block (PCB)           │
+│      أو Thread Control Block (TCB)          │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Process ID (PID):          12345           │
+│  Process State:             Running         │
+│  Program Counter (PC):      0x00401000      │
+│  Stack Pointer (SP):        0x7FFF8000      │
+│                                             │
+│  CPU Registers:                             │
+│  ├─ R0:  0x00000001                         │
+│  ├─ R1:  0x00000042                         │
+│  ├─ R2:  0xDEADBEEF                         │
+│  └─ ... (R3-R15)                            │
+│                                             │
+│  Memory Management:                         │
+│  ├─ Page Table Base:  0x12340000            │
+│  ├─ Code Segment:     0x00400000-0x0040FFFF│
+│  ├─ Data Segment:     0x00600000-0x0060FFFF│
+│  └─ Stack Segment:    0x7FFF0000-0x7FFFFFFF│
+│                                             │
+│  I/O Status:                                │
+│  ├─ Open Files:       [fd0, fd3, fd7]       │
+│  ├─ Network Sockets:  [socket5]             │
+│  └─ Pending I/O:      None                  │
+│                                             │
+│  Scheduling Info:                           │
+│  ├─ Priority:         High (120)            │
+│  ├─ CPU Time Used:    450ms                 │
+│  ├─ Time Quantum:     10ms                  │
+│  └─ Wait Time:        5ms                   │
+│                                             │
+│  Parent PID:          1000                  │
+│  Child PIDs:          [12346, 12347]        │
+│                                             │
+└─────────────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>لماذا Context Switching مكلف؟ 💰</h2>
+
+          <h3>التكاليف الخمس الرئيسية:</h3>
+
+          <h4>1. CPU Register Save/Restore (التكلفة المباشرة):</h4>
+
+          <div dir="ltr">
+            <pre>Modern CPU has ~32-64 Registers to save:
+┌────────────────────────────────────────┐
+│ General Purpose: R0-R15   (16 regs)    │
+│ Floating Point:  F0-F31   (32 regs)    │
+│ Vector/SIMD:     V0-V31   (32 regs)    │
+│ Special:         PC, SP, LR, etc       │
+└────────────────────────────────────────┘
+
+Cost per register: ~1 CPU cycle
+Total: 80-100 CPU cycles just for save/restore
+
+On 2 GHz CPU:
+• 100 cycles ≈ 50 nanoseconds
+• Seems cheap? Not really when done millions of times!</pre>
+          </div>
+
+          <h4>2. Cache Pollution (التكلفة الخفية الأكبر):</h4>
+
+          <div dir="ltr">
+            <pre>Cache Hierarchy:
+┌─────────────────────────────────────────────────┐
+│  L1 Cache:  32 KB, 4 cycles   (~2 ns)          │
+│  L2 Cache: 256 KB, 12 cycles  (~6 ns)          │
+│  L3 Cache:   8 MB, 40 cycles  (~20 ns)         │
+│  RAM:       8 GB, 200+ cycles (~100 ns)        │
+└─────────────────────────────────────────────────┘
+
+Before Context Switch:
+┌────────────────────────────────────┐
+│ L1 Cache: [Thread A data]  ✓      │ ← Hot, fast access
+│ L2 Cache: [Thread A data]  ✓      │
+│ L3 Cache: [Thread A data]  ✓      │
+└────────────────────────────────────┘
+
+After Context Switch to Thread B:
+┌────────────────────────────────────┐
+│ L1 Cache: [Thread A data]  ❌      │ ← Thread B needs different data
+│           → CACHE MISS! 💥         │ ← Must fetch from RAM (100+ ns)
+│ L2 Cache: [Thread A data]  ❌      │
+│ L3 Cache: [Thread A data]  ❌      │
+└────────────────────────────────────┘
+
+Result:
+• Next 1000+ memory accesses = SLOW (cache miss)
+• Performance drops by 10-100x until cache warms up!
+
+This is why Context Switch feels "expensive"!</pre>
+          </div>
+
+          <h4>3. TLB Flush (Memory Translation):</h4>
+
+          <div dir="ltr">
+            <pre>TLB (Translation Lookaside Buffer):
+• Cache لـ Virtual → Physical address translation
+• Size: 64-512 entries
+• Access: 1 cycle (fast!)
+
+During Process Context Switch:
+┌────────────────────────────────────────────┐
+│ Process A's TLB:                           │
+│ Virtual Address → Physical Address         │
+│ 0x00400000      → 0x12340000   ✓          │
+│ 0x00401000      → 0x12341000   ✓          │
+│ ... (64 entries cached)                    │
+└────────────────────────────────────────────┘
+
+Switch to Process B:
+└─→ TLB FLUSH! (must invalidate all entries)
+
+┌────────────────────────────────────────────┐
+│ Process B's TLB:                           │
+│ [Empty - must rebuild]  ❌                 │
+└────────────────────────────────────────────┘
+
+Cost:
+• Every memory access needs page table walk (50+ cycles)
+• Until TLB refills (gradual)
+• Hundreds of microseconds of slowdown!
+
+Note: Thread Context Switch (same process) = NO TLB flush ✓</pre>
+          </div>
+
+          <h4>4. Pipeline Flush (Instruction Execution):</h4>
+
+          <div dir="ltr">
+            <pre>Modern CPU Pipeline (simplified):
+┌─────────────────────────────────────────────────┐
+│ Stage 1: Fetch    → [Instruction 1]             │
+│ Stage 2: Decode   → [Instruction 2]             │
+│ Stage 3: Execute  → [Instruction 3]             │
+│ Stage 4: Memory   → [Instruction 4]             │
+│ Stage 5: Write    → [Instruction 5]             │
+└─────────────────────────────────────────────────┘
+All stages work in parallel = 5x throughput!
+
+During Context Switch:
+└─→ Pipeline FLUSH! (throw away all in-flight instructions)
+
+┌─────────────────────────────────────────────────┐
+│ Stage 1: [Empty]  ❌                            │
+│ Stage 2: [Empty]  ❌                            │
+│ Stage 3: [Empty]  ❌                            │
+│ Stage 4: [Empty]  ❌                            │
+│ Stage 5: [Empty]  ❌                            │
+└─────────────────────────────────────────────────┘
+
+Cost: 5-20 cycles wasted (depending on pipeline depth)
+On deep pipelines (20+ stages): 20+ cycles = 10+ ns</pre>
+          </div>
+
+          <h4>5. OS Scheduler Overhead:</h4>
+
+          <div dir="ltr">
+            <pre>Scheduler Work during Context Switch:
+┌────────────────────────────────────────┐
+│ 1. Save current thread state  (50 ns)  │
+│ 2. Update statistics          (20 ns)  │
+│ 3. Scan ready queue           (100 ns) │
+│ 4. Calculate priorities       (50 ns)  │
+│ 5. Pick next thread           (30 ns)  │
+│ 6. Load next thread state     (50 ns)  │
+│ 7. Update bookkeeping         (20 ns)  │
+└────────────────────────────────────────┘
+Total: ~320 nanoseconds
+
+For 100 threads competing:
+• Scan time increases → O(n)
+• More complexity → more overhead</pre>
+          </div>
+
+          <h3>التكلفة الإجمالية:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المكون</th>
+                <th>التكلفة (نانوثانية)</th>
+                <th>النسبة</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Register Save/Restore</strong></td>
+                <td>50 ns</td>
+                <td>5%</td>
+              </tr>
+              <tr>
+                <td><strong>Scheduler Overhead</strong></td>
+                <td>300 ns</td>
+                <td>30%</td>
+              </tr>
+              <tr>
+                <td><strong>Pipeline Flush</strong></td>
+                <td>10 ns</td>
+                <td>1%</td>
+              </tr>
+              <tr>
+                <td><strong>TLB Flush (Process only)</strong></td>
+                <td>100 ns</td>
+                <td>10%</td>
+              </tr>
+              <tr>
+                <td><strong>Cache Miss Penalty</strong></td>
+                <td>500+ ns</td>
+                <td>50%+</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="warning">
+            <strong>⚠️ النقطة الحرجة:</strong><br />
+            <strong>Cache Miss</strong> هو التكلفة الأكبر!<br />
+            • Register Save = 50 ns<br />
+            • Cache Miss = 500+ ns (10x أغلى!)<br />
+            <br />
+            <strong>→ Context Switching ليس مكلفًا بسبب التبديل نفسه، بل بسبب Cache Pollution!</strong>
+          </div>
+
+          <hr />
+
+          <h2>Process Context Switch vs Thread Context Switch 🔄</h2>
+
+          <h3>المقارنة التفصيلية:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الجانب</th>
+                <th>Thread Context Switch</th>
+                <th>Process Context Switch</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>الوقت</strong></td>
+                <td>1-5 µs</td>
+                <td>10-100 µs (10-20x أبطأ)</td>
+              </tr>
+              <tr>
+                <td><strong>Register Save/Restore</strong></td>
+                <td>نعم ✓</td>
+                <td>نعم ✓</td>
+              </tr>
+              <tr>
+                <td><strong>Stack Switch</strong></td>
+                <td>نعم ✓</td>
+                <td>نعم ✓</td>
+              </tr>
+              <tr>
+                <td><strong>TLB Flush</strong></td>
+                <td>لا ❌ (نفس Address Space)</td>
+                <td>نعم ✓ (مكلف جدًا!)</td>
+              </tr>
+              <tr>
+                <td><strong>Cache Pollution</strong></td>
+                <td>متوسط (نفس Heap)</td>
+                <td>عالي (Heap مختلف تمامًا)</td>
+              </tr>
+              <tr>
+                <td><strong>Memory Protection Switch</strong></td>
+                <td>لا ❌</td>
+                <td>نعم ✓ (Page Table Switch)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>لماذا Thread أسرع من Process؟</h3>
+
+          <div dir="ltr">
+            <pre>Thread Context Switch (Same Process):
+┌──────────────────────────────────────────────┐
+│ Before: Thread A running                     │
+│ ├─ PC, SP, Registers: Thread A               │
+│ ├─ Page Table: Process X                     │ ← لا يتغير
+│ ├─ TLB: Process X mappings                   │ ← لا يتغير
+│ └─ Cache: Process X data                     │ ← بعضه مشترك
+│                                              │
+│ After: Thread B running (same Process X)     │
+│ ├─ PC, SP, Registers: Thread B               │ ← يتغير
+│ ├─ Page Table: Process X                     │ ← نفسه! ✓
+│ ├─ TLB: Process X mappings                   │ ← نفسه! ✓
+│ └─ Cache: Process X data                     │ ← بعضه يُعاد استخدامه ✓
+│                                              │
+│ Savings:                                     │
+│ • No TLB flush                               │
+│ • Shared Heap in Cache                       │
+│ • Same Page Table                            │
+│ → 5-10x faster!                              │
+└──────────────────────────────────────────────┘
+
+
+Process Context Switch:
+┌──────────────────────────────────────────────┐
+│ Before: Process A running                    │
+│ ├─ PC, SP, Registers: Process A              │
+│ ├─ Page Table: Process A                     │
+│ ├─ TLB: Process A mappings                   │
+│ └─ Cache: Process A data                     │
+│                                              │
+│ After: Process B running                     │
+│ ├─ PC, SP, Registers: Process B              │ ← يتغير
+│ ├─ Page Table: Process B                     │ ← يتغير! 💰
+│ ├─ TLB: Process B mappings (FLUSHED!)        │ ← يتغير! 💰💰
+│ └─ Cache: Process B data (COLD!)             │ ← يتغير! 💰💰💰
+│                                              │
+│ Costs:                                       │
+│ • TLB flush + refill: 100+ ns                │
+│ • Cache pollution: 500+ ns                   │
+│ • Page table switch: 50 ns                   │
+│ → 10-20x slower than Thread!                 │
+└──────────────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>تأثير Context Switching على الأداء 📊</h2>
+
+          <h3>السيناريو 1: تطبيق بسيط (Low Context Switching):</h3>
+
+          <div dir="ltr">
+            <pre>Scenario: Single-threaded app doing computation
+
+Timeline (1 second):
+┌────────────────────────────────────────────────┐
+│ Thread A: [████████████████████████████████]  │ ← 99% CPU time
+│ Context Switches: ▼    ▼    ▼    ▼    ▼       │ ← 1% overhead
+│                  (OS checks every 10ms)        │
+└────────────────────────────────────────────────┘
+
+Statistics:
+• Context Switches: 100/second (every 10ms)
+• Time per switch: 5 µs
+• Total overhead: 100 * 5µs = 500µs = 0.05%
+• Useful work: 99.95%
+
+Result: ✅ Context switching is negligible!</pre>
+          </div>
+
+          <h3>السيناريو 2: تطبيق معقد (High Context Switching):</h3>
+
+          <div dir="ltr">
+            <pre>Scenario: 100 threads competing for 4 CPU cores
+
+Timeline (1 second):
+┌────────────────────────────────────────────────┐
+│ CPU1: [█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼]   │
+│ CPU2: [█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼]   │
+│ CPU3: [█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼]   │
+│ CPU4: [█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼█▼]   │
+│       █ = 100µs work  ▼ = 5µs context switch   │
+└────────────────────────────────────────────────┘
+
+Statistics:
+• Context Switches: 100,000/second per core
+• Time per switch: 5 µs
+• Total overhead: 4 cores * 100,000 * 5µs = 2 seconds!
+• But we only have 4 seconds total (4 cores * 1 second)
+• Overhead: 50%!
+
+Result: ❌ Half the CPU time is wasted on context switching!</pre>
+          </div>
+
+          <h3>قانون العوائد المتناقصة:</h3>
+
+          <div dir="ltr">
+            <pre>Threads vs Performance:
+
+Throughput
+    │
+100%│     ████
+    │    ██  ██
+ 80%│   ██    ██
+    │  ██      ██
+ 60%│ ██        ███
+    │██          ████
+ 40%│█             ████████
+    │                     ██████████████
+ 20%│
+    │
+  0%└────────────────────────────────────→ Number of Threads
+      1  4   8   16  32  64  128  256
+
+Optimal Zone: ~CPU cores * 2
+After that: Diminishing returns due to context switching!
+
+Real Data (4-core CPU):
+• 4 threads:   100% efficiency ✓
+• 8 threads:   95% efficiency  ✓
+• 16 threads:  85% efficiency  ⚠️
+• 32 threads:  70% efficiency  ⚠️
+• 64 threads:  50% efficiency  ❌
+• 128 threads: 30% efficiency  ❌❌</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ القاعدة الذهبية:</strong><br />
+            <strong>Number of Threads ≈ Number of CPU Cores * 2</strong><br />
+            <br />
+            • أقل من ذلك → CPU غير مستغل بالكامل<br />
+            • أكثر من ذلك → Context Switching يأكل الأداء<br />
+            <br />
+            في Android (عادة 8 cores):<br />
+            <strong>→ Optimal Thread Pool Size = 8-16 threads</strong>
+          </div>
+
+          <hr />
+
+          <h2>Context Switching في Android 📱</h2>
+
+          <h3>Android Scheduler Strategy:</h3>
+
+          <div dir="ltr">
+            <pre>Android uses CFS (Completely Fair Scheduler):
+
+Priority Levels:
+┌─────────────────────────────────────────────────┐
+│ -20 to -16:  Foreground (UI Thread, Active App) │ ← High Priority
+│ -15 to -10:  Visible Apps                       │
+│  -9 to -1 :  Background Services                │
+│   0 to 10 :  Background (Cached Apps)           │ ← Low Priority
+│  11 to 19 :  Idle (Very Low Priority)           │
+└─────────────────────────────────────────────────┘
+
+Typical Android App Threads:
+┌─────────────────────────────────────────────────┐
+│ Main Thread (UI):           Priority -10        │ ← يحصل على CPU أولاً
+│ RenderThread:               Priority -4         │
+│ Binder Threads (8x):        Priority 0          │
+│ Background Worker Threads:  Priority 10         │
+│ GC Thread:                  Priority 5          │
+└─────────────────────────────────────────────────┘
+
+Time Quantum per thread: 5-10ms
+→ بعدها Context Switch تلقائي (حتى لو Thread لم ينتهي)</pre>
+          </div>
+
+          <h3>Main Thread Protection في Android:</h3>
+
+          <div dir="ltr">
+            <pre>Android aggressively protects Main Thread:
+
+┌────────────────────────────────────────────────┐
+│  Main Thread Time Slice: 10ms                  │
+├────────────────────────────────────────────────┤
+│                                                │
+│  If Main Thread used < 10ms:                   │
+│  └─→ Voluntarily yields (goes to sleep)        │
+│      └─→ Context Switch to next thread         │
+│          └─→ Cost: 5 µs                        │
+│                                                │
+│  If Main Thread blocked (waiting for I/O):     │
+│  └─→ Immediate Context Switch                  │
+│      └─→ Don't waste CPU time!                 │
+│                                                │
+│  If Main Thread running for > 16ms:            │
+│  └─→ ⚠️ Frame Drop! (Jank)                     │
+│      └─→ User sees lag                         │
+│                                                │
+│  If Main Thread running for > 5 seconds:       │
+│  └─→ 💀 ANR Dialog!                            │
+│      └─→ App Not Responding                    │
+│                                                │
+└────────────────────────────────────────────────┘
+
+Why 16ms? → 60 FPS = 16.6ms per frame
+• Main Thread must finish work in 16ms
+• Otherwise: Frame drop → Jank → Bad UX</pre>
+          </div>
+
+          <h3>مثال: ماذا يحدث عند Scrolling في RecyclerView؟</h3>
+
+          <div dir="ltr">
+            <pre>User Scrolls RecyclerView (60 FPS):
+
+Frame 1 (0-16ms):
+┌───────────────────────────────────────────┐
+│ Main Thread:                              │
+│ ├─ 0-1ms:   Handle Touch Event            │
+│ ├─ 1-8ms:   Measure & Layout Views        │
+│ ├─ 8-12ms:  Bind ViewHolders              │
+│ ├─ 12-14ms: Draw to Canvas                │
+│ └─ 14-16ms: Submit to RenderThread        │ ✓
+│                                           │
+│ RenderThread (parallel):                  │
+│ └─ 0-16ms: Rasterize previous frame       │
+│                                           │
+│ Background Threads (parallel):            │
+│ ├─ Load images from disk/network         │
+│ └─ Decode bitmaps                         │
+└───────────────────────────────────────────┘
+
+Frame 2 (16-32ms): Same pattern...
+
+Context Switches per Frame:
+• Main Thread yields: 1-2 times (voluntary)
+• Background Threads preempted: 5-10 times
+• Total: ~10-15 Context Switches per Frame
+
+At 60 FPS:
+• 60 frames * 15 switches = 900 switches/second
+• 900 * 5µs = 4.5ms overhead
+• On 4 cores = ~1-2% overhead ✓ Acceptable!
+
+But if you create 100 background threads:
+• 60 frames * 100 switches = 6,000 switches/second
+• 6,000 * 5µs = 30ms overhead
+• Frames start dropping → Jank! ❌</pre>
+          </div>
+
+          <h3>Binder IPC Context Switching:</h3>
+
+          <div dir="ltr">
+            <pre>IPC Call example: App → System Service
+
+┌────────────────────────────────────────────────┐
+│ App Process (PID 12345)                        │
+│ ├─ Main Thread calls:                          │
+│ │  locationManager.getLastKnownLocation()      │
+│ │                                              │
+│ │  ↓ Binder IPC (crosses process boundary)    │
+│ │                                              │
+│ └─→ Context Switch! (5-50 µs)                  │
+│     ├─ Save App's state                        │
+│     ├─ Switch to Kernel                        │
+│     ├─ Marshall data                           │
+│     └─ Context Switch to System Server         │
+│                                                │
+├────────────────────────────────────────────────┤
+│ System Server Process (PID 1000)               │
+│ ├─ Binder Thread receives request              │
+│ ├─ Executes: getLastKnownLocation()            │
+│ │  └─ Access GPS, check permissions, etc.     │
+│ │                                              │
+│ │  ↓ Return result via Binder                 │
+│ │                                              │
+│ └─→ Context Switch back! (5-50 µs)             │
+│     ├─ Marshall result                         │
+│     ├─ Switch to Kernel                        │
+│     ├─ Switch back to App Process              │
+│     └─ Restore App's state                     │
+│                                                │
+└────────────────────────────────────────────────┘
+
+Total Cost:
+• 2 Context Switches (Process level)
+• 2 Data Marshalling operations
+• Kernel overhead
+→ 50-500 microseconds total
+
+This is why:
+• IPC calls are "expensive"
+• Should be minimized
+• Should not be called on Main Thread for heavy operations</pre>
+          </div>
+
+          <hr />
+
+          <h2>كيف تقلل من تكلفة Context Switching؟ 🛠</h2>
+
+          <h3>الاستراتيجية 1: تقليل عدد Threads</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ سيئ: إنشاء Thread لكل عملية
+fun loadImages(urls: List<String>) {
+    urls.forEach { url ->
+        Thread {
+            val image = downloadImage(url)
+            saveToCache(image)
+        }.start()
+    }
+    // 100 URLs = 100 Threads = Disaster! 💥
+    // Context switching overhead >> actual work
+}
+
+
+// ✅ جيد: استخدام Thread Pool
+fun loadImages(urls: List<String>) {
+    val executor = Executors.newFixedThreadPool(4)  // فقط 4 threads
+    
+    urls.forEach { url ->
+        executor.execute {
+            val image = downloadImage(url)
+            saveToCache(image)
+        }
+    }
+    // 100 URLs, 4 threads = efficient!
+    // Threads reused, minimal context switching
+    
+    executor.shutdown()
+}
+
+
+// ✅ أفضل: Coroutines مع Dispatcher محدود
+suspend fun loadImages(urls: List<String>) {
+    val dispatcher = Dispatchers.IO.limitedParallelism(4)
+    
+    urls.map { url ->
+        async(dispatcher) {
+            val image = downloadImage(url)
+            saveToCache(image)
+        }
+    }.awaitAll()
+    
+    // Coroutines: خفيفة، efficient scheduling
+    // Context switching minimal
+}</pre>
+          </div>
+
+          <h3>الاستراتيجية 2: Batch Processing</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ سيئ: معالجة عنصر واحد في كل مرة
+fun processItems(items: List<Item>) {
+    items.forEach { item ->
+        thread {
+            process(item)  // Thread جديد لكل item
+            // Context switch overhead!
+        }
+    }
+}
+
+
+// ✅ جيد: معالجة Batch
+fun processItems(items: List<Item>) {
+    val batchSize = 100
+    val executor = Executors.newFixedThreadPool(4)
+    
+    items.chunked(batchSize).forEach { batch ->
+        executor.execute {
+            batch.forEach { item ->
+                process(item)  // معالجة 100 items في thread واحد
+            }
+        }
+    }
+    
+    executor.shutdown()
+}
+
+// Result:
+// Before: 1000 items = 1000 threads = 1000+ context switches
+// After:  1000 items = 10 batches = 10 threads = ~10 context switches
+// → 100x reduction in context switching!</pre>
+          </div>
+
+          <h3>الاستراتيجية 3: CPU Affinity</h3>
+
+          <div dir="ltr">
+            <pre>// CPU Affinity: تثبيت Thread على CPU محدد
+// لتقليل Cache misses
+
+// في Linux/Android (low-level):
+fun setCpuAffinity(threadId: Int, cpuCore: Int) {
+    // Native call to sched_setaffinity()
+    // Pins thread to specific CPU core
+}
+
+// فائدة:
+// Thread A على CPU 0 دائمًا
+// → Cache CPU 0 يحتوي على بيانات Thread A
+// → عند العودة لـ Thread A، Cache warm! ✓
+
+// Android Framework لا يعرض هذا مباشرة
+// لكن Scheduler يحاول تحقيقه تلقائيًا (Cache affinity)</pre>
+          </div>
+
+          <h3>الاستراتيجية 4: Lock-Free Programming</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ سيئ: Lock يسبب Context Switching
+class Counter {
+    private var count = 0
+    private val lock = Any()
+    
+    fun increment() {
+        synchronized(lock) {  // Thread blocks if lock held
+            count++           // → Context switch to another thread
+        }
+    }
+}
+
+// Thread A يمسك lock
+// Thread B يحاول الدخول → blocked!
+// → OS يعمل Context Switch لـ Thread C
+// → Wasted context switch!
+
+
+// ✅ جيد: Atomic (lock-free)
+class Counter {
+    private val count = AtomicInteger(0)
+    
+    fun increment() {
+        count.incrementAndGet()  // Hardware atomic instruction
+        // No lock, no blocking, no context switch!
+    }
+}
+
+// Threads تتنافس على CPU instruction level
+// لا يوجد OS context switching
+// → 10-100x faster!</pre>
+          </div>
+
+          <h3>الاستراتيجية 5: Reduce IPC Calls</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ سيئ: IPC لكل item
+fun saveSettings(settings: Map<String, String>) {
+    settings.forEach { (key, value) ->
+        // كل set() = IPC call = 2 context switches!
+        sharedPreferences.edit().putString(key, value).apply()
+    }
+}
+// 100 settings = 200 context switches! 💰
+
+
+// ✅ جيد: Batch IPC
+fun saveSettings(settings: Map<String, String>) {
+    sharedPreferences.edit().apply {
+        settings.forEach { (key, value) ->
+            putString(key, value)
+        }
+    }.apply()  // واحدة IPC call فقط!
+}
+// 100 settings = 2 context switches ✓
+
+
+// Real example: ContentProvider batch operations
+// ❌ سيئ:
+contacts.forEach { contact ->
+    contentResolver.insert(ContactsContract.CONTENT_URI, contact)
+    // Each insert = IPC call
+}
+
+// ✅ جيد:
+val operations = contacts.map { contact ->
+    ContentProviderOperation.newInsert(ContactsContract.CONTENT_URI)
+        .withValues(contact)
+        .build()
+}
+contentResolver.applyBatch(ContactsContract.AUTHORITY, operations)
+// Batch = واحدة IPC call!</pre>
+          </div>
+
+          <hr />
+
+          <h2>أمثلة عملية من الواقع 💡</h2>
+
+          <h3>مثال 1: Image Loading Library (Glide/Coil)</h3>
+
+          <div dir="ltr">
+            <pre>// كيف Glide يتجنب Context Switching:
+
+class ImageLoader {
+    // Thread Pool محدود (4 threads فقط)
+    private val diskExecutor = Executors.newFixedThreadPool(4)
+    private val networkExecutor = Executors.newFixedThreadPool(2)
+    
+    // LRU Cache لتجنب re-loading
+    private val memoryCache = LruCache<String, Bitmap>(cacheSize)
+    
+    fun load(url: String, callback: (Bitmap) -> Unit) {
+        // 1. Check memory cache (Main Thread - fast!)
+        memoryCache.get(url)?.let {
+            callback(it)
+            return  // No context switch needed!
+        }
+        
+        // 2. Check disk cache (Background Thread)
+        diskExecutor.execute {
+            val cachedBitmap = loadFromDisk(url)
+            if (cachedBitmap != null) {
+                memoryCache.put(url, cachedBitmap)
+                runOnMainThread { callback(cachedBitmap) }
+                return@execute
+            }
+            
+            // 3. Download from network (Network Thread)
+            networkExecutor.execute {
+                val bitmap = downloadImage(url)
+                saveToDisk(url, bitmap)
+                memoryCache.put(url, bitmap)
+                runOnMainThread { callback(bitmap) }
+            }
+        }
+    }
+}
+
+// Why efficient?
+✓ Limited thread pools (4+2 threads, not 1000!)
+✓ Memory cache avoids thread switches (hits ~80%)
+✓ Disk cache reduces network threads (hits ~15%)
+✓ Only 5% actually download (minimal context switching)
+
+Result:
+• 100 images to load
+• 80 from memory (no thread, 0 context switches)
+• 15 from disk (4 threads reused, ~30 context switches)
+• 5 from network (2 threads reused, ~10 context switches)
+→ Total: ~40 context switches vs 200+ without optimization!</pre>
+          </div>
+
+          <h3>مثال 2: Database Access (Room)</h3>
+
+          <div dir="ltr">
+            <pre>// ❌ سيئ: Thread لكل query
+class UserRepository {
+    fun getUser(id: Int): User {
+        return thread {
+            database.userDao().getUser(id)
+        }.get()
+    }
+}
+
+// 100 sequential queries:
+// = 100 threads created/destroyed
+// = 200+ context switches
+// = slow!
+
+
+// ✅ جيد: Single background thread with queue
+class UserRepository {
+    private val executor = Executors.newSingleThreadExecutor()
+    
+    fun getUser(id: Int, callback: (User) -> Unit) {
+        executor.execute {
+            val user = database.userDao().getUser(id)
+            mainHandler.post { callback(user) }
+        }
+    }
+}
+
+// 100 queries:
+// = 1 thread (reused)
+// = ~2 context switches (once to background, once back)
+// = fast! ✓
+
+
+// ✅ أفضل: Room + Coroutines (official recommendation)
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUser(id: Int): User  // suspend = coroutine-friendly
+}
+
+class UserRepository(private val dao: UserDao) {
+    suspend fun getUser(id: Int): User {
+        return withContext(Dispatchers.IO) {
+            dao.getUser(id)
+        }
+    }
+}
+
+// في ViewModel:
+viewModelScope.launch {
+    val users = (1..100).map { id ->
+        async { repository.getUser(id) }
+    }.awaitAll()
+}
+
+// Coroutines:
+// • Light weight (no full thread per query)
+// • Dispatchers.IO uses optimized thread pool
+// • Minimal context switching
+// → Best performance! ✓✓</pre>
+          </div>
+
+          <h3>مثال 3: Networking (Retrofit + OkHttp)</h3>
+
+          <div dir="ltr">
+            <pre>// OkHttp Connection Pool strategy:
+
+class OkHttpClient {
+    private val connectionPool = ConnectionPool(
+        maxIdleConnections = 5,  // إبقاء 5 connections مفتوحة
+        keepAliveDuration = 5,   // لمدة 5 دقائق
+        TimeUnit.MINUTES
+    )
+    
+    private val dispatcher = Dispatcher().apply {
+        maxRequests = 64              // Maximum concurrent requests
+        maxRequestsPerHost = 5        // Per host limit
+    }
+}
+
+// Why?
+1. Connection Reuse:
+   • Opening TCP connection = expensive (3-way handshake)
+   • SSL/TLS handshake = very expensive (multiple round trips)
+   • Reusing connection = no handshake = fast!
+   
+2. Limited Parallelism:
+   • 64 concurrent requests maximum
+   • Uses shared thread pool (not 1 thread per request!)
+   • Reduces context switching
+
+// Example: 100 API calls
+
+// ❌ Without connection pool:
+• 100 TCP connections opened/closed
+• 100 SSL handshakes
+• 100+ threads
+• 1000+ context switches
+• Time: 10+ seconds
+
+// ✅ With connection pool:
+• 5 TCP connections (reused)
+• 5 SSL handshakes
+• ~10 threads (thread pool)
+• ~100 context switches
+• Time: 2-3 seconds
+→ 5x faster! ✓</pre>
+          </div>
+
+          <h3>مثال 4: RecyclerView Prefetching</h3>
+
+          <div dir="ltr">
+            <pre>// RecyclerView intelligent prefetching:
+
+class RecyclerView {
+    private val prefetchRegistry = GapWorker.LayoutPrefetchRegistryImpl()
+    
+    fun onScroll() {
+        // 1. Detect scroll direction & velocity
+        val velocity = computeVelocity()
+        
+        // 2. Predict which items will be visible soon
+        val upcomingItems = predictUpcomingItems(velocity)
+        
+        // 3. Prefetch on IDLE time (avoid context switch during frame)
+        if (isIdle && upcomingItems.isNotEmpty()) {
+            prefetchRegistry.addPosition(upcomingItems.first())
+            
+            // Prefetch runs on Main Thread during IDLE!
+            // → No context switch needed
+            // → Cache warm when item actually needed
+        }
+    }
+}
+
+// Why smart?
+Traditional approach:
+┌─────────────────────────────────────────┐
+│ User scrolls                            │
+│ → New item visible                      │
+│ → Context switch to background          │
+│ → Load data                             │
+│ → Context switch to main                │
+│ → Bind & display                        │
+│ → User sees delay (Jank!)               │
+└─────────────────────────────────────────┘
+
+RecyclerView prefetch:
+┌─────────────────────────────────────────┐
+│ User scrolling (current frame)          │
+│ → Predict next items                    │
+│ → Prefetch on IDLE (same thread!)       │
+│ → Cache warm                            │
+│ User scrolls more (next frame)          │
+│ → Item already ready!                   │
+│ → Bind instantly (no delay)             │
+│ → Smooth 60 FPS ✓                       │
+└─────────────────────────────────────────┘
+
+Result: Reduced context switching + better UX!</pre>
+          </div>
+
+          <hr />
+
+          <h2>القياس والتحليل 📊</h2>
+
+          <h3>كيف تقيس Context Switching في تطبيقك؟</h3>
+
+          <h4>1. Android Studio Profiler:</h4>
+
+          <div dir="ltr">
+            <pre>Steps:
+1. Open Android Studio
+2. Run → Profile 'app'
+3. CPU Profiler → Record
+4. Threads tab → Check:
+   ├─ Number of threads (should be < 20)
+   ├─ Thread activity (green = running, gray = sleeping)
+   └─ Context switches (rapid color changes = bad!)
+
+What to look for:
+┌────────────────────────────────────────┐
+│ ✅ Good:                               │
+│ Main Thread:    ████████████████████   │ ← Mostly green
+│ Worker Thread:  ████    ████    ████   │ ← Bursts of activity
+│ Idle Thread:    ────────────────────   │ ← Mostly gray
+│                                        │
+│ ❌ Bad:                                │
+│ Main Thread:    █▓▒░█▓▒░█▓▒░█▓▒░█▓▒    │ ← Too many switches
+│ Worker Threads: ▓▒▓▒▓▒▓▒▓▒▓▒▓▒▓▒▓▒▓    │ ← Thrashing!
+│ (20+ threads competing)                │
+└────────────────────────────────────────┘</pre>
+          </div>
+
+          <h4>2. Systrace (Advanced):</h4>
+
+          <div dir="ltr">
+            <pre>// Capture systrace:
+$ python systrace.py -t 10 sched freq idle -o trace.html
+
+// Analyze:
+• Look for "sched_switch" events
+• High frequency = excessive context switching
+• Color-coded timeline shows which thread running on which CPU
+
+Example findings:
+┌────────────────────────────────────────────┐
+│ CPU 0: [Thread A][Thread B][Thread A]...  │
+│        ↑ switch   ↑ switch  ↑ switch      │
+│                                            │
+│ Good:  ~100 switches/second                │
+│ Bad:   ~10,000 switches/second             │
+└────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h4>3. Code Instrumentation:</h4>
+
+          <div dir="ltr">
+            <pre>// قياس في الكود:
+
+class ContextSwitchMonitor {
+    private var lastThreadId = 0L
+    private var switchCount = 0
+    
+    fun checkSwitch() {
+        val currentThreadId = Thread.currentThread().id
+        if (currentThreadId != lastThreadId) {
+            switchCount++
+            Log.d("ContextSwitch", "Switch #$switchCount: " +
+                  "Thread $lastThreadId → Thread $currentThreadId")
+        }
+        lastThreadId = currentThreadId
+    }
+}
+
+// استخدام:
+val monitor = ContextSwitchMonitor()
+
+fun doWork() {
+    monitor.checkSwitch()  // قبل العمل
+    // ... actual work
+    monitor.checkSwitch()  // بعد العمل
+}
+
+// Results:
+// High switch count = optimization needed!</pre>
+          </div>
+
+          <h3>Benchmarking Context Switching:</h3>
+
+          <div dir="ltr">
+            <pre>// Micro-benchmark: قياس تكلفة Context Switch
+
+fun benchmarkContextSwitch() {
+    val iterations = 10000
+    
+    // Test 1: Thread creation + switch
+    val startThreads = System.nanoTime()
+    repeat(iterations) {
+        val thread = Thread { /* minimal work */ }
+        thread.start()
+        thread.join()
+    }
+    val timeThreads = (System.nanoTime() - startThreads) / iterations
+    println("Thread creation + switch: ${timeThreads / 1000} µs")
+    
+    // Test 2: Thread Pool (reuse)
+    val executor = Executors.newFixedThreadPool(4)
+    val startPool = System.nanoTime()
+    val latch = CountDownLatch(iterations)
+    repeat(iterations) {
+        executor.execute {
+            // minimal work
+            latch.countDown()
+        }
+    }
+    latch.await()
+    val timePool = (System.nanoTime() - startPool) / iterations
+    println("Thread pool: ${timePool / 1000} µs")
+    
+    executor.shutdown()
+    
+    // Test 3: Coroutines
+    val startCoroutines = System.nanoTime()
+    runBlocking {
+        repeat(iterations) {
+            launch(Dispatchers.Default) {
+                // minimal work
+            }
+        }
+    }
+    val timeCoroutines = (System.nanoTime() - startCoroutines) / iterations
+    println("Coroutines: ${timeCoroutines / 1000} µs")
+}
+
+// Typical Results (على Pixel 6):
+// Thread creation + switch: 150 µs
+// Thread pool:              8 µs   (20x faster!)
+// Coroutines:              2 µs   (75x faster!)
+
+// Conclusion: Thread Pool و Coroutines أفضل بكثير!</pre>
+          </div>
+
+          <hr />
+
+          <h2>الخلاصة والنصائح العملية 🎓</h2>
+
+          <h3>ملخص التكاليف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>النوع</th>
+                <th>الوقت</th>
+                <th>التكلفة الرئيسية</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Thread Context Switch</strong></td>
+                <td>1-5 µs</td>
+                <td>Cache pollution, Register save/restore</td>
+              </tr>
+              <tr>
+                <td><strong>Process Context Switch</strong></td>
+                <td>10-100 µs</td>
+                <td>TLB flush, Cache flush, Memory protection switch</td>
+              </tr>
+              <tr>
+                <td><strong>IPC (Binder)</strong></td>
+                <td>50-500 µs</td>
+                <td>2x Process context switches + Marshalling</td>
+              </tr>
+              <tr>
+                <td><strong>System Call</strong></td>
+                <td>0.1-1 µs</td>
+                <td>User → Kernel mode switch</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>القواعد الذهبية:</h3>
+
+          <div dir="ltr">
+            <pre>✓ Context Switching = حفظ واستعادة حالة Thread/Process
+✓ التكلفة الأكبر = Cache Miss (ليس Register Save!)
+✓ Thread Switch أرخص 10-20x من Process Switch
+✓ Optimal Thread Count ≈ CPU Cores * 2
+✓ كثرة Threads = Context Switching Overhead
+✓ Thread Pool أفضل من إنشاء Threads جديدة
+✓ Coroutines أخف من Threads
+✓ Batch Operations تقلل IPC Context Switches
+✓ Lock-Free Programming يتجنب Context Switching
+✓ قِس قبل التحسين (Profiler, Systrace)</pre>
+          </div>
+
+          <h3>Best Practices في Android:</h3>
+
+          <div class="success">
+            <strong>✅ النصائح العملية:</strong><br />
+            <br />
+            <strong>1. حدد عدد Threads:</strong><br />
+            • استخدم <code>Executors.newFixedThreadPool(cores * 2)</code><br />
+            • أو <code>Dispatchers.IO.limitedParallelism(n)</code><br />
+            • لا تنشئ 100+ Thread!<br />
+            <br />
+            <strong>2. أعد استخدام Threads:</strong><br />
+            • Thread Pool بدلاً من Thread جديد لكل task<br />
+            • Coroutines تدير Thread Pool تلقائيًا<br />
+            <br />
+            <strong>3. قلل IPC Calls:</strong><br />
+            • Batch operations عند الإمكان<br />
+            • Cache النتائج لتجنب re-calling<br />
+            <br />
+            <strong>4. استخدم Lock-Free عند الإمكان:</strong><br />
+            • <code>AtomicInteger/AtomicReference</code> بدلاً من <code>synchronized</code><br />
+            • <code>ConcurrentHashMap</code> بدلاً من <code>synchronized HashMap</code><br />
+            <br />
+            <strong>5. Main Thread Protection:</strong><br />
+            • لا تعطل Main Thread (> 16ms = Jank)<br />
+            • استخدم <code>Dispatchers.Main</code> للـ UI فقط<br />
+            • <code>Dispatchers.IO</code> للـ I/O operations<br />
+            <br />
+            <strong>6. Profiling منتظم:</strong><br />
+            • راقب Thread count في Android Profiler<br />
+            • ابحث عن Thread thrashing<br />
+            • حلل Systrace للحالات المعقدة
+          </div>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ينشئ Thread لكل عملية</td>
+                <td>يستخدم Thread Pool أو Coroutines</td>
+              </tr>
+              <tr>
+                <td>لا يعرف عدد Threads في تطبيقه</td>
+                <td>يحدد عدد Threads بناءً على CPU cores</td>
+              </tr>
+              <tr>
+                <td>يعتقد أن Threads مجانية</td>
+                <td>يفهم تكلفة Context Switching</td>
+              </tr>
+              <tr>
+                <td>ينشئ 100 Thread للسرعة</td>
+                <td>يعرف أن 100 Thread = أبطأ من 10 Threads!</td>
+              </tr>
+              <tr>
+                <td>لا يستخدم Profiler</td>
+                <td>يقيس الأداء ويحلل Context Switches</td>
+              </tr>
+              <tr>
+                <td>يستخدم synchronized كثيرًا</td>
+                <td>يستخدم Lock-Free structures عند الإمكان</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr />
+
+          <h2>أسئلة شائعة (FAQ) 💭</h2>
+
+          <h3>س1: هل Coroutines تتجنب Context Switching تمامًا؟</h3>
+          <p>
+            <strong>لا.</strong> Coroutines تعمل فوق Threads، لكنها:<br />
+            • تقلل عدد Threads المطلوبة (dispatcher يُدير thread pool)<br />
+            • Suspending أرخص من Blocking (لا يعطل Thread)<br />
+            • Structured concurrency تتجنب Thread leaks<br />
+            <br />
+            <strong>→ Context switching لا يزال يحدث، لكن بتكرار أقل.</strong>
+          </p>
+
+          <h3>س2: لماذا تطبيقي بطيء رغم أن CPU استخدامه منخفض؟</h3>
+          <p>
+            احتمال كبير: <strong>Context Switching Overhead!</strong><br />
+            • CPU يقضي وقت في التبديل بين Threads، ليس في العمل الفعلي<br />
+            • افتح Profiler → Threads → إذا كان عدد Threads > 50 → مشكلة!<br />
+            <br />
+            <strong>→ قلل عدد Threads، لا تزيدها!</strong>
+          </p>
+
+          <h3>س3: ما هو Thread Thrashing؟</h3>
+          <p>
+            حالة حيث OS يقضي معظم وقته في Context Switching بدلاً من العمل الفعلي.<br />
+            <strong>أعراض:</strong><br />
+            • CPU مشغول 100% لكن الإنتاجية قليلة<br />
+            • تطبيق بطيء جدًا<br />
+            • Threads كثيرة (50+) تتنافس<br />
+            <br />
+            <strong>الحل:</strong> قلل عدد Threads إلى ~CPU cores * 2
+          </p>
+
+          <h3>س4: متى يكون Context Switching مقبول؟</h3>
+          <p>
+            <strong>مقبول:</strong><br />
+            • عدد قليل من Context Switches (< 1000/second)<br />
+            • Threads تنتظر I/O (Blocking operations)<br />
+            • Interactive UI (Main Thread yields voluntarily)<br />
+            <br />
+            <strong>غير مقبول:</strong><br />
+            • Threads كثيرة تتنافس على CPU (CPU-bound work)<br />
+            • Context Switching > 10% من CPU time<br />
+            • Jank في UI (frame drops)
+          </p>
+
+          <h3>س5: كيف أعرف العدد الأمثل لـ Threads؟</h3>
+          <p>
+            <strong>قاعدة عامة:</strong><br />
+            • <strong>CPU-bound work:</strong> Threads = CPU cores<br />
+            • <strong>I/O-bound work:</strong> Threads = CPU cores * 2<br />
+            • <strong>Mixed workload:</strong> Threads = CPU cores * 1.5<br />
+            <br />
+            في Android (8 cores نموذجي):<br />
+            <strong>→ Optimal Thread Pool = 8-16 threads</strong><br />
+            <br />
+            <strong>لكن:</strong> قِس واختبر! كل تطبيق مختلف.
+          </p>
+
+          <hr />
+
+          <h2>خاتمة 🏁</h2>
+
+          <blockquote>
+            <strong>Context Switching ليس العدو</strong><br />
+            <br />
+            هو ضرورة لنظام Multi-tasking.<br />
+            لكن <strong>الإفراط</strong> في Context Switching هو العدو!<br />
+            <br />
+            <strong>الفهم الصحيح:</strong><br />
+            • Context Switching = overhead لا مفر منه<br />
+            • التكلفة الحقيقية = Cache Miss (ليس Register Save)<br />
+            • Thread Pool > إنشاء Threads جديدة<br />
+            • Coroutines > Threads التقليدية<br />
+            • قياس الأداء > الظنون<br />
+            <br />
+            <strong>عندما تفهم Context Switching:</strong><br />
+            ✓ تكتب كود أسرع (أقل threads، أقل overhead)<br />
+            ✓ تتجنب Thread thrashing<br />
+            ✓ تفهم لماذا تطبيقك بطيء<br />
+            ✓ تتخذ قرارات تصميم صحيحة<br />
+            <br />
+            <strong>المهندس المحترف يفهم التكلفة الخفية للتبديل، ويُحسّن بحكمة. ⚡</strong>
+          </blockquote>
+
+          <div class="info">
+            <strong>💡 الخطوة التالية:</strong><br />
+            1. افتح Android Studio Profiler<br />
+            2. اذهب لـ CPU → Threads<br />
+            3. عُد عدد Threads النشطة<br />
+            4. إذا كان > 20 → ابدأ التحسين!<br />
+            5. استخدم Thread Pool أو Coroutines<br />
+            6. قِس الفرق قبل وبعد<br />
+            <br />
+            <strong>→ البيانات تكشف الحقيقة! 📊</strong>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

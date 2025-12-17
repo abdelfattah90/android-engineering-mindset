@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>الفرق بين CPU و GPU في Android</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 { font-size: 1.3rem; }
+    h4 { font-size: 1.1rem; color: #374151; }
+
+    p { margin: 12px 0; }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th, table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+<div class="content">
+
+<h1>ما الفرق بين CPU و GPU؟ 🧠⚡</h1>
+
+<h2>المحتويات</h2>
+<p>
+1 - الفكرة الجوهرية<br />
+2 - كيف يفكر كل معالج<br />
+3 - البنية الداخلية (Architecture)<br />
+4 - CPU vs GPU داخل Android<br />
+5 - أمثلة عملية من الواقع<br />
+6 - أخطاء شائعة تؤدي لأداء سيء<br />
+7 - الخلاصة
+</p>
+
+<hr />
+
+<h2>الفكرة الجوهرية 🎯</h2>
+
+<blockquote>
+<strong>CPU</strong> = معالج ذكي، سريع في اتخاذ القرار، يعمل على مهام قليلة ومعقّدة<br />
+<strong>GPU</strong> = معالج ضخم، يعمل على عدد هائل من المهام البسيطة بالتوازي
+</blockquote>
+
+<p>
+الفرق بين CPU و GPU ليس في "السرعة" فقط، بل في <strong>طريقة التفكير والتنفيذ</strong>.
+</p>
+
+<hr />
+
+<h2>كيف يفكّر كل معالج؟ 🧩</h2>
+
+<h3>CPU – التفكير التسلسلي الذكي</h3>
+<p>
+CPU مصمم لتنفيذ:
+</p>
+<ul>
+  <li>منطق معقّد</li>
+  <li>قرارات متغيرة</li>
+  <li>تدفّق أوامر غير متوقّع</li>
+</ul>
+
+<pre>// مثال: منطق معقّد
+if (user.isLoggedIn) {
+    if (user.hasPermission("ADMIN")) {
+        showAdminPanel()
+    } else {
+        showUserHome()
+    }
+} else {
+    redirectToLogin()
+}</pre>
+
+<h3>GPU – التفكير المتوازي الغبي (لكن القوي)</h3>
+<p>
+GPU لا يحب الشروط المعقّدة، لكنه ممتاز في:
+</p>
+<ul>
+  <li>تكرار نفس العملية</li>
+  <li>على كمية هائلة من البيانات</li>
+  <li>في نفس اللحظة</li>
+</ul>
+
+<pre>// مثال تخيّلي: نفس العملية على آلاف العناصر
+for (pixel in imagePixels) {
+    pixel.color = applyBlur(pixel.color)
+}</pre>
+
+<hr />
+
+<h2>البنية الداخلية (Architecture) 🏗️</h2>
+
+<table>
+<thead>
+<tr>
+<th>المقارنة</th>
+<th>CPU</th>
+<th>GPU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>عدد الأنوية</td>
+<td>قليل (4 – 8)</td>
+<td>كبير جداً (مئات / آلاف)</td>
+</tr>
+<tr>
+<td>قوة النواة</td>
+<td>قوية ومعقّدة</td>
+<td>بسيطة</td>
+</tr>
+<tr>
+<td>نوع المهام</td>
+<td>Logic + Control</td>
+<td>Data Parallel</td>
+</tr>
+<tr>
+<td>التفرّع (if/else)</td>
+<td>ممتاز</td>
+<td>سيء</td>
+</tr>
+<tr>
+<td>الذاكرة</td>
+<td>Cache ذكي وسريع</td>
+<td>Bandwidth عالي</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2>CPU و GPU داخل Android 📱</h2>
+
+<h3>متى يستخدم Android الـ CPU؟</h3>
+<ul>
+  <li>Main Thread (UI Thread)</li>
+  <li>تنفيذ Kotlin / Java</li>
+  <li>Networking</li>
+  <li>Database</li>
+  <li>Business Logic</li>
+</ul>
+
+<div class="warning">
+<strong>⚠️ أي عملية ثقيلة على CPU داخل Main Thread</strong><br />
+= Frame Drops أو ANR
+</div>
+
+<h3>متى يستخدم Android الـ GPU؟</h3>
+<ul>
+  <li>رسم الواجهات (Rendering)</li>
+  <li>Animations</li>
+  <li>Transitions</li>
+  <li>Video Processing</li>
+  <li>OpenGL / Vulkan</li>
+</ul>
+
+<blockquote>
+عند كل Frame (~16ms):<br />
+CPU يحسب ماذا سيرسم → GPU يرسم فعلياً
+</blockquote>
+
+<hr />
+
+<h2>أمثلة عملية من Android 🔧</h2>
+
+<h3>مثال 1: Scroll بطيء في RecyclerView</h3>
+
+<p>
+❌ المشكلة ليست في GPU غالباً، بل:
+</p>
+<ul>
+  <li>CPU مشغول بحسابات ثقيلة داخل onBindViewHolder</li>
+  <li>Parsing JSON</li>
+  <li>Formatting Dates</li>
+</ul>
+
+<div class="success">
+<strong>✅ الحل:</strong><br />
+حضّر البيانات مسبقاً، واجعل onBindViewHolder خفيفاً جداً
+</div>
+
+<hr />
+
+<h3>مثال 2: Animation تقطع (Jank)</h3>
+
+<p>
+غالباً السبب:
+</p>
+<ul>
+  <li>CPU لم يسلّم Frame في الوقت</li>
+  <li>GPU كان جاهزاً لكن لم يستلم أوامر</li>
+</ul>
+
+<pre>// ❌ حسابات أثناء Animation
+view.animate().translationY(100f).withEndAction {
+    heavyCalculation()
+}</pre>
+
+<hr />
+
+<h2>أخطاء شائعة 🚨</h2>
+
+<table>
+<thead>
+<tr>
+<th>الخطأ</th>
+<th>السبب الحقيقي</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"GPU بطيء"</td>
+<td>CPU Blocking Main Thread</td>
+</tr>
+<tr>
+<td>UI Lag</td>
+<td>Logic ثقيل في Rendering Phase</td>
+</tr>
+<tr>
+<td>Animation سيئة</td>
+<td>Overdraw أو Layout معقّد</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2>الخلاصة 🎓</h2>
+
+<blockquote>
+<strong>CPU يفكّر، GPU يرسم</strong><br />
+<strong>CPU يقرّر، GPU ينفّذ على نطاق واسع</strong>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th>إذا كانت مهمتك...</th>
+<th>استخدم</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>منطق + قرارات</td>
+<td>CPU</td>
+</tr>
+<tr>
+<td>تكرار نفس العملية</td>
+<td>GPU</td>
+</tr>
+<tr>
+<td>UI + Animations</td>
+<td>GPU (بإشراف CPU)</td>
+</tr>
+<tr>
+<td>Networking / DB</td>
+<td>CPU (خارج Main Thread)</td>
+</tr>
+</tbody>
+</table>
+
+<div class="success">
+<strong>✨ عقلية مهندس Android:</strong><br />
+لا تسأل: "أيهما أسرع؟"<br />
+بل اسأل: <strong>من هو المعالج المناسب لهذه المهمة؟</strong>
+</div>
+
+<hr />
+
+<h2>الخطوة القادمة 🚀</h2>
+<p>
+السؤال المنطقي التالي:
+</p>
+<blockquote>
+كيف يتعاون CPU و GPU لرسم Frame واحدة داخل Android؟
+</blockquote>
+
+</div>
+</div>
+</body>
+</html>

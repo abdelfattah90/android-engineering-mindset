@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>أنواع الأخطاء البرمجية و Debugging في Android</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code-bg: #666666;
+      --code-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', Tahoma, Arial, sans-serif; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: auto;
+      padding: 32px 16px;
+    }
+
+    .content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      color: #111827;
+      margin-top: 32px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-right: 4px solid var(--accent);
+      padding-right: 12px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #374151;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table th,
+    table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+    }
+
+    table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    ul, ol {
+      padding-right: 20px;
+    }
+
+    blockquote {
+      background: #f1f5f9;
+      border-right: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #374151;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 0.9rem;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+    }
+
+    p code {
+      background: #eef2ff;
+      color: #1e40af;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .warning {
+      background: #fef2f2;
+      border-right: 4px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border-right: 4px solid #16a34a;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #166534;
+    }
+
+    .info {
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: #1e40af;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="content">
+      <div class="crossnote markdown-preview">
+        <div dir="rtl">
+          <h1>أنواع الأخطاء البرمجية وعقلية Debugging الاحترافية 🐛</h1>
+
+          <h2>المحتويات</h2>
+          <p>
+            1 - التصنيف الأساسي للأخطاء<br />
+            2 - Compile-Time Errors (أخطاء وقت الترجمة)<br />
+            3 - Runtime Errors (أخطاء وقت التشغيل)<br />
+            4 - Logic Errors (الأخطاء المنطقية)<br />
+            5 - عقلية المبرمج المحترف في Debugging<br />
+            6 - أدوات Debugging في Android<br />
+            7 - أمثلة واقعية من Android<br />
+            8 - الخلاصة والنصائح المتقدمة
+          </p>
+
+          <hr />
+
+          <h2>التصنيف الأساسي للأخطاء 🎯</h2>
+
+          <blockquote>
+            <strong>القاعدة الذهبية:</strong><br />
+            الأخطاء ليست عشوائية، بل لها أنماط يمكن تصنيفها وفهمها.<br />
+            المبرمج المحترف يعرف <strong>متى</strong> يظهر الخطأ و<strong>لماذا</strong> حدث.
+          </blockquote>
+
+          <table>
+            <thead>
+              <tr>
+                <th>نوع الخطأ</th>
+                <th>متى يُكتشف؟</th>
+                <th>من يكتشفه؟</th>
+                <th>خطورته</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Compile-Time</strong></td>
+                <td>قبل تشغيل التطبيق</td>
+                <td>Compiler / IDE</td>
+                <td>🟢 آمن (لن يصل للمستخدم)</td>
+              </tr>
+              <tr>
+                <td><strong>Runtime</strong></td>
+                <td>أثناء تشغيل التطبيق</td>
+                <td>JVM / Android Runtime</td>
+                <td>🔴 خطير (Crash مباشر)</td>
+              </tr>
+              <tr>
+                <td><strong>Logic</strong></td>
+                <td>بعد التشغيل (نتيجة خاطئة)</td>
+                <td>المستخدم / Testing</td>
+                <td>🟡 خطير جداً (صامت ومخفي)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div dir="ltr">
+            <pre>┌────────────────────────────────────────────────────┐
+│          Error Detection Timeline                  │
+├────────────────────────────────────────────────────┤
+│                                                    │
+│  Write Code → Compile → Build → Run → Use         │
+│       ↓          ↓        ↓       ↓       ↓       │
+│       │     Compile-Time  │   Runtime   Logic     │
+│       │      Errors       │   Errors    Errors    │
+│       │          ↓        │      ↓         ↓      │
+│       │      (Safe)       │  (Crash)  (Wrong)     │
+│                                                    │
+└────────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <hr />
+
+          <h2>Compile-Time Errors (أخطاء وقت الترجمة) 🛠️</h2>
+
+          <h3>التعريف:</h3>
+          <p>
+            أخطاء تمنع <strong>Compiler</strong> من تحويل الكود إلى Bytecode. يكتشفها <strong>Android Studio</strong> مباشرة قبل Build.
+          </p>
+
+          <h3>الأنواع الشائعة في Android:</h3>
+
+          <h4>1. Syntax Errors (أخطاء نحوية)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ نسيان الفاصلة المنقوطة
+val name = "Ahmed"  // ✓ Kotlin لا يحتاج ;
+String name = "Ahmed"  // ❌ Java يحتاج ;
+
+// ❌ أقواس غير متطابقة
+fun calculateSum(a: Int, b: Int {  // ❌ Missing )
+    return a + b
+}
+
+// ❌ كلمة محجوزة كاسم متغير
+val class = "Math"  // ❌ class محجوزة
+val className = "Math"  // ✓</pre>
+          </div>
+
+          <h4>2. Type Mismatch (عدم تطابق الأنواع)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Compile Error: Type mismatch
+val age: Int = "25"  // ❌ String لا يمكن تعيينه لـ Int
+
+// ✓ الحل
+val age: Int = 25
+val ageText: String = "25"
+
+// ❌ في Android
+val textView: TextView = findViewById(R.id.button)  
+// ❌ Button ليس TextView
+
+// ✓ الحل
+val button: Button = findViewById(R.id.button)</pre>
+          </div>
+
+          <h4>3. Unresolved Reference (مرجع غير موجود)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ استخدام متغير غير معرّف
+fun greet() {
+    println(username)  // ❌ username not defined
+}
+
+// ✓ الحل
+fun greet(username: String) {
+    println(username)
+}
+
+// ❌ في Android: استدعاء دالة غير موجودة
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setupUI()  // ❌ setupUI() not defined
+    }
+}</pre>
+          </div>
+
+          <h4>4. Missing Dependencies (مكتبة غير موجودة)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ استخدام Retrofit بدون إضافته في build.gradle
+import retrofit2.Retrofit  // ❌ Cannot resolve symbol
+
+// ✓ الحل: إضافة في build.gradle.kts
+dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+}</pre>
+          </div>
+
+          <div class="success">
+            <strong>✅ ميزة Compile-Time Errors:</strong><br />
+            يتم اكتشافها <strong>فوراً</strong> في Android Studio مع خط أحمر وشرح واضح.<br />
+            لن يصل الخطأ أبداً للمستخدم النهائي.
+          </div>
+
+          <hr />
+
+          <h2>Runtime Errors (أخطاء وقت التشغيل) ⚡</h2>
+
+          <h3>التعريف:</h3>
+          <p>
+            أخطاء تحدث <strong>أثناء تشغيل التطبيق</strong> وتسبب <strong>Crash</strong> مباشر.<br />
+            الكود صحيح نحوياً (Compiler وافق عليه)، لكن هناك مشكلة في <strong>التنفيذ</strong>.
+          </p>
+
+          <h3>الأنواع الخطيرة في Android:</h3>
+
+          <h4>1. NullPointerException (NPE) - الأكثر شيوعاً</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Crash عند التشغيل
+class UserProfile : AppCompatActivity() {
+    private var user: User? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // ❌ Runtime Crash: user is null
+        val name = user.name  // NullPointerException!
+        textView.text = name
+    }
+}
+
+// ✓ الحل 1: Null Check
+val name = user?.name ?: "Guest"
+
+// ✓ الحل 2: Late Init (إذا كنت متأكد)
+private lateinit var user: User
+
+// ✓ الحل 3: Non-null Type
+private var user: User = User("Default")</pre>
+          </div>
+
+          <h4>2. ArrayIndexOutOfBoundsException</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Crash عند الوصول لـ index غير موجود
+val items = listOf("A", "B", "C")
+val item = items[5]  // ❌ Crash! List size = 3
+
+// ✓ الحل: Check size أولاً
+val item = items.getOrNull(5) ?: "Default"
+
+// أو
+if (index in items.indices) {
+    val item = items[index]
+}</pre>
+          </div>
+
+          <h4>3. ClassCastException (خطأ في التحويل)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Crash عند تحويل خاطئ
+val view: View = findViewById(R.id.textView)
+val button = view as Button  // ❌ Crash! It's TextView
+
+// ✓ الحل: Safe Cast
+val button = view as? Button  // null إذا فشل التحويل
+
+if (view is Button) {
+    // Safe to use as Button
+    view.setOnClickListener { }
+}</pre>
+          </div>
+
+          <h4>4. NumberFormatException (في Android كثيراً)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ مثال واقعي: تحويل input من EditText
+val ageInput = editText.text.toString()  // المستخدم كتب "abc"
+val age = ageInput.toInt()  // ❌ Crash! Can't convert "abc" to Int
+
+// ✓ الحل: Validation + Safe Parsing
+val age = ageInput.toIntOrNull()
+if (age == null) {
+    Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show()
+    return
+}
+
+// أو بشكل أفضل
+try {
+    val age = ageInput.toInt()
+    // Use age
+} catch (e: NumberFormatException) {
+    showError("Invalid number format")
+}</pre>
+          </div>
+
+          <h4>5. ConcurrentModificationException</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ تعديل List أثناء التكرار عليها
+val items = mutableListOf("A", "B", "C")
+for (item in items) {
+    if (item == "B") {
+        items.remove(item)  // ❌ Crash!
+    }
+}
+
+// ✓ الحل 1: استخدام Iterator
+val iterator = items.iterator()
+while (iterator.hasNext()) {
+    if (iterator.next() == "B") {
+        iterator.remove()
+    }
+}
+
+// ✓ الحل 2: Filter (الأفضل في Kotlin)
+val filteredItems = items.filter { it != "B" }</pre>
+          </div>
+
+          <h4>6. Android-Specific: ActivityNotFoundException</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Crash إذا لم يكن هناك تطبيق لفتح الـ Intent
+val intent = Intent(Intent.ACTION_VIEW, Uri.parse("custom://app"))
+startActivity(intent)  // ❌ Crash! No app can handle this
+
+// ✓ الحل: Check قبل الاستدعاء
+val intent = Intent(Intent.ACTION_VIEW, Uri.parse("custom://app"))
+if (intent.resolveActivity(packageManager) != null) {
+    startActivity(intent)
+} else {
+    Toast.makeText(this, "No app found", Toast.LENGTH_SHORT).show()
+}</pre>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ خطورة Runtime Errors:</strong><br />
+            • تسبب <strong>Crash فوري</strong> للتطبيق<br />
+            • قد تحدث فقط في <strong>سيناريوهات معينة</strong> (صعب اكتشافها في Testing)<br />
+            • تُدمّر <strong>تجربة المستخدم</strong> وتؤدي لـ 1-star reviews<br />
+            • يمكن أن تحدث في Production فقط (بيانات حقيقية مختلفة)
+          </div>
+
+          <hr />
+
+          <h2>Logic Errors (الأخطاء المنطقية) 🧩</h2>
+
+          <h3>التعريف:</h3>
+          <p>
+            الكود يعمل <strong>بدون Crash</strong>، لكن النتيجة <strong>خاطئة</strong>.<br />
+            هذا النوع هو <strong>الأخطر</strong> لأنه:
+          </p>
+          <ul>
+            <li>لا يكتشفه Compiler</li>
+            <li>لا يسبب Crash (يمر بصمت)</li>
+            <li>قد يُكتشف بعد وصول التطبيق للمستخدمين</li>
+            <li>يؤدي لنتائج غير متوقعة وخطيرة (خصوصاً في المعاملات المالية)</li>
+          </ul>
+
+          <h3>أمثلة واقعية من Android:</h3>
+
+          <h4>1. خطأ في شرط if (الأكثر شيوعاً)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Logic Error: الشرط معكوس
+fun applyDiscount(price: Double, isPremium: Boolean): Double {
+    return if (!isPremium) {  // ❌ المنطق معكوس!
+        price * 0.9  // Premium يحصل على خصم!
+    } else {
+        price  // Non-Premium لا يحصل على خصم
+    }
+}
+// النتيجة: المستخدمين العاديين يحصلون على خصم بالخطأ!
+
+// ✓ الحل
+fun applyDiscount(price: Double, isPremium: Boolean): Double {
+    return if (isPremium) {
+        price * 0.9
+    } else {
+        price
+    }
+}</pre>
+          </div>
+
+          <h4>2. Off-by-One Error (خطأ في الحدود)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Logic Error: العنصر الأخير لن يُعالج
+fun processItems(items: List<String>) {
+    for (i in 0 until items.size - 1) {  // ❌ Missing last item!
+        println(items[i])
+    }
+}
+// List of 5 items → only 4 will be processed
+
+// ✓ الحل
+fun processItems(items: List<String>) {
+    for (i in items.indices) {  // أو for (item in items)
+        println(items[i])
+    }
+}</pre>
+          </div>
+
+          <h4>3. خطأ في حساب المجموع (في E-commerce مثلاً)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Logic Error: حساب خاطئ للسعر الإجمالي
+class CartViewModel : ViewModel() {
+    fun calculateTotal(items: List<Product>): Double {
+        var total = 0.0
+        items.forEach { product ->
+            total = product.price  // ❌ يستبدل بدلاً من الجمع!
+        }
+        return total
+    }
+}
+// النتيجة: السعر الإجمالي = سعر آخر منتج فقط!
+
+// ✓ الحل
+fun calculateTotal(items: List<Product>): Double {
+    return items.sumOf { it.price }  // أو total += product.price
+}</pre>
+          </div>
+
+          <h4>4. خطأ في Timestamp / Date (شائع في Android)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Logic Error: مقارنة Timestamp خاطئة
+fun isExpired(expiryTime: Long): Boolean {
+    val currentTime = System.currentTimeMillis()
+    return expiryTime > currentTime  // ❌ المنطق معكوس!
+}
+// النتيجة: المنتهية صلاحيته تظهر كأنها صالحة!
+
+// ✓ الحل
+fun isExpired(expiryTime: Long): Boolean {
+    return System.currentTimeMillis() > expiryTime
+}</pre>
+          </div>
+
+          <h4>5. خطأ في Thread Safety (في Android Multi-threading)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Logic Error: Race Condition
+class CounterViewModel : ViewModel() {
+    var counter = 0
+    
+    fun increment() {
+        viewModelScope.launch {
+            counter++  // ❌ Not thread-safe!
+        }
+    }
+}
+// 100 clicks → counter قد يكون 87 بدلاً من 100!
+
+// ✓ الحل: استخدام Atomic أو Mutex
+class CounterViewModel : ViewModel() {
+    private val _counter = MutableStateFlow(0)
+    val counter: StateFlow<Int> = _counter
+    
+    fun increment() {
+        _counter.update { it + 1 }  // Thread-safe
+    }
+}</pre>
+          </div>
+
+          <h4>6. خطأ في JSON Parsing (شائع في APIs)</h4>
+
+          <div dir="ltr">
+            <pre>// ❌ Logic Error: خطأ في اسم الـ Field
+data class User(
+    @SerializedName("user_name")  // ❌ API يرسل "username"
+    val username: String
+)
+// النتيجة: username = null دائماً (بدون Crash!)
+
+// ✓ الحل: التأكد من اسم الـ Field في API
+data class User(
+    @SerializedName("username")  // ✓ مطابق للـ API
+    val username: String
+)</pre>
+          </div>
+
+          <div class="warning">
+            <strong>🚨 لماذا Logic Errors خطيرة جداً؟</strong><br />
+            • لا يوجد Error Message<br />
+            • لا يوجد Stack Trace<br />
+            • يمر بصمت في Testing<br />
+            • قد يُكتشف بعد أشهر من الإطلاق<br />
+            • يؤثر على البيانات الحقيقية (مثل: أسعار خاطئة، حسابات مالية، صلاحيات)
+          </div>
+
+          <hr />
+
+          <h2>عقلية المبرمج المحترف في Debugging 🧠</h2>
+
+          <h3>الفرق بين المبتدئ والمحترف:</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>المبتدئ</th>
+                <th>المحترف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>يجرّب حلول عشوائية (Trial & Error)</td>
+                <td>يفهم <strong>لماذا</strong> حدث الخطأ أولاً</td>
+              </tr>
+              <tr>
+                <td>يركز على <strong>الأعراض</strong></td>
+                <td>يبحث عن <strong>السبب الجذري</strong></td>
+              </tr>
+              <tr>
+                <td>يقرأ أول سطر من Stack Trace فقط</td>
+                <td>يقرأ Stack Trace <strong>كاملاً</strong> من الأسفل للأعلى</td>
+              </tr>
+              <tr>
+                <td>يستخدم <code>println()</code> فقط</td>
+                <td>يستخدم Debugger + Breakpoints + Logs</td>
+              </tr>
+              <tr>
+                <td>يتجاهل Warnings</td>
+                <td>يعالج Warnings قبل أن تصبح Errors</td>
+              </tr>
+              <tr>
+                <td>يبحث في Google بشكل عشوائي</td>
+                <td>يبحث بـ <strong>الكلمات المفتاحية الصحيحة</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>منهجية Debugging الاحترافية (5 خطوات):</h3>
+
+          <div dir="ltr">
+            <pre>┌──────────────────────────────────────────────────┐
+│         Professional Debugging Process           │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  1. REPRODUCE                                    │
+│     ↓ Can you make it happen again?              │
+│                                                  │
+│  2. ISOLATE                                      │
+│     ↓ Where exactly does it fail?                │
+│                                                  │
+│  3. UNDERSTAND                                   │
+│     ↓ Why does it fail? (Root Cause)             │
+│                                                  │
+│  4. FIX                                          │
+│     ↓ Solve the root cause, not the symptom     │
+│                                                  │
+│  5. VERIFY                                       │
+│     ↓ Did it actually fix the problem?           │
+│                                                  │
+└──────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <h4>1. REPRODUCE (إعادة إنتاج الخطأ)</h4>
+
+          <blockquote>
+            <strong>القاعدة:</strong> إذا لم تستطع إعادة إنتاج الخطأ، لا يمكنك حله.
+          </blockquote>
+
+          <div dir="ltr">
+            <pre>// أسئلة يجب الإجابة عليها:
+✓ متى يحدث الخطأ؟ (Crash عند الضغط على زر معين؟)
+✓ هل يحدث دائماً أم أحياناً؟
+✓ في أي Device / OS Version؟
+✓ في أي Network condition؟ (Online / Offline)
+✓ بعد أي خطوات محددة؟
+
+// مثال: NPE في Profile Screen
+Steps to Reproduce:
+1. Open app
+2. Navigate to Profile
+3. Click on "Edit" button
+→ Crash: NullPointerException at line 45</pre>
+          </div>
+
+          <h4>2. ISOLATE (عزل المشكلة)</h4>
+
+          <p>استخدم <strong>Binary Search Debugging</strong>:</p>
+
+          <div dir="ltr">
+            <pre>// مثال: Crash في دالة معقدة
+fun processUserData(user: User) {
+    val profile = fetchProfile(user.id)      // Line 1
+    val posts = fetchPosts(user.id)          // Line 2
+    val comments = fetchComments(user.id)    // Line 3
+    updateUI(profile, posts, comments)       // Line 4
+}
+
+// Debugging Strategy:
+// ضع Breakpoint أو Log في منتصف الدالة (Line 2)
+Log.d("DEBUG", "Checkpoint 1: Profile fetched")
+
+// هل Crash قبل أم بعد هذا السطر؟
+// إذا قبل → المشكلة في fetchProfile()
+// إذا بعد → المشكلة في Lines 2-4
+
+// كرر العملية حتى تحدد السطر المحدد
+Log.d("DEBUG", "Checkpoint 2: Posts fetched")
+Log.d("DEBUG", "Checkpoint 3: Comments fetched")
+
+// النتيجة: تحديد دقيق لموقع المشكلة
