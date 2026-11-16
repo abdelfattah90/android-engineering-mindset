@@ -1293,6 +1293,21 @@ Android Device / Emulator (ART)</pre>
             </div>
           </div>
 
+          <h2 class="content-section__title" id="running-debugging">التشغيل والتصحيح (Running &amp; Debugging)</h2>
+          <p class="content-section__description">
+            بعد نجاح Build، نحتاج إلى التأكد من أن التطبيق يعمل كما هو متوقع. وعندما تظهر مشكلة،
+            نحدد أولًا هل حدثت أثناء البناء أم أثناء التشغيل، ثم نختار الأداة المناسبة لفهم السبب.
+          </p>
+          <div class="callout callout--definition">
+            <span class="callout__label">الفكرة الأساسية</span>
+            <p>
+              <strong>Logcat</strong> يعرض ما سجله التطبيق والنظام، و<strong>Debugger</strong>
+              يسمح بمراقبة تنفيذ الكود وقيم المتغيرات، أما <strong>Compiler Messages</strong>
+              و<strong>Build Output</strong> فيساعدان على تشخيص المشكلات التي تمنع بناء التطبيق.
+              لا توجد أداة واحدة تكشف كل أنواع الأخطاء.
+            </p>
+          </div>
+
           <div class="topic-block" id="emulator">
             <h3 class="topic-block__title">التشغيل على Emulator</h3>
             <div class="callout callout--definition">
@@ -1358,10 +1373,48 @@ Android Device / Emulator (ART)</pre>
               </div>
               <pre class="code-block__body"><code>import android.util.Log
 
+private const val TAG = "MainActivity"
+
 fun onButtonClicked() {
-    Log.d("MainActivity", "Button Clicked")
-    Log.e("MainActivity", "Failed to load data")
+    Log.d(TAG, "Button clicked")
+}
+
+fun logLoadFailure(error: Throwable) {
+    Log.e(TAG, "Failed to load data", error)
 }</code></pre>
+            </div>
+            <p>
+              تتكون الرسالة عادةً من <strong>Tag</strong> يحدد مصدرها، و<strong>Log Level</strong>
+              يوضح أهميتها، ثم نص الرسالة. وعند تمرير <code>Throwable</code> إلى
+              <code>Log.e()</code> يمكن أن تظهر تفاصيل الاستثناء وStack Trace المرتبط به.
+            </p>
+            <div class="table-wrap table-wrap--fit">
+              <table>
+                <thead>
+                  <tr>
+                    <th>العنصر</th>
+                    <th>وظيفته</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>TAG</code></td>
+                    <td>اسم يساعد على تمييز الرسائل الصادرة من جزء معين في التطبيق.</td>
+                  </tr>
+                  <tr>
+                    <td>Log Level</td>
+                    <td>مستوى الرسالة، مثل Debug أو Warning أو Error.</td>
+                  </tr>
+                  <tr>
+                    <td>Message</td>
+                    <td>المعلومة التي يريد المطور تسجيلها.</td>
+                  </tr>
+                  <tr>
+                    <td><code>Throwable</code></td>
+                    <td>تفاصيل الاستثناء عند تسجيل خطأ مرتبط به.</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             <div class="table-wrap table-wrap--fit">
               <table>
@@ -1401,11 +1454,21 @@ fun onButtonClicked() {
                 </tbody>
               </table>
             </div>
+            <ol>
+              <li>شغّل التطبيق وافتح نافذة <strong>Logcat</strong> من Tool Windows.</li>
+              <li>حدد الجهاز والتطبيق المطلوبين حتى لا تختلط رسائلهما برسائل تطبيقات أخرى.</li>
+              <li>استخدم Search أو Filters للتصفية بحسب النص أو Tag أو Log Level.</li>
+              <li>أعد تنفيذ الخطوات التي تُظهر المشكلة، ثم راقب الرسائل التي ظهرت في اللحظة نفسها.</li>
+            </ol>
+            <div class="callout callout--note">
+              <span class="callout__label">نصيحة</span>
+              <p>
+                اجعل الرسائل محددة ومفيدة، وتجنب تسجيل كلمات المرور أو Tokens أو أي بيانات شخصية.
+                استخدم <code>Log.d()</code> لمعلومات التطوير، وراجع ما ينبغي تسجيله في نسخ Release.
+              </p>
+            </div>
             <p>
-              لفتح Logcat، شغّل التطبيق ثم افتح نافذة Logcat من Tool Windows،
-              وحدد الجهاز والتطبيق، واستخدم Filters أو Search للوصول إلى الرسالة
-              المطلوبة. شكل النافذة موضح في صفحة
-              <a href="https://developer.android.com/studio/debug/logcat">Logcat</a>
+              للمزيد: <a href="https://developer.android.com/studio/debug/logcat">Logcat</a>
               في التوثيق الرسمي.
             </p>
           </div>
@@ -1428,11 +1491,19 @@ fun onButtonClicked() {
               <pre class="code-block__body"><code>fun calculateTotal(price: Int, quantity: Int): Int {
     val total = price * quantity  // Set a breakpoint here
     return total
+}
+
+fun onCheckoutClicked() {
+    val total = calculateTotal(100, 5)
+    // Continue with the checkout flow using total
 }</code></pre>
             </div>
             <p>
               ضع Breakpoint بالضغط في الهامش بجوار رقم السطر، ثم شغّل التطبيق
-              باستخدام Debug. عند الوصول إلى السطر المحدد سيتوقف التنفيذ مؤقتًا.
+              باستخدام <strong>Debug</strong> بدلًا من Run. عند وصول التنفيذ إلى هذا
+              السطر سيتوقف مؤقتًا، ويمكنك فحص قيم <code>price</code> و<code>quantity</code>
+              و<code>total</code> من نافذة Debugger. إذا لم يصل التطبيق إلى السطر فلن
+              يتوقف عند نقطة التوقف تلك.
             </p>
           </div>
 
@@ -1448,9 +1519,9 @@ fun onButtonClicked() {
     return total
 }
 
-fun main() {
+fun onCheckoutClicked() {
     val result = calculateTotal(100, 5)
-    println(result)
+    // Inspect result while debugging
 }</code></pre>
             </div>
             <div class="output-block">
@@ -1485,18 +1556,29 @@ fun main() {
               </table>
             </div>
             <p>
-              يمكن إضافة Expressions مثل <code>price</code> أو
-              <code>quantity</code> أو <code>price * quantity</code> إلى Watches
-              ومتابعة نتائجها عندما تكون صالحة في السياق الحالي.
+              في المثال، ضع Breakpoint على سطر استدعاء
+              <code>calculateTotal()</code>. استخدم Step Over لتنفيذ الدالة والانتقال
+              إلى السطر التالي، أو Step Into للدخول إلى <code>calculateTotal()</code>
+              ومشاهدة حساب <code>total</code> من الداخل. يمكن إضافة Expressions مثل
+              <code>price</code> أو <code>quantity</code> أو
+              <code>price * quantity</code> إلى Watches ومتابعة نتائجها عندما تكون
+              هذه المتغيرات متاحة في النطاق الحالي (Current Scope).
             </p>
+            <div class="callout callout--note">
+              <span class="callout__label">تذكّر</span>
+              <p>
+                Step Over لا يعني تخطي تنفيذ الدالة؛ بل ينفذها كاملةً دون عرض خطواتها الداخلية.
+                أما Step Into فينقلك إلى داخل الدالة لمتابعة تفاصيل تنفيذها.
+              </p>
+            </div>
           </div>
 
           <div class="topic-block" id="compiler-messages">
             <h3 class="topic-block__title">Compiler Messages</h3>
             <p>
-              تظهر رسائل Compiler عندما توجد مشكلة تمنع ترجمة الكود، بينما قد
-              تعرض نافذة Build أيضًا رسائل من Gradle أو Plugins أو SDK أو
-              Dependency Resolution.
+              تظهر رسائل Kotlin Compiler عندما توجد مشكلة في كود Kotlin تمنع ترجمته.
+              أما نافذة Build فقد تعرض أيضًا رسائل من Gradle أو Plugins أو Android SDK
+              أو Dependency Resolution؛ لذلك اقرأ مصدر الرسالة قبل افتراض أن المشكلة في الكود.
             </p>
             <div class="code-block">
               <div class="code-block__header">
@@ -1546,11 +1628,19 @@ Found: String</pre>
                 </tbody>
               </table>
             </div>
-            <p>
-              يمكن قراءة الرسائل من Build Output أو Problems داخل Android Studio.
-              ليس كل فشل Build ناتجًا عن Kotlin Compiler؛ فقد يكون السبب Gradle
-              أو Plugin أو Dependency أو Android SDK.
-            </p>
+            <ol>
+              <li>افتح Build Output أو Problems واقرأ رسالة الخطأ كاملة.</li>
+              <li>حدد اسم الملف ورقم السطر إن كانت الرسالة تشير إلى كود المشروع.</li>
+              <li>في Type Mismatch، قارن النوع المطلوب بالنوع الموجود فعليًا.</li>
+              <li>إذا كانت الرسالة عن Repository أو Dependency أو Plugin، افحص إعدادات البناء والاتصال بالمستودع بدلًا من تعديل Kotlin Code عشوائيًا.</li>
+            </ol>
+            <div class="callout callout--note">
+              <span class="callout__label">ملاحظة</span>
+              <p>
+                قد تظهر Warnings لا تمنع البناء، بينما Errors تمنع تنفيذ المرحلة المتأثرة.
+                ابدأ بأول رسالة خطأ ذات صلة؛ فقد تكون رسائل لاحقة مجرد نتائج مترتبة عليها.
+              </p>
+            </div>
           </div>
 
           <div class="topic-block" id="stack-trace">
@@ -1596,12 +1686,20 @@ at android.app.Activity.performCreate(...)</pre>
                 </tbody>
               </table>
             </div>
-            <p>
-              ابدأ بنوع Exception، ثم ابحث عن أول سطر يشير إلى كود مشروعك. افتح
-              الملف ورقم السطر وافحص القيم والسياق. وإذا ظهر
-              <code>Caused by</code> فقد يشير إلى السبب الأصلي وراء الاستثناء
-              الظاهر.
-            </p>
+            <ol>
+              <li>ابدأ باسم Exception لمعرفة فئة المشكلة، مثل <code>NullPointerException</code>.</li>
+              <li>ابحث عن أول Stack Frame يشير إلى Package أو ملف تابع لمشروعك.</li>
+              <li>افتح الملف عند رقم السطر المذكور وافحص القيم التي كانت مستخدمة وقت الخطأ.</li>
+              <li>راجع الأسطر التالية لفهم الدوال التي استدعت الدالة التي حدث فيها الخطأ.</li>
+              <li>عند ظهور <code>Caused by</code>، افحص السبب المتداخل؛ فقد يوضح المشكلة الأصلية بصورة أدق.</li>
+            </ol>
+            <div class="callout callout--note">
+              <span class="callout__label">ملاحظة</span>
+              <p>
+                لا يلزم فهم كل سطر في Stack Trace من البداية؛ ركّز أولًا على نوع Exception
+                وأول سطر مرتبط بكودك، ثم ارجع إلى بقية الاستدعاءات عند الحاجة.
+              </p>
+            </div>
           </div>
 
           <div class="topic-block" id="error-types">
@@ -1675,6 +1773,61 @@ val correctTotal = price * quantity</code></pre>
               الكود الأول صحيح من ناحية Syntax والأنواع، لكنه لا ينفذ المعادلة
               المطلوبة. لذلك لا تؤدي كل الأخطاء إلى Crash.
             </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                Runtime Exception لا يعني دائمًا أن التطبيق سينهار فورًا؛ فقد يلتقطه
+                التطبيق ويتعامل معه. لكن الاستثناء غير المعالج، خصوصًا على Main Thread،
+                قد يؤدي إلى إنهاء عملية التطبيق.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="debugging-workflow">
+            <h3 class="topic-block__title">منهج عملي لتحديد سبب المشكلة</h3>
+            <p>
+              بدل تجربة تغييرات عشوائية، اتبع تسلسلًا بسيطًا يوصلك إلى الأداة المناسبة:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ما الذي تلاحظه؟</th>
+                    <th>ابدأ باستخدام</th>
+                    <th>ما الذي تبحث عنه؟</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>فشل Sync أو Build قبل تشغيل التطبيق.</td>
+                    <td>Build Output وCompiler Messages.</td>
+                    <td>أول Error، واسم الملف أو Plugin أو Dependency المرتبط به.</td>
+                  </tr>
+                  <tr>
+                    <td>التطبيق يتوقف أو يغلق أثناء التشغيل.</td>
+                    <td>Logcat وStack Trace.</td>
+                    <td>Exception ونقطة حدوثه وأي <code>Caused by</code>.</td>
+                  </tr>
+                  <tr>
+                    <td>التطبيق يعمل لكن النتيجة غير صحيحة.</td>
+                    <td>Breakpoints وStep Over وStep Into وWatches.</td>
+                    <td>القيم الفعلية وتسلسل تنفيذ الدوال.</td>
+                  </tr>
+                  <tr>
+                    <td>المشكلة لا تظهر في كل مرة.</td>
+                    <td>Logcat مع إعادة إنتاج الحالة، ثم Debugger عند الحاجة.</td>
+                    <td>الظروف والخطوات التي سبقت ظهور المشكلة.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ol>
+              <li>أعد تنفيذ الخطوات التي تؤدي إلى المشكلة وسجّل ما يحدث.</li>
+              <li>حدد هل المشكلة أثناء Sync/Build أم بعد بدء تشغيل التطبيق.</li>
+              <li>اقرأ رسالة الخطأ أو Stack Trace وحدد أقرب موضع مرتبط بكودك.</li>
+              <li>ضع Breakpoint قبل الموضع المتوقع، ثم تحرك خطوة بخطوة وافحص القيم.</li>
+              <li>عدّل السبب، ثم أعد الاختبار للتأكد من زوال المشكلة وعدم ظهور أثر جانبي.</li>
+            </ol>
           </div>
         </div>
       </section>
@@ -1716,8 +1869,9 @@ val correctTotal = price * quantity</code></pre>
             <li>تشغيل التطبيق على Emulator وعلى جهاز Android حقيقي.</li>
             <li>إظهار رسالة باستخدام <code>Log.d()</code> والعثور عليها في Logcat.</li>
             <li>وضع Breakpoint واستخدام Step Over وStep Into وWatches.</li>
-            <li>قراءة Stack Trace وتحديد الملف ورقم السطر المرتبطين بالخطأ.</li>
+            <li>قراءة Stack Trace وتحديد الملف ورقم السطر والسبب الأصلي عند وجود <code>Caused by</code>.</li>
             <li>التمييز بين Compile-time Error وRuntime Error وLogical Error.</li>
+            <li>اختيار أداة التشخيص المناسبة واتباع خطوات Debugging منظمة بدل تعديل الكود عشوائيًا.</li>
           </ul>
         </div>
 
