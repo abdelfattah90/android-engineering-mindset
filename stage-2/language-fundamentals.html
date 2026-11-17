@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#34a853" />
+    <title>Language Fundamentals - أساسيات اللغة | Android Engineering Mindset</title>
+    <link
+      rel="shortcut icon"
+      href="https://www.gstatic.com/devrel-devsite/prod/v579d635a54d6e1f40caad46ce407560c5106c8915e5ff7e6341f5b13eb245c5a/android/images/favicon.svg"
+    />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+
+  <body>
+    <main class="page-container">
+      <header class="hero">
+        <div class="hero__top">
+          <div class="hero__eyebrow">المرحلة 2 · أساسيات Kotlin</div>
+          <a class="hero__back" href="../index.html#P2">العودة إلى الخطة</a>
+        </div>
+        <h1 class="hero__title">Language Fundamentals - أساسيات اللغة</h1>
+        <p class="hero__lead">
+          هذه الصفحة تبني الطبقة الأولى من Kotlin: كيف تُخزَّن القيم وتُقارَن وتُحوَّل. كل قاعدة هنا تُحسم وقت الترجمة أو وقت التشغيل، ومعرفة أيهما هو ما يميّز من يقرأ الخطأ من من يخمّنه. كل ما يأتي بعدها في المرجع يعتمد عليها.
+        </p>
+      </header>
+
+      <section class="content-section" id="explanation">
+        <h2 class="content-section__title">شرح وتطبيق كل موضوع</h2>
+
+        <div class="article-content article-content--numbered">
+          <div class="topic-block" id="variables">
+            <h3 class="topic-block__title">Variables - المتغيرات: val وvar</h3>
+            <p>
+              القيمة التي تتغير دون قصد مصدر أخطاء يصعب تتبعه. لذلك تفصل Kotlin بين اسم يُربط بقيمة مرة واحدة واسم يمكن إعادة ربطه.
+            </p>
+            <div class="callout callout--definition">
+              <span class="callout__label">قاعدة</span>
+              <p>
+                <code>val</code> يمنع إعادة الإسناد بعد التهيئة، و<code>var</code> يسمح بها. ابدأ بـ <code>val</code>، ولا تستعمل <code>var</code> إلا حين يكون التغيير جزءًا من المنطق.
+              </p>
+            </div>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val name = "Musab"
+    var score = 10
+    score = 12
+    println("$name: $score")
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">Musab: 12</pre>
+            </div>
+            <p>
+              إسناد قيمة جديدة إلى <code>name</code> يفشل وقت الترجمة، فلا يصل الخطأ إلى المستخدم أبدًا.
+            </p>
+            <div class="callout callout--note">
+              <span class="callout__label">ملاحظة</span>
+              <p>
+                <code>val</code> يثبّت الربط لا الكائن: كائن قابل للتعديل يبقى قابلًا للتعديل (سنرى ذلك مع المصفوفات). وعلى JVM يُترجم <code>val</code> كخاصية إلى حقل <code>final</code>، وهذا تفصيل تنفيذي لا ضمان لغوي.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="type-inference">
+            <h3 class="topic-block__title">Type Inference and Explicit Types - استنتاج النوع والنوع الصريح</h3>
+            <p>
+              Kotlin لغة static typing: لكل تعبير نوع معلوم وقت الترجمة. المترجم يستنتج النوع من الطرف الأيمن، فلا كلفة وقت تشغيل ولا نوع «ديناميكي». نكتب النوع صراحة عند غياب قيمة ابتدائية، أو حين يختلف النوع المطلوب عن الافتراضي، أو لتوضيح واجهة عامة.
+            </p>
+            <p>ماذا تتوقع أن يكون نوع <code>3_000_000_000</code>؟ جرّب قبل أن تنظر إلى النتيجة.</p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val a = 42
+    val c = 3.14
+    val d = 3.14f
+    val f = 3_000_000_000
+    val e: Short = 7 // no literal suffix exists for Short
+    println(a::class.simpleName)
+    println(c::class.simpleName)
+    println(d::class.simpleName)
+    println(f::class.simpleName)
+    println(e::class.simpleName)
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">Int
+Double
+Float
+Long
+Short</pre>
+            </div>
+            <p>
+              العدد الأكبر من مدى <code>Int</code> صار <code>Long</code> تلقائيًا، بينما الرقم العشري الافتراضي <code>Double</code>، ولجعله <code>Float</code> نضيف <code>f</code>.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                <code>val x: Double = 1</code> خطأ ترجمة: لا يوجد تحويل ضمني من <code>Int</code> إلى <code>Double</code>. اكتب <code>1.0</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="data-types">
+            <h3 class="topic-block__title">Data Types - أنواع البيانات الأساسية</h3>
+            <p>
+              لكل نوع رقمي حجم ثابت يحدد مداه. اختيار النوع قرار عن المدى والدقة والذاكرة، وليس تفصيلًا شكليًا.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>النوع</th>
+                    <th>الحجم</th>
+                    <th>المدى أو الاستعمال</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Byte</td><td>8 bits</td><td>-128 إلى 127</td></tr>
+                  <tr><td>Short</td><td>16 bits</td><td>-32,768 إلى 32,767</td></tr>
+                  <tr><td>Int</td><td>32 bits</td><td>حوالي ±2.1 مليار (الافتراضي)</td></tr>
+                  <tr><td>Long</td><td>64 bits</td><td>حوالي ±9.2 × 10^18</td></tr>
+                  <tr><td>Float</td><td>32 bits</td><td>حوالي 6 إلى 7 خانات عشرية دقيقة</td></tr>
+                  <tr><td>Double</td><td>64 bits</td><td>حوالي 15 إلى 16 خانة دقيقة (الافتراضي)</td></tr>
+                  <tr><td>Boolean</td><td>true أو false</td><td>الشروط والحالات</td></tr>
+                  <tr><td>Char</td><td>16 bits</td><td>وحدة UTF-16 واحدة، وليست رقمًا</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>ماذا تتوقع من <code>Int.MAX_VALUE + 1</code>؟ ومن <code>tiny + 1</code> حيث <code>tiny</code> من نوع <code>Byte</code> قيمته 127؟</p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val big = Int.MAX_VALUE
+    println(big + 1)
+    println(Long.MAX_VALUE)
+    val tiny: Byte = 127
+    println(tiny + 1)
+    println('A' + 1)
+    println('A'.code)
+    println(0.1 + 0.2)
+    println(1_000_000)
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">-2147483648
+9223372036854775807
+128
+B
+65
+0.30000000000000004
+1000000</pre>
+            </div>
+            <p>
+              تجاوز المدى لا يُنتج خطأ: القيمة «تلتف» إلى الطرف الآخر بصمت. وعمليات <code>Byte</code> و<code>Short</code> تُنتج <code>Int</code>، لذلك ظهر 128 دون التفاف. أما <code>0.1 + 0.2</code> فهو حدّ تمثيل الأعداد العشرية الثنائية، وليس خطأ في Kotlin.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                لا تستعمل <code>Double</code> أو <code>Float</code> للمبالغ المالية. الأسلم تخزين الكمية بوحدة صغرى صحيحة (مثل القروش) في <code>Long</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="strings">
+            <h3 class="topic-block__title">String and String Templates - النصوص والقوالب النصية</h3>
+            <p>
+              <code>String</code> غير قابل للتعديل (immutable): كل عملية تُرجع نصًا جديدًا ولا تغيّر الأصل. القالب <code>$name</code> أو <code>${expression}</code> يدمج القيم داخل النص بلا تجميع يدوي بـ <code>+</code>. والنص الخام <code>"""..."""</code> يحافظ على الأسطر والرموز دون escape.
+            </p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val user = "Musab"
+    val price = 19.5
+    val qty = 3
+    println("Hi $user, total: ${price * qty}")
+    println("%.2f".format(price * qty))
+    println(user.uppercase() + " " + user.length)
+    println(user.substring(1, 3))
+    println("  a,b ".trim().replace(",", ";"))
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">Hi Musab, total: 58.5
+58.50
+MUSAB 5
+us
+a;b</pre>
+            </div>
+            <p>
+              العمليات الشائعة الأخرى: <code>contains</code> و<code>startsWith</code> و<code>lowercase</code>، والوصول لحرف بالفهرس <code>user[0]</code> (يُرجع <code>Char</code>). ومن 0 يبدأ الفهرس، وفي <code>substring(1, 3)</code> الطرف الأول مضمّن والثاني مستبعد.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                <code>format</code> يستعمل لغة الجهاز (default locale)، وقد تختلف الفاصلة العشرية والأرقام. للنصوص التي تقرؤها الآلة مرّر <code>Locale.US</code> صراحة.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="type-conversion">
+            <h3 class="topic-block__title">Type Conversion and Casting - تحويل الأنواع</h3>
+            <p>
+              Kotlin لا تحوّل بين الأنواع الرقمية ضمنيًا، لأن التحويل الصامت يخفي فقدان البيانات. فالتحويل دائمًا صريح: <code>toInt()</code> و<code>toLong()</code> و<code>toByte()</code> وغيرها.
+            </p>
+            <div class="callout callout--definition">
+              <span class="callout__label">تعريف</span>
+              <p>
+                Conversion ينتج قيمة جديدة من نوع آخر. أما Casting (<code>as</code> و<code>is</code>) فيتعامل مع الكائن نفسه كنوع آخر دون إنتاج قيمة جديدة، ويتعلق بالأنواع المرجعية (يُشرح في المرحلة 5).
+              </p>
+            </div>
+            <p>ماذا تتوقع من <code>130.toByte()</code>؟ ومن <code>7.9.toInt()</code>؟</p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val i = 130
+    val l: Long = i.toLong()
+    val b: Byte = i.toByte()
+    val d = 7.9
+    println(l)
+    println(b)
+    println(d.toInt())
+    println("42".toInt() + 1)
+    println(7 / 2)
+    println(7 / 2.0)
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">130
+-126
+7
+43
+3
+3.5</pre>
+            </div>
+            <p>
+              التضييق (<code>Int</code> إلى <code>Byte</code>) يقتطع البتات الزائدة فيصير 130 إلى -126. والتحويل من <code>Double</code> إلى <code>Int</code> يحذف الجزء العشري ولا يقرّب. وقسمة <code>Int</code> على <code>Int</code> تبقى <code>Int</code>.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                <code>"abc".toInt()</code> يُترجم بسلام ثم يفشل وقت التشغيل بـ <code>NumberFormatException</code> (يُشرح في المرحلة 8). صحة النص لا يعرفها المترجم.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="equality">
+            <h3 class="topic-block__title">Equality - المساواة: == و===</h3>
+            <p>
+              سؤالان مختلفان: هل القيمتان متساويتان؟ وهل هما الكائن نفسه؟ العامل <code>==</code> يستدعي <code>equals</code> (structural equality)، و<code>===</code> يقارن الهوية في الذاكرة (referential equality).
+            </p>
+            <p>ماذا تتوقع من مقارنة مصفوفتين بنفس المحتوى؟ (المصفوفات تُشرح في موضوع لاحق من هذه الصفحة.)</p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val p = "Ahmed"
+    val q = "Ah" + "med"
+    println(p == q)
+    val x = intArrayOf(1, 2)
+    val y = intArrayOf(1, 2)
+    val z = x
+    println(x == y)
+    println(x === z)
+    println(x.contentEquals(y))
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">true
+false
+true
+true</pre>
+            </div>
+            <p>
+              المصفوفة لا تعيد تعريف <code>equals</code>، فيصبح <code>==</code> عليها مقارنة هوية، ولذلك استعملنا <code>contentEquals</code> لمقارنة المحتوى. وللنصوص يعمل <code>==</code> على المحتوى.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                لا تستعمل <code>===</code> للنصوص أو الأرقام: نتيجتها تتبع تفاصيل JVM (مثل string interning) ولا تعبّر عن قصدك. و<code>1 == 1L</code> خطأ ترجمة لاختلاف النوعين، فحوّل صراحة.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="operators">
+            <h3 class="topic-block__title">Operators - العوامل وأولوية العمليات</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الفئة</th>
+                    <th>العوامل</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Arithmetic</td><td><code>+ - * / %</code></td></tr>
+                  <tr><td>Assignment</td><td><code>= += -= *= /= %= ++ --</code></td></tr>
+                  <tr><td>Comparison</td><td><code>== != &lt; &gt; &lt;= &gt;=</code></td></tr>
+                  <tr><td>Logical</td><td><code>&amp;&amp; || !</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              الأولوية من الأعلى إلى الأدنى: العوامل الأحادية (<code>!</code> و<code>-</code> و<code>++</code>)، ثم <code>* / %</code>، ثم <code>+ -</code>، ثم النطاقات (<code>..</code>)، ثم <code>in</code>، ثم المقارنة، ثم المساواة، ثم <code>&amp;&amp;</code>، ثم <code>||</code>، وأخيرًا الإسناد. وعند الشك استعمل الأقواس.
+            </p>
+            <p>
+              <code>&amp;&amp;</code> و<code>||</code> يعملان بالتقييم المختصر (short-circuit): إن حُسمت النتيجة من الطرف الأيسر لا يُقيَّم الأيمن.
+            </p>
+            <p>ماذا تتوقع من <code>-7 / 2</code> ومن <code>-7 % 3</code>؟</p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    println(2 + 3 * 4)
+    println(-7 / 2)
+    println(-7 % 3)
+    println((-7).mod(3))
+    var n = 10
+    n += 5
+    n++
+    println(n)
+    println(n &gt; 10 &amp;&amp; n % 2 == 0 || false)
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">14
+-3
+-1
+2
+16
+true</pre>
+            </div>
+            <p>
+              القسمة الصحيحة تقطع نحو الصفر، وإشارة <code>%</code> تتبع المقسوم (الباقي -1). وإن أردت باقيًا غير سالب فاستعمل <code>mod</code>.
+            </p>
+          </div>
+
+          <div class="topic-block" id="arrays">
+            <h3 class="topic-block__title">Arrays - المصفوفات وعملياتها الأساسية</h3>
+            <p>
+              المصفوفة كتلة متجاورة في الذاكرة بحجم ثابت يُحدَّد عند الإنشاء، وعناصرها قابلة للتعديل. <code>IntArray</code> يُترجم على JVM إلى <code>int[]</code> دون boxing، بينما <code>Array&lt;Int&gt;</code> يُخزّن كائنات <code>Integer</code>، فالأول أخف عند الأعداد الكبيرة.
+            </p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val nums = intArrayOf(10, 20, 30)
+    nums[1] = 25
+    println(nums.size)
+    println(nums.contentToString())
+    println(nums.sum())
+    println(nums.copyOf(5).contentToString())
+    val names = arrayOf("Musab", "Ahmed")
+    println(names[0])
+    println(IntArray(3).contentToString())
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">3
+[10, 25, 30]
+65
+[10, 25, 30, 0, 0]
+Musab
+[0, 0, 0]</pre>
+            </div>
+            <p>
+              <code>val nums</code> لم يمنع <code>nums[1] = 25</code>، فالربط ثابت والمحتوى متغيّر. و<code>copyOf(5)</code> يُنشئ مصفوفة جديدة، فالحجم لا يتغير في الأصل.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                <code>println(nums)</code> يطبع اسم النوع وقيمة hash وليس العناصر، فاستعمل <code>contentToString()</code>. والوصول لفهرس خارج الحجم يفشل وقت التشغيل بـ <code>ArrayIndexOutOfBoundsException</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="ranges">
+            <h3 class="topic-block__title">Ranges - النطاقات: .. و..&lt; وdownTo وstep</h3>
+            <p>
+              النطاق كائن صغير يحمل البداية والنهاية فقط ولا يُنشئ عناصره في الذاكرة. <code>..</code> يشمل النهاية، و<code>..&lt;</code> يستبعدها، و<code>downTo</code> يعدّ تنازليًا، و<code>step</code> يحدد القفزة. وتُستعمل غالبًا مع <code>for</code> (المرحلة 3).
+            </p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    println((1..5).toList()) // toList is covered in stage 6
+    println((1..&lt;5).toList())
+    println((5 downTo 1).toList())
+    println((1..10 step 3).toList())
+    println(3 in 1..5)
+    println((5..1).toList())
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">[1, 2, 3, 4, 5]
+[1, 2, 3, 4]
+[5, 4, 3, 2, 1]
+[1, 4, 7, 10]
+true
+[]</pre>
+            </div>
+            <p>
+              الفحص <code>3 in 1..5</code> مقارنتان فقط بلا مرور على العناصر. وتصلح النطاقات للأحرف أيضًا مثل <code>'a'..'e'</code>.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                <code>5..1</code> نطاق فارغ ولا يعدّ تنازليًا؛ استعمل <code>downTo</code>. والخطوة يجب أن تكون موجبة، وإلا رُمي <code>IllegalArgumentException</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="type-aliases">
+            <h3 class="topic-block__title">Type Aliases - الأسماء المستعارة للأنواع</h3>
+            <p>
+              <code>typealias</code> يعطي اسمًا آخر لنوع موجود لتحسين القراءة. يُستبدل وقت الترجمة ولا يُنشئ نوعًا جديدًا، ويُعلن على مستوى الملف فقط.
+            </p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>typealias UserId = Long
+typealias Celsius = Double
+
+fun main() {
+    val id: UserId = 1042L
+    val temp: Celsius = 36.6
+    val raw: Long = id
+    println("$id $temp $raw")
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">1042 36.6 1042</pre>
+            </div>
+            <p>
+              إسناد <code>UserId</code> إلى <code>Long</code> نجح لأنهما النوع نفسه. استعمله حين يكون الاسم الأصلي طويلًا أو غامضًا.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                لا يمنح الأمان: <code>typealias OrderId = Long</code> يقبل في مكان <code>UserId</code> دون اعتراض. إن أردت فصلًا حقيقيًا بين النوعين فتحتاج نوعًا جديدًا (يأتي لاحقًا في المرجع).
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block" id="packages-imports">
+            <h3 class="topic-block__title">Packages and Imports - الحزم والاستيراد</h3>
+            <p>
+              الـ package يمنح الأسماء مساحة تمنع التصادم بين الملفات والمكتبات. الإعلان في أول الملف، ويُستحسن أن يطابق مسار المجلدات، لكن المترجم لا يفرض ذلك. للوصول إلى اسم من حزمة أخرى نستورده بـ <code>import</code> أو نكتب اسمه الكامل.
+            </p>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Price.kt — package com.example.shop</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>package com.example.shop
+
+const val TAX_PERCENT = 10
+
+// functions are covered in stage 4
+fun withTax(amount: Int): Int {
+    return amount + amount * TAX_PERCENT / 100
+}</code></pre>
+            </div>
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Main.kt — package com.example.app</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>package com.example.app
+
+import com.example.shop.withTax
+
+fun main() {
+    println(withTax(100))
+}</code></pre>
+            </div>
+            <div class="output-block">
+              <span class="output-block__label">Output</span>
+              <pre class="output-block__body">110</pre>
+            </div>
+            <p>
+              <code>import a.b.*</code> يستورد كل الأسماء، و<code>import a.b.Name as Other</code> يعيد تسمية المستورد عند التصادم. وبعض الحزم تُستورد تلقائيًا مثل <code>kotlin.*</code> و<code>kotlin.io.*</code>، ولذلك تعمل <code>println</code> بلا import.
+            </p>
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                الاستيراد بالنجمة قد يُخفي من أي حزمة جاء الاسم ويسبب التباسًا عند تصادم أسماء. فضّل الاستيراد المحدد.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section" id="quiz">
+        <h2 class="content-section__title">اختبر نفسك</h2>
+        <p class="content-section__description">
+          حاول أن تجيب بنفسك قبل أن تفتح الإجابة تحت كل سؤال.
+        </p>
+
+        <div class="article-content">
+          <div class="topic-block" id="q1">
+            <h3 class="topic-block__title">سؤال 1</h3>
+            <p>كتب Musab <code>val scores = intArrayOf(1, 2)</code> ثم <code>scores[0] = 9</code>. هل يُترجم الكود؟ ولماذا؟</p>
+            <details class="reveal">
+              <summary>الإجابة</summary>
+              <div class="reveal__body">
+                <p>نعم يُترجم. <code>val</code> يمنع إعادة ربط الاسم بمصفوفة أخرى، لكنه لا يمنع تعديل عناصر المصفوفة نفسها. (راجع: Variables - المتغيرات)</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="topic-block" id="q2">
+            <h3 class="topic-block__title">سؤال 2</h3>
+            <p>ما نوع <code>val x = 3_000_000_000</code>؟ وماذا يحدث لو كتبنا <code>val y: Int = 3_000_000_000</code>؟</p>
+            <details class="reveal">
+              <summary>الإجابة</summary>
+              <div class="reveal__body">
+                <p>الأول <code>Long</code> لأن المترجم يرفع نوع الرقم الحرفي الذي لا يتسع في <code>Int</code>. الثاني خطأ ترجمة لأن النوع الصريح فرض <code>Int</code> والقيمة لا تتسع فيه. (راجع: Type Inference and Explicit Types - استنتاج النوع والنوع الصريح)</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="topic-block" id="q3">
+            <h3 class="topic-block__title">سؤال 3</h3>
+            <p>ما ناتج <code>println(7 / 2)</code> و<code>println(-7 % 3)</code>؟ ولماذا؟</p>
+            <details class="reveal">
+              <summary>الإجابة</summary>
+              <div class="reveal__body">
+                <p>الناتجان 3 و-1. قسمة <code>Int</code> على <code>Int</code> تبقى <code>Int</code> وتقطع الجزء العشري، وإشارة الباقي تتبع المقسوم. (راجع: Operators - العوامل وأولوية العمليات)</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="topic-block" id="q4">
+            <h3 class="topic-block__title">سؤال 4</h3>
+            <p>لماذا يطبع <code>intArrayOf(1, 2) == intArrayOf(1, 2)</code> القيمة <code>false</code>؟ وكيف نقارن المحتوى؟</p>
+            <details class="reveal">
+              <summary>الإجابة</summary>
+              <div class="reveal__body">
+                <p>المصفوفة لا تعيد تعريف <code>equals</code>، فتصبح المقارنة بالهوية وهما كائنان مختلفان. نقارن المحتوى بـ <code>contentEquals</code>. (راجع: Equality - المساواة)</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="topic-block" id="q5">
+            <h3 class="topic-block__title">سؤال 5</h3>
+            <p>عرّف فريقك <code>typealias UserId = Long</code> و<code>typealias OrderId = Long</code>، ثم مرّر أحدهم <code>OrderId</code> إلى دالة تنتظر <code>UserId</code> فلم يعترض المترجم. هل هذا خلل؟ وما القرار؟</p>
+            <details class="reveal">
+              <summary>الإجابة</summary>
+              <div class="reveal__body">
+                <p>ليس خللًا؛ الاسمان المستعاران هما <code>Long</code> نفسه، فلا فحص بينهما. إن كان الخلط مكلفًا فالقرار نوع مستقل يمنعه المترجم، وإلا يكفي الاسم المستعار للتوثيق. (راجع: Type Aliases - الأسماء المستعارة للأنواع)</p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section" id="exercise">
+        <h2 class="content-section__title">تمرين شامل: حساب خصم فاتورة</h2>
+
+        <div class="article-content">
+          <p>
+            يحسب Ahmed إجمالي فاتورة من ثلاثة أسعار ثم يطبق خصمًا نسبته 10%. يشتكي العميل أن الخصم يظهر دائمًا صفرًا.
+          </p>
+          <div class="code-block">
+            <div class="code-block__header">
+              <span class="code-block__filename">Invoice.kt</span>
+              <span class="code-block__lang">Kotlin</span>
+            </div>
+            <pre class="code-block__body"><code>fun main() {
+    val prices = intArrayOf(250, 100, 75)
+    val total = prices.sum()
+    val discountPercent = 10
+    val discount = total * (discountPercent / 100)
+    println("Total: $total, discount: $discount")
+}</code></pre>
+          </div>
+          <ol>
+            <li>توقّع المخرجات ثم نفّذ الكود وقارن.</li>
+            <li>أصلح السطر المسؤول عن الخطأ.</li>
+            <li>فسّر لماذا ظهر الصفر، وما الذي يحدث لنصف الوحدة في الناتج الجديد؟</li>
+            <li>
+              عقلية المهندس: ماذا لو كانت الأسعار بملايين الوحدات؟ وما نوع التخزين الذي تختاره للمبالغ المالية، ولماذا؟
+            </li>
+          </ol>
+          <details class="reveal reveal--hint">
+            <summary>تلميح</summary>
+            <div class="reveal__body">
+              <p>انظر إلى نوع الناتج من <code>discountPercent / 100</code> قبل أن يدخل في الضرب.</p>
+            </div>
+          </details>
+          <details class="reveal">
+            <summary>الحل</summary>
+            <div class="reveal__body">
+              <p>الكود الأصلي يطبع:</p>
+              <div class="output-block">
+                <span class="output-block__label">Output</span>
+                <pre class="output-block__body">Total: 425, discount: 0</pre>
+              </div>
+              <p>الإصلاح بتأخير القسمة إلى آخر العملية:</p>
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__filename">Invoice.kt — fixed</span>
+                  <span class="code-block__lang">Kotlin</span>
+                </div>
+                <pre class="code-block__body"><code>fun main() {
+    val prices = intArrayOf(250, 100, 75)
+    val total = prices.sum()
+    val discountPercent = 10
+    val discount = total * discountPercent / 100
+    println("Total: $total, discount: $discount")
+}</code></pre>
+              </div>
+              <div class="output-block">
+                <span class="output-block__label">Output</span>
+                <pre class="output-block__body">Total: 425, discount: 42</pre>
+              </div>
+              <p>
+                <code>10 / 100</code> قسمة <code>Int</code> على <code>Int</code> فتقطع إلى 0، فصار كل الضرب صفرًا. بعد الإصلاح صار الضرب أولًا (4250) ثم القسمة، لكن الناتج 42 لا 42.5 لأن القسمة الصحيحة تقطع الجزء العشري.
+              </p>
+              <p>
+                <strong>عقلية المهندس:</strong> الخطأ لم يظهر وقت الترجمة لأن الكود سليم لغويًا، فالتحقق يكون باختبار قيم معروفة النتيجة. مع الملايين يتجاوز <code>total * discountPercent</code> مدى <code>Int</code> وتلتف القيمة بصمت، فنستعمل <code>Long</code> (وتبقى الدقة العشرية للنصف مسألة قرار عمل). ولا نستعمل <code>Double</code> للمال بسبب أخطاء التمثيل مثل <code>0.1 + 0.2</code>. والأسلم تخزين المبلغ بالوحدة الصغرى في <code>Long</code>.
+              </p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="content-section" id="summary">
+        <h2 class="content-section__title">أهم ما يجب تذكّره</h2>
+
+        <div class="summary-card">
+          <ul class="summary-card__list">
+            <li><code>val</code> يثبّت الربط لا محتوى الكائن؛ ابدأ به وانتقل إلى <code>var</code> عند الحاجة.</li>
+            <li>الأنواع تُحسم وقت الترجمة، والاستنتاج لا يكلّف شيئًا وقت التشغيل.</li>
+            <li>تجاوز مدى الأرقام يلتف بصمت بلا خطأ، و<code>Double</code> لا يصلح للمال.</li>
+            <li>التحويل بين الأنواع صريح دائمًا، والتضييق يقتطع البتات والعشري يُحذف ولا يُقرَّب.</li>
+            <li><code>==</code> يقارن القيمة، و<code>===</code> يقارن الهوية، والمصفوفات تحتاج <code>contentEquals</code>.</li>
+            <li>القسمة الصحيحة تقطع الناتج، وعند الشك في الأولوية استعمل الأقواس.</li>
+            <li>النطاقات لا تُنشئ عناصرها، و<code>typealias</code> اسم آخر دون أمان إضافي.</li>
+            <li>عقلية المهندس: اسأل أولًا هل يُحسم الخطأ وقت الترجمة أم وقت التشغيل، ثم تحقق بمثال نتيجته معروفة.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
