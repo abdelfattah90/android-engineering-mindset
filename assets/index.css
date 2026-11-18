@@ -1,0 +1,609 @@
+/* index.css — standalone styles for index.html (LTR). Independent from style.css. All classes use the ix- prefix. */
+
+:root {
+  --ix-bg: #f7f7f7;
+  --ix-surface: #ffffff;
+  --ix-surface-muted: #efefef;
+  --ix-text: #27344a;
+  --ix-text-muted: #5d6b82;
+  --ix-link: #4a6592;
+  --ix-border: #e4e4e4;
+  --ix-primary: #627da8;
+  --ix-primary-light: #84a2d2;
+  --ix-accent: #df4765;
+  --ix-highlight: #f0e68c;
+  --ix-highlight-soft: rgba(240, 230, 140, 0.4);
+  --ix-olive: #a8a562;
+  --ix-tag-core: #84a2d2;
+  --ix-tag-advanced: #df4765;
+  --ix-tag-supp: #f0e68c;
+  --ix-tag-supp-text: #4d4a1c;
+  --ix-tag-legacy: #a8a562;
+  --ix-tag-legacy-text: #1f1e07;
+  --ix-tag-situational: #d8d8d8;
+  --ix-tag-verify: #af4d90;
+  --ix-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ix-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --ix-radius: 5px;
+  --ix-shadow: 0 2px 10px rgba(39, 52, 74, 0.1);
+  --ix-width: 920px;
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 16px;
+}
+
+.ix-page,
+.ix-page * {
+  box-sizing: border-box;
+}
+
+.ix-page {
+  margin: 0;
+  background: var(--ix-bg);
+  color: var(--ix-text);
+  font: 16px/1.65 var(--ix-font);
+}
+
+.ix-page button,
+.ix-page input,
+.ix-page table {
+  font-family: inherit;
+}
+
+.ix-page a {
+  color: var(--ix-link);
+  text-decoration: none;
+}
+
+.ix-page a:hover {
+  text-decoration: underline;
+}
+
+.ix-page h2 {
+  font-size: 22px;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ix-page h3 {
+  font-size: 17px;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.ix-page code {
+  font-family: var(--ix-mono);
+  background: var(--ix-surface-muted);
+  border-radius: var(--ix-radius);
+  padding: 0 5px;
+  font-size: 0.9em;
+}
+
+.ix-page table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14.5px;
+}
+
+.ix-page th,
+.ix-page td {
+  border: 1px solid var(--ix-border);
+  padding: 6px 10px;
+  text-align: start;
+  vertical-align: top;
+}
+
+.ix-page th {
+  background: var(--ix-surface-muted);
+}
+
+.ix-page blockquote {
+  margin: 8px 0;
+  background: var(--ix-highlight-soft);
+  border-radius: var(--ix-radius);
+  padding: 8px 14px;
+}
+
+.ix-page details {
+  margin-top: 14px;
+  background: var(--ix-bg);
+  border: 1px solid var(--ix-border);
+  border-radius: var(--ix-radius);
+  padding: 8px 14px;
+}
+
+.ix-page details ul {
+  margin: 6px 0 2px;
+  padding-inline-start: 22px;
+}
+
+.ix-page summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ix-link);
+}
+
+.ix-container {
+  max-width: var(--ix-width);
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+.ix-title {
+  margin: 0 0 24px;
+  text-align: center;
+  color: var(--ix-accent);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.ix-table-wrap {
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+/* Cards */
+.ix-card,
+.ix-info {
+  background: var(--ix-surface);
+  border: 1px solid var(--ix-border);
+  border-radius: var(--ix-radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.ix-info h2 {
+  margin-bottom: 10px;
+  color: var(--ix-link);
+}
+
+.ix-info h3 {
+  margin-top: 18px;
+}
+
+.ix-info p,
+.ix-info li {
+  max-width: 78ch;
+}
+
+.ix-card>header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.ix-card h2 {
+  flex: 1;
+}
+
+.ix-card>.ix-progress {
+  margin: -2px 0 12px;
+}
+
+.ix-card--project {
+  border-inline-start: 4px solid var(--ix-accent);
+}
+
+.ix-card--project .ix-badge {
+  background: var(--ix-accent);
+}
+
+.ix-card--track .ix-badge {
+  background: var(--ix-olive);
+  color: var(--ix-tag-legacy-text);
+}
+
+.ix-card.is-collapsed>.ix-progress {
+  margin-bottom: 0;
+}
+
+.ix-card.is-collapsed>header {
+  margin-bottom: 4px;
+}
+
+.ix-card.is-collapsed>.ix-card__body {
+  display: none;
+}
+
+.ix-card__count {
+  font-size: 13px;
+  color: var(--ix-text-muted);
+  white-space: nowrap;
+}
+
+.ix-badge {
+  background: var(--ix-accent);
+  color: #fff;
+  border-radius: var(--ix-radius);
+  padding: 2px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ix-link {
+  font-size: 13px;
+  color: var(--ix-text-muted) !important;
+  border: 1px solid var(--ix-border);
+  border-radius: var(--ix-radius);
+  padding: 0 8px;
+}
+
+/* Parts and topics */
+.ix-part {
+  margin: 20px 0;
+}
+
+.ix-part>h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ix-part__num {
+  background: var(--ix-highlight);
+  color: #000;
+  border-radius: var(--ix-radius);
+  padding: 2px 8px;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.ix-meta {
+  margin: 4px 0;
+  color: var(--ix-text-muted);
+  font-size: 15px;
+}
+
+.ix-note {
+  background: var(--ix-surface-muted);
+  border-radius: var(--ix-radius);
+  padding: 6px 12px;
+  margin: 4px 0 12px;
+  font-size: 15px;
+}
+
+ul.ix-topics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ix-topic {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--ix-border);
+}
+
+.ix-topic:last-child {
+  border-bottom: 0;
+}
+
+.ix-topic input {
+  order: -1;
+  flex: none;
+  margin: 4px 0 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ix-primary);
+  cursor: pointer;
+}
+
+.ix-topic__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ix-topic--verify .ix-topic__text {
+  font-weight: 500;
+}
+
+.ix-subs {
+  margin: 3px 0 2px;
+  padding-inline-start: 18px;
+  font-size: 14.5px;
+  color: var(--ix-text-muted);
+}
+
+.ix-subs li {
+  margin: 1px 0;
+}
+
+.ix-topics .ix-ref {
+  font-size: 13.5px;
+  color: var(--ix-text-muted);
+  padding: 3px 4px;
+  margin-inline-start: 30px;
+}
+
+/* Tags */
+.ix-tag {
+  flex: none;
+  width: 104px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: var(--ix-radius);
+  line-height: 1.7;
+  margin-top: 3px;
+  padding: 2px 8px;
+  color: #fff;
+}
+
+.ix-tag--core {
+  background: var(--ix-tag-core);
+}
+
+.ix-tag--advanced {
+  background: var(--ix-tag-advanced);
+}
+
+.ix-tag--supplementary {
+  background: var(--ix-tag-supp);
+  color: var(--ix-tag-supp-text);
+}
+
+.ix-tag--legacy {
+  background: var(--ix-tag-legacy);
+  color: var(--ix-tag-legacy-text);
+}
+
+.ix-tag--situational {
+  background: var(--ix-tag-situational);
+  color: #000;
+}
+
+.ix-tag--verify {
+  background: var(--ix-tag-verify);
+}
+
+.ix-panel {
+  margin: 16px 0;
+  padding: 10px 14px;
+  border-radius: var(--ix-radius);
+  background: var(--ix-bg);
+  border: 1px solid var(--ix-border);
+}
+
+.ix-panel--checkpoint {
+  border-color: var(--ix-highlight);
+  background: var(--ix-highlight);
+}
+
+.ix-panel .ix-meta {
+  margin: 0 0 4px;
+  color: var(--ix-text);
+}
+
+/* Study path */
+.ix-path {
+  padding-inline-start: 0;
+  list-style: none;
+  counter-reset: ix-step;
+}
+
+.ix-path>li {
+  counter-increment: ix-step;
+  position: relative;
+  padding: 8px 0 8px 44px;
+  border-bottom: 1px solid var(--ix-border);
+}
+
+.ix-path>li::before {
+  content: counter(ix-step);
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--ix-radius);
+  background: var(--ix-primary-light);
+  color: #16233d;
+  text-align: center;
+  line-height: 28px;
+  font-weight: 700;
+}
+
+.ix-path span {
+  display: block;
+  color: var(--ix-text-muted);
+  font-size: 14.5px;
+}
+
+.ix-path b {
+  display: block;
+}
+
+.ix-path div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ix-path div a {
+  background: var(--ix-surface-muted);
+  border-radius: var(--ix-radius);
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+/* Progress and toolbar */
+.ix-progress {
+  height: 6px;
+  background: var(--ix-surface-muted);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ix-progress>i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--ix-primary);
+  transition: width 0.2s;
+}
+
+.ix-toggle,
+.ix-toolbar button {
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  color: var(--ix-link);
+  background: var(--ix-bg);
+  border: 1px solid var(--ix-border);
+  border-radius: var(--ix-radius);
+  padding: 1px 12px;
+  line-height: 1.8;
+}
+
+.ix-toggle:hover,
+.ix-toolbar button:hover {
+  background: var(--ix-surface-muted);
+}
+
+.ix-toolbar button[aria-pressed='true'] {
+  background: var(--ix-primary);
+  color: #fff;
+  border-color: var(--ix-primary);
+}
+
+.ix-toolbar {
+  position: relative;
+  top: 8px;
+  z-index: 20;
+  background: var(--ix-surface);
+  border: 1px solid var(--ix-border);
+  border-radius: var(--ix-radius);
+  padding: 8px 14px;
+  margin-bottom: 20px;
+  box-shadow: var(--ix-shadow);
+}
+
+.ix-toolbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.ix-toolbar__row+.ix-toolbar__row {
+  margin-top: 8px;
+}
+
+.ix-toolbar__row[hidden] {
+  display: none;
+}
+
+.ix-toolbar__progress {
+  flex: 1;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ix-toolbar__progress small {
+  color: var(--ix-text-muted);
+  font-size: 12.5px;
+}
+
+.ix-toolbar__label {
+  font-size: 13.5px;
+  color: var(--ix-text-muted);
+}
+
+.ix-toolbar__spacer {
+  flex: 1;
+}
+
+.ix-toolbar input[type='search'] {
+  font: inherit;
+  font-size: 14px;
+  flex: 0 1 200px;
+  min-width: 120px;
+  border: 1px solid var(--ix-border);
+  border-radius: var(--ix-radius);
+  padding: 1px 10px;
+  background: var(--ix-bg);
+  color: var(--ix-text);
+  line-height: 1.9;
+}
+
+.ix-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.ix-chip input {
+  accent-color: var(--ix-primary);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ix-chip .ix-tag {
+  width: auto;
+  margin-top: 0;
+  padding: 1px 10px;
+}
+
+@media (max-width: 600px) {
+  .ix-container {
+    padding: 14px 10px;
+  }
+
+  .ix-card,
+  .ix-info {
+    padding: 14px;
+  }
+
+  .ix-tag {
+    width: 84px;
+    font-size: 12px;
+  }
+
+  .ix-topic {
+    gap: 8px;
+  }
+
+  .ix-title {
+    font-size: 26px;
+  }
+}
+
+@media (min-width: 700px) {
+  html {
+    scroll-padding-top: 100px;
+  }
+}
+
+@media (max-width: 699px) {
+  .ix-toolbar {
+    position: static;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ix-progress>i {
+    transition: none;
+  }
+}
