@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#34a853" />
+    <title>Introduction to Kotlin | Android Engineering Mindset</title>
+    <link
+      rel="shortcut icon"
+      href="https://www.gstatic.com/devrel-devsite/prod/v579d635a54d6e1f40caad46ce407560c5106c8915e5ff7e6341f5b13eb245c5a/android/images/favicon.svg"
+    />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <div>
+          <span>Introduction to Kotlin</span>
+          <a href="../index.html">العودة إلى الخطة</a>
+        </div>
+        <h1>Introduction to Kotlin - مقدمة إلى Kotlin</h1>
+      </header>
+
+      <article>
+        <h2>Introduction to Kotlin</h2>
+        <p>Kotlin ليست مجرد Java بصياغة أقصر؛ إنها لغة صُممت لتقليل الأخطاء الشائعة، وتحسين وضوح الكود، وتسهيل تطوير الأنظمة الكبيرة دون التخلي عن النظام البيئي لـ Java. لفهم مكانتها في Android، سنبدأ بالمشكلات الهندسية التي دفعت إلى تصميمها، ثم نفكك خصائصها الأساسية: <code dir="ltr">concise syntax</code> و<code dir="ltr">null safety</code> و<code dir="ltr">Java interoperability</code> و<code dir="ltr">type inference</code>. بعد ذلك سنحدد أين تُنفَّذ Kotlin وكيف تختلف بيئة Android عن JVM، ثم نقارنها بـ Java على مستوى اللغة والتكامل و<code dir="ltr">runtime</code>. وأخيرًا سنفهم دورة إصدارات Kotlin ودور <code dir="ltr">K2 compiler</code>، لأن اختيار إصدار اللغة جزء من توافق منظومة البناء، وليس مجرد تغيير رقم في المشروع.</p>
+
+        <h3>1. What Kotlin is and the problems it was designed to solve</h3>
+        <h4>1.1 المشكلة</h4>
+        <p>قبل Kotlin، كان تطوير تطبيقات Android يعتمد بدرجة كبيرة على Java، وهي لغة <code dir="ltr">statically typed</code> وذات نظام بيئي واسع، لكنها تفرض على المطور كتابة قدر من الكود المتكرر، ولا تعبّر عن احتمالية <code dir="ltr">null</code> في نظام الأنواع بالطريقة التي يفعلها Kotlin.</p>
+        <p>المشكلة لم تكن أن Java عاجزة عن بناء تطبيقات موثوقة؛ بل أن بعض المخاطر والتكاليف كانت تُترك بدرجة أكبر لانضباط المطور والاختبارات.</p>
+        <p>لنفترض وجود تطبيق مصرفي يعرض بيانات حساب العميل. قد تصل البيانات من API دون قيمة للاسم المعروض، أو قد تُرجع مكتبة قديمة <code dir="ltr">null</code> رغم أن المستهلك يتوقع كائنًا صالحًا.</p>
+        <p>في Java التقليدية:</p>
+        <pre dir="ltr"><code>String customerName = account.getCustomer().getName();</code></pre>
+        <p>قد يتسبب أي عنصر وسيط يساوي <code dir="ltr">null</code> في <code dir="ltr">NullPointerException</code> وقت التشغيل.</p>
+        <p>كذلك، عند بناء نماذج البيانات، وتوصيل callbacks، وتعريف constructors وgetters وsetters، قد يتكرر عدد كبير من الأسطر التي لا تضيف منطقًا تجاريًا جديدًا.</p>
+        <p>كان المطلوب لغة تحقق عدة أهداف في الوقت نفسه:</p>
+        <ul>
+          <li>تقليل boilerplate دون التضحية بالـ static typing.</li>
+          <li>جعل حالات الخطأ الشائعة، وخصوصًا التعامل مع <code dir="ltr">null</code>، أوضح أثناء كتابة الكود ووقت compile.</li>
+          <li>المحافظة على القدرة على استخدام مكتبات Java الحالية.</li>
+          <li>تقديم لغة مناسبة لتطبيقات كبيرة يمكن تطويرها وصيانتها تدريجيًا.</li>
+          <li>توفير أسلوب برمجي أكثر تعبيرًا، مع دعم object-oriented وfunctional programming.</li>
+        </ul>
+        <p>بدأ تطوير Kotlin في JetBrains عام 2010، وأُعلن عنها مفتوحة المصدر عام 2012، ثم وصلت إلى الإصدار المستقر 1.0 في فبراير 2016. لم يكن الهدف إنشاء منصة تشغيل جديدة تنافس JVM، بل إنشاء لغة حديثة تستطيع الاستفادة من المنصات الموجودة والتكامل معها. <a href="https://kotlinlang.org/docs/faq.html">Kotlin FAQ</a></p>
+
+        <h4>1.2 كيف يعمل</h4>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>تعامل مع Kotlin باعتبارها لغة برمجة مستقلة ذات type system وcompiler خاصين بها، ويمكنها استهداف أكثر من منصة.</p>
+        <p>أي أن Kotlin تحدد كيف تكتب الكود وكيف تُفحص صحته، بينما تحدد المنصة المستهدفة كيف يُترجم الكود وكيف يُنفَّذ.</p>
+        <pre dir="ltr"><code>Kotlin Source Code
+       |
+       v
+Kotlin Compiler
+       |
+       +------ JVM target ------&gt; JVM Bytecode
+       |
+       +------ Android target --&gt; JVM Bytecode
+       |
+       +------ Native target ---&gt; Native Binary
+       |
+       +------ JS target -------&gt; JavaScript
+       |
+       +------ Wasm target -----&gt; WebAssembly</code></pre>
+        <p>هذا نموذج توضيحي للمسارات العامة؛ فطريقة البناء والتفاصيل الوسيطة تختلف حسب الـ target والـ build tools.</p>
+        <p>في Android تحديدًا، تستفيد Kotlin من توافقها مع Java وJVM bytecode. لا تحتاج إلى استبدال Android Runtime أو إنشاء runtime مستقل للتطبيق.</p>
+        <p>من المهم فهم الفرق بين <strong>لغة البرمجة</strong> و<strong>بيئة التنفيذ</strong>:</p>
+        <ul>
+          <li>Kotlin هي اللغة التي تكتب بها.</li>
+          <li>Kotlin Compiler هو المسؤول عن تحويل الكود والتحقق من صحته.</li>
+          <li>Android SDK يوفّر APIs التي تتعامل مع نظام Android.</li>
+          <li>Android Runtime (ART) هو بيئة تشغيل كود التطبيقات على أجهزة Android الحديثة.</li>
+        </ul>
+        <p>إذًا، Kotlin لا تمنح تطبيق Android صلاحيات إضافية، ولا تغيّر قواعد نظام التشغيل المتعلقة بالذاكرة أو العمليات أو threads لمجرد أنك استخدمتها بدل Java.</p>
+
+        <h4>1.3 مثال واقعي</h4>
+        <p>لنفترض أن تطبيق توصيل يحتاج إلى بناء نموذج يمثل حالة الطلب:</p>
+        <pre dir="ltr"><code>data class DeliveryStatus(
+    val orderId: String,
+    val driverName: String?,
+    val estimatedMinutes: Int,
+    val isDelivered: Boolean
+)</code></pre>
+        <p><code dir="ltr">data class</code> هي فئة مخصصة أساسًا لحمل البيانات، ويولّد لها Kotlin تلقائيًا وظائف شائعة مثل <code dir="ltr">equals()</code> و<code dir="ltr">hashCode()</code> و<code dir="ltr">toString()</code> و<code dir="ltr">copy()</code>.</p>
+        <p>وجود <code dir="ltr">String?</code> يعبّر مباشرة عن أن اسم السائق قد يكون غير متاح، بينما <code dir="ltr">orderId: String</code> يعبّر عن أن المعرّف يجب أن يكون غير فارغ وفق عقد Kotlin.</p>
+        <p>هذا التصميم لا يلغي الحاجة إلى validation؛ فقد يكون الاسم فارغًا كنص <code dir="ltr">""</code>، وقد تكون قيمة <code dir="ltr">estimatedMinutes</code> سالبة نتيجة خطأ في البيانات. لكنه يجعل بعض شروط العقد جزءًا من type system بدل أن تبقى مجرد اتفاق غير موثق بين المطورين.</p>
+
+        <h4>1.4 البدائل</h4>
+        <table>
+          <thead>
+            <tr><th>البديل</th><th>الميزة</th><th>الكلفة أو القيد</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Java</td><td>ناضجة، واسعة الانتشار، وتتكامل مع Android بالكامل</td><td>بعض المهام تتطلب boilerplate أكثر، والـ nullability ليست جزءًا أصيلًا من type system بالطريقة نفسها</td></tr>
+            <tr><td>Kotlin</td><td>concise syntax، null safety، وتكامل مباشر مع Java</td><td>تحتاج إلى فهم خصائص اللغة والـ compiler والتوافق بين إصدارات الأدوات</td></tr>
+            <tr><td>لغة أخرى مع Cross-platform framework</td><td>قد توفر نموذج تطوير موحدًا عبر المنصات</td><td>قد تختلف طريقة التكامل مع Android APIs والاعتماد على framework أو bridges حسب التقنية</td></tr>
+          </tbody>
+        </table>
+        <p>بالنسبة إلى Android الأصلي، توصي Google بالبدء باستخدام Kotlin، وتتبنى نهج Kotlin-first في تطوير المنصة. لكن هذا لا يعني أن Java أصبحت غير صالحة أو أن إعادة كتابة تطبيق Java قائم مطلوبة. <a href="https://developer.android.com/kotlin/first">Android Kotlin-first</a></p>
+
+        <h4>1.5 أين يفشل</h4>
+        <p><strong>الخطأ الأول: الاعتقاد بأن Kotlin تمنع جميع أخطاء runtime.</strong></p>
+        <p>قد يمنع type system أنواعًا كثيرة من الأخطاء، لكنه لا يضمن صحة منطق التطبيق أو البيانات القادمة من الشبكة أو سلامة التعامل مع الذاكرة والعمليات المتزامنة.</p>
+        <p>الأعراض قد تكون crash رغم أن جميع أنواع Kotlin تبدو صحيحة. عند التشخيص، افحص stack trace والـ input الفعلي وشروط العمل، ولا تفترض أن استخدام Kotlin يعني استحالة حدوث أخطاء.</p>
+        <p><strong>الخطأ الثاني: الاعتقاد بأن Kotlin تستبدل Android SDK أو ART.</strong></p>
+        <p>Kotlin لا توفر نسخة بديلة من <code dir="ltr">Activity</code> أو <code dir="ltr">Context</code> أو Android lifecycle. إنها تتيح كتابة الكود الذي يتعامل مع هذه المكونات.</p>
+        <p><strong>الخطأ الثالث: اعتبار تقليل عدد الأسطر دليلًا كافيًا على جودة التصميم.</strong></p>
+        <p>يمكن كتابة كود Kotlin قصير جدًا لكنه غامض أو هش، خصوصًا مع الاستخدام المفرط للـ extension functions والـ lambdas والـ implicit type inference.</p>
+        <p>عند مراجعة الكود، اسأل: هل يستطيع مهندس آخر فهم العقد والآثار الجانبية من دون تتبع عدد كبير من التعبيرات المختصرة؟</p>
+
+        <h4>1.6 قاعدة القرار</h4>
+        <p>استخدم Kotlin كلغة أساسية لمشروع Android جديد لأنها اللغة الموصى بها رسميًا وتوفر تكاملًا كاملًا مع Android APIs وJava libraries.</p>
+        <p>أما في مشروع Java قائم، فأدخل Kotlin تدريجيًا عندما تحقق فائدة واضحة، دون افتراض ضرورة إعادة كتابة النظام.</p>
+
+        <h3>2. Core language traits</h3>
+        <p>تقوم قوة Kotlin على مجموعة خصائص مترابطة، وليس على syntax مختصر فقط. فهم هذه الخصائص مهم لأنك ستستخدمها لاحقًا في تصميم Android Architecture Components وJetpack Compose، حيث تعتمد المكتبات الحديثة على type system وlambdas وخصوصًا nullability بشكل كبير.</p>
+
+        <h4>2.1 Concise Syntax</h4>
+        <p><strong>المشكلة</strong></p>
+        <p>في التطبيقات الكبيرة، يتكرر عدد كبير من الأسطر لأداء مهام متشابهة: إنشاء objects، وتعريف properties، وتوصيل parameters، وكتابة getters وsetters، والتعامل مع collections.</p>
+        <p>هذا التكرار له كلفة تتجاوز عدد الأسطر؛ فهو يزيد مساحة الكود التي تحتاج إلى مراجعة وتعديل واختبار.</p>
+        <p>لكن اختصار الكود وحده ليس هدفًا كافيًا. الاختصار الذي يخفي السلوك أو يجعل الكود أصعب في القراءة ليس تحسينًا هندسيًا.</p>
+        <p><strong>كيف يعمل</strong></p>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>Kotlin تجعل عددًا من الأنماط الشائعة تعبيرات مباشرة في اللغة، ثم يتولى compiler توليد التفاصيل اللازمة.</p>
+        <p>أهم مثال على ذلك هو <code dir="ltr">data class</code>، لكن توجد آليات أخرى مثل <code dir="ltr">primary constructor</code> و<code dir="ltr">properties</code> و<code dir="ltr">default parameters</code> و<code dir="ltr">expression body</code>.</p>
+        <p><strong>1. Primary Constructor</strong></p>
+        <p>هو constructor يُعرَّف مباشرة بعد اسم الـ class، ويمكن من خلاله تعريف properties وتهيئتها.</p>
+        <pre dir="ltr"><code>class BankAccount(
+    val accountId: String,
+    var availableBalance: Long
+)</code></pre>
+        <p>بدلًا من كتابة constructor منفصل وتعريف المتغيرات وإسناد القيم إليها، يجمع Kotlin هذه العمليات في declaration واحدة.</p>
+        <p><code dir="ltr">val</code> تعني أن المرجع لا يمكن إعادة إسناد قيمة جديدة إليه بعد تهيئته، بينما <code dir="ltr">var</code> تسمح بإعادة الإسناد.</p>
+        <p>لاحظ أن <code dir="ltr">val</code> لا تعني بالضرورة أن الكائن immutable؛ فإذا كانت القيمة تشير إلى <code dir="ltr">MutableList</code>، يمكن تعديل محتويات القائمة رغم عدم إمكانية إعادة إسناد المرجع.</p>
+        <p><strong>2. Properties</strong></p>
+        <p>الـ property هي عضو يمثل قيمة داخل class، ويوفر Kotlin آلية getter وsetter لها دون الحاجة إلى كتابة دوال الوصول يدويًا في الحالات العادية.</p>
+        <pre dir="ltr"><code>class Cart {
+    var itemCount: Int = 0
+        private set
+
+    fun addItem() {
+        itemCount++
+    }
+}</code></pre>
+        <p>هنا يستطيع الكود الخارجي قراءة <code dir="ltr">itemCount</code>، لكنه لا يستطيع تعديلها مباشرة لأن setter أصبح <code dir="ltr">private</code>.</p>
+        <p><strong>3. Expression Body</strong></p>
+        <p>تسمح Kotlin بكتابة دالة يكون جسمها تعبيرًا واحدًا، وتُستنتج قيمة الإرجاع من التعبير.</p>
+        <pre dir="ltr"><code>fun calculateTotal(
+    subtotal: Long,
+    deliveryFee: Long = 0
+) = subtotal + deliveryFee</code></pre>
+        <p><code dir="ltr">default parameter</code> هي قيمة افتراضية لمعلمة الدالة، تُستخدم عندما لا يمرر المستدعي قيمة لها.</p>
+        <p>يمكن استدعاء الدالة هكذا:</p>
+        <pre dir="ltr"><code>val total = calculateTotal(subtotal = 12500)</code></pre>
+        <p>فيكون <code dir="ltr">total</code> مساويًا لـ <code dir="ltr">12500</code> دون الحاجة إلى تمرير <code dir="ltr">deliveryFee</code>.</p>
+        <p>هذه الميزة تقلل الحاجة إلى تعريف overloads متعددة للدالة نفسها.</p>
+        <p><strong>4. Data Classes</strong></p>
+        <p>تساعد على تعريف نماذج البيانات دون كتابة وظائف المقارنة والنسخ والعرض يدويًا.</p>
+        <pre dir="ltr"><code>data class Money(
+    val amountMinor: Long,
+    val currency: String
+)</code></pre>
+        <p>يمكن الاستفادة من الوظائف المولدة:</p>
+        <pre dir="ltr"><code>val original = Money(15000, "EGP")
+
+val updated = original.copy(amountMinor = 18000)</code></pre>
+        <p>الـ <code dir="ltr">copy()</code> هنا تنشئ object جديدًا باستخدام قيم الكائن الأصلي، مع استبدال القيم التي حددتها.</p>
+        <p>لكنها لا تنشئ deep copy تلقائيًا؛ فإذا احتوت إحدى properties على قائمة mutable، فقد يشترك الكائنان في مرجع القائمة نفسها.</p>
+        <p>هذه نقطة مهمة في تطبيقات Android التي تعتمد على immutable state لتقليل المشكلات الناتجة عن مشاركة البيانات القابلة للتعديل.</p>
+        <p><strong>مثال واقعي</strong></p>
+        <p>في تطبيق تجارة إلكترونية، لديك بيانات المنتج:</p>
+        <pre dir="ltr"><code>data class Product(
+    val id: String,
+    val name: String,
+    val priceMinor: Long,
+    val discountMinor: Long = 0
+)</code></pre>
+        <p>يمكنك تمثيل المنتج وتحديث بعض بياناته دون كتابة constructors وgetters وcopy methods يدويًا.</p>
+        <p>الأهم أن تعريف البيانات أصبح واضحًا في موضع واحد، ويمكن لأي مهندس قراءة الـ class ومعرفة القيم التي يحتاج إليها المنتج.</p>
+        <p>لاحظ استخدام <code dir="ltr">priceMinor</code> بدلًا من <code dir="ltr">price</code>؛ تمثيل المبالغ المالية بوحدات العملة الصغرى كأعداد صحيحة يتجنب بعض مشكلات الدقة التي تظهر مع floating-point arithmetic.</p>
+        <p><strong>البدائل</strong></p>
+        <p>يمكنك كتابة classes تقليدية عندما تحتاج إلى تحكم خاص في الإنشاء أو السلوك، أو استخدام <code dir="ltr">data class</code> لنماذج البيانات، أو استخدام Java records عند العمل مع Java حديثة.</p>
+        <p>اختر <code dir="ltr">data class</code> عندما تكون الهوية الأساسية للكائن مرتبطة بقيم بياناته، وليس عندما يمثل الكائن كيانًا له هوية وسلوك معقدان ويجب أن يتحكم في دورة حياته وتعديلاته.</p>
+        <p><strong>أين يفشل</strong></p>
+        <p><strong>الخلط بين <code dir="ltr">val</code> وimmutability.</strong></p>
+        <pre dir="ltr"><code>val products = mutableListOf("Laptop")
+
+products.add("Phone")</code></pre>
+        <p>هذا الكود صحيح لأن المرجع <code dir="ltr">products</code> لم يتغير، لكن محتويات القائمة تغيرت.</p>
+        <p><strong>الإفراط في الاختصار.</strong></p>
+        <p>الدالة التالية صحيحة من ناحية اللغة:</p>
+        <pre dir="ltr"><code>fun processOrder(order: Order) =
+    if (order.isPaid) order.items.sumOf { it.price } else 0</code></pre>
+        <p>لكن عندما يصبح المنطق التجاري معقدًا، قد يكون جسم الدالة متعدد الأسطر أوضح، ويسهّل إضافة validation والتعامل مع الأخطاء.</p>
+        <p><strong>الاعتماد على <code dir="ltr">copy()</code> بوصفها Deep Copy.</strong></p>
+        <p>قد يؤدي ذلك إلى مشاركة mutable objects بين نسختين من نموذج البيانات، فتظهر تغييرات غير متوقعة في أكثر من مكان.</p>
+        <p><strong>قاعدة القرار</strong></p>
+        <p>استخدم concise syntax لتقليل الكود المتكرر، لا لإخفاء المنطق.</p>
+        <p>استخدم <code dir="ltr">data class</code> لتمثيل البيانات، و<code dir="ltr">val</code> افتراضيًا عندما لا تحتاج إلى إعادة إسناد المرجع، واحتفظ بالكود متعدد الأسطر عندما يجعل شروط العمل والآثار الجانبية أوضح.</p>
+
+        <h4>2.2 Null Safety</h4>
+        <p><strong>المشكلة</strong></p>
+        <p><code dir="ltr">null</code> تمثل غياب القيمة، لكنها قد تتحول إلى مشكلة عندما يتعامل الكود معها كما لو كانت object موجودة.</p>
+        <p>في Android، يمكن أن تظهر هذه الحالة في أماكن كثيرة:</p>
+        <ul>
+          <li>استجابة API لا تحتوي على بيانات اختيارية.</li>
+          <li>سجل قديم في قاعدة بيانات لا يحتوي على حقل معين.</li>
+          <li>Java API ترجع <code dir="ltr">null</code>.</li>
+          <li>بيانات المستخدم لم تُحمَّل بعد.</li>
+          <li>قيمة تعتمد على نتيجة عملية غير متزامنة.</li>
+        </ul>
+        <p>إذا لم يكن غياب القيمة ظاهرًا في عقد الدالة، فقد يكتب المستهلك كودًا يفترض وجود object ثم يفشل عند التشغيل.</p>
+        <p><strong>كيف يعمل</strong></p>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>تعامل Kotlin مع nullable وnon-nullable بوصفهما نوعين مختلفين.</p>
+        <pre dir="ltr"><code>val customerName: String = "Ahmed"
+val secondaryPhone: String? = null</code></pre>
+        <p><code dir="ltr">String</code> لا تسمح بإسناد <code dir="ltr">null</code> إليها من كود Kotlin العادي، بينما <code dir="ltr">String?</code> تسمح بذلك.</p>
+        <p>الرمز <code dir="ltr">?</code> جزء من نظام الأنواع نفسه، وليس مجرد تعليق توثيقي.</p>
+        <p>هذا يجعل compiler قادرًا على التحقق من طريقة التعامل مع القيمة قبل تشغيل البرنامج.</p>
+        <p><strong>الآلية الداخلية</strong></p>
+        <p>عندما يقرأ compiler تعبيرًا من نوع <code dir="ltr">String?</code>، لا يسمح باستدعاء العمليات الخاصة بـ <code dir="ltr">String</code> مباشرة دون التأكد من عدم وجود <code dir="ltr">null</code>.</p>
+        <p>مثلًا:</p>
+        <pre dir="ltr"><code>val phone: String? = getCustomerPhone()
+
+println(phone.length)</code></pre>
+        <p>هذا الكود لا يُقبل؛ لأن <code dir="ltr">phone</code> قد تكون <code dir="ltr">null</code>.</p>
+        <p>أمامك عدة طرق للتعامل مع الاحتمال.</p>
+        <p><strong>1. Safe-call operator <code dir="ltr">?.</code></strong></p>
+        <p>هو operator يسمح باستدعاء property أو function فقط عندما يكون المرجع غير فارغ.</p>
+        <pre dir="ltr"><code>val length = phone?.length</code></pre>
+        <p>إذا كانت <code dir="ltr">phone</code> تساوي <code dir="ltr">null</code>، تصبح النتيجة <code dir="ltr">null</code> أيضًا.</p>
+        <p>لاحظ أن نوع <code dir="ltr">length</code> سيكون <code dir="ltr">Int?</code>، لأن العملية نفسها يمكن أن تنتج قيمة غير موجودة.</p>
+        <p><strong>2. Elvis operator <code dir="ltr">?:</code></strong></p>
+        <p>هو operator يوفر قيمة بديلة عندما يكون التعبير الموجود على يساره <code dir="ltr">null</code>.</p>
+        <pre dir="ltr"><code>val length = phone?.length ?: 0</code></pre>
+        <p>النتيجة هنا دائمًا <code dir="ltr">Int</code>، وليس <code dir="ltr">Int?</code>.</p>
+        <p>يمكن استخدام <code dir="ltr">return</code> أو <code dir="ltr">throw</code> على يمين Elvis أيضًا:</p>
+        <pre dir="ltr"><code>fun getPhoneLength(phone: String?): Int {
+    val value = phone ?: return 0
+
+    return value.length
+}</code></pre>
+        <p><strong>3. Smart Cast</strong></p>
+        <p>هو قدرة compiler على استنتاج أن قيمة معينة أصبحت من نوع أكثر تحديدًا بعد فحص شرط منطقي.</p>
+        <pre dir="ltr"><code>fun displayPhone(phone: String?) {
+    if (phone != null) {
+        println(phone.length)
+    }
+}</code></pre>
+        <p>داخل الشرط، يعرف compiler أن <code dir="ltr">phone</code> غير فارغة، ولذلك يسمح باستدعاء <code dir="ltr">length</code> دون استخدام <code dir="ltr">?.</code>.</p>
+        <p>لا يحدث هذا في كل الحالات؛ يجب أن تكون القيمة مستقرة بما يكفي حتى يضمن compiler أن الفحص ما زال صالحًا عند استخدامها. لذلك قد يفشل smart cast مع <code dir="ltr">var</code> قابلة للتغيير أو property ذات getter غير مستقر.</p>
+        <p><strong>4. Not-null assertion <code dir="ltr">!!</code></strong></p>
+        <p>هو operator يجبر compiler على التعامل مع قيمة nullable باعتبارها non-nullable.</p>
+        <pre dir="ltr"><code>val length = phone!!.length</code></pre>
+        <p>إذا كانت القيمة <code dir="ltr">null</code>، يحدث <code dir="ltr">NullPointerException</code> وقت التشغيل.</p>
+        <p>إذن <code dir="ltr">!!</code> لا يحل المشكلة؛ إنه ينقل مسؤولية التأكد من صحة الافتراض إلى المطور.</p>
+        <p><a href="https://kotlinlang.org/docs/null-safety.html">Kotlin Null Safety</a></p>
+        <p><strong>مثال واقعي</strong></p>
+        <p>لنفترض أن تطبيق مراسلة يعرض اسم الطرف الآخر وصورته الشخصية. الصورة اختيارية، لكن بيانات الحساب الأساسية يجب أن تكون موجودة.</p>
+        <pre dir="ltr"><code>data class UserProfile(
+    val userId: String,
+    val displayName: String,
+    val avatarUrl: String?
+)</code></pre>
+        <p>يمكن التعامل مع الصورة دون اعتبار غيابها خطأ:</p>
+        <pre dir="ltr"><code>fun getAvatarLabel(profile: UserProfile): String {
+    return profile.avatarUrl?.let {
+        "Avatar available"
+    } ?: "Default avatar"
+}</code></pre>
+        <p>لكن يجب التمييز بين ثلاث حالات:</p>
+        <ol>
+          <li>لا يوجد <code dir="ltr">avatarUrl</code> أصلًا.</li>
+          <li>يوجد URL لكنه غير صالح.</li>
+          <li>يوجد URL صالح لكن تحميل الصورة فشل بسبب الشبكة.</li>
+        </ol>
+        <p><code dir="ltr">Null Safety</code> تعالج الحالة الأولى على مستوى أنواع Kotlin، لكنها لا تعالج الحالتين الأخريين تلقائيًا.</p>
+        <p>هذه نقطة مهمة: nullability تصف إمكانية غياب القيمة، ولا تصف صلاحيتها أو صحتها التجارية.</p>
+        <p><strong>البدائل</strong></p>
+        <p>في Java يمكن استخدام <code dir="ltr">Optional&lt;T&gt;</code> في بعض عقود APIs لتمثيل احتمالية غياب قيمة، أو الاعتماد على null checks والـ annotations.</p>
+        <p>أما Kotlin فتدمج nullable types في نظام الأنواع، ولذلك تكون المعالجة جزءًا من طريقة كتابة التعبيرات نفسها.</p>
+        <p>في تطبيق Android، لا يوجد سبب لفرض <code dir="ltr">Optional</code> على جميع النماذج المكتوبة بـ Kotlin؛ استخدم nullable types وفق عقد البيانات، مع الانتباه إلى توافقها مع Java libraries.</p>
+        <p><strong>أين يفشل</strong></p>
+        <p><strong>1. Null Safety لا تشمل Java تلقائيًا.</strong></p>
+        <p>هذه أهم نقطة في التكامل بين اللغتين.</p>
+        <p>قد تستدعي Kotlin دالة Java لا تحتوي على nullability annotations:</p>
+        <pre dir="ltr"><code>public String getDisplayName() {
+    return null;
+}</code></pre>
+        <p>عند استدعائها من Kotlin، قد يتعامل compiler مع نوع الإرجاع باعتباره <code dir="ltr">String!</code>.</p>
+        <p>يسمى هذا النوع <strong>Platform Type</strong>، وهو نوع مرن لا يحدد بوضوح هل القيمة nullable أم non-nullable.</p>
+        <p>يسمح ذلك بقدر أكبر من التوافق مع Java، لكنه يعني أن Kotlin لا تستطيع ضمان null safety عند هذا الحد الفاصل.</p>
+        <pre dir="ltr"><code>val name: String = javaUser.getDisplayName()</code></pre>
+        <p>قد يقبل compiler هذا الإسناد، لكن إذا أعادت Java قيمة <code dir="ltr">null</code> فقد يظهر <code dir="ltr">NullPointerException</code> وقت التشغيل.</p>
+        <p>الحل هو وضع nullability contract واضح في Java APIs باستخدام annotations المناسبة، أو تحويل القيمة إلى nullable type فور دخولها إلى Kotlin.</p>
+        <p><strong>2. استخدام <code dir="ltr">!!</code> كحل متكرر.</strong></p>
+        <p>إذا وجدت <code dir="ltr">!!</code> في مسار تنفيذ عادي مثل تحميل بيانات المستخدم أو معالجة استجابة API، فغالبًا توجد مشكلة في تصميم عقد البيانات أو طريقة التعامل مع الفشل.</p>
+        <p><strong>3. الخلط بين null وempty.</strong></p>
+        <p><code dir="ltr">null</code> و<code dir="ltr">""</code> حالتان مختلفتان:</p>
+        <pre dir="ltr"><code>val a: String? = null
+val b: String = ""</code></pre>
+        <p>قد تكون القيمة موجودة لكنها فارغة، وهذا لا يسبب مشكلة nullability، لكنه قد يظل خطأً تجاريًا.</p>
+        <p><strong>4. افتراض أن nullable يعني أن البيانات اختيارية تجاريًا.</strong></p>
+        <p>قد تسمح قاعدة البيانات بقيمة فارغة، لكن النظام التجاري لا يسمح بها. يجب ألا تجعل نوع البيانات وحده هو مصدر الحقيقة لقواعد العمل.</p>
+        <p>عند التشخيص، راجع النوع الذي أعلنته Kotlin، ومصدر القيمة، وأي Java boundary عبر stack trace ورسالة الخطأ. ويمكنك أيضًا فحص نوع القيمة الذي يعرضه Android Studio عند الوقوف على المتغير.</p>
+        <p><strong>قاعدة القرار</strong></p>
+        <p>استخدم <code dir="ltr">T?</code> عندما يكون غياب القيمة جزءًا صحيحًا من عقد البيانات، واستخدم <code dir="ltr">T</code> عندما يجب أن تكون القيمة موجودة.</p>
+        <p>عند عبور Java APIs، لا تفترض أن null safety محفوظة تلقائيًا؛ حوّل Platform Types إلى أنواع Kotlin صريحة عند حدود النظام.</p>
+
+        <h4>2.3 Java Interoperability</h4>
+        <p><strong>المشكلة</strong></p>
+        <p>Android لا يبدأ من Kotlin فقط.</p>
+        <p>تاريخيًا، كُتبت معظم Android APIs والمكتبات الأساسية باستخدام Java، كما توجد مشاريع إنتاجية ضخمة ومكتبات داخلية تعتمد عليها.</p>
+        <p>إذا كانت Kotlin تتطلب إعادة كتابة كل Java code أو استبدال جميع المكتبات، لكانت كلفة تبنيها مرتفعة جدًا.</p>
+        <p>كان من الضروري أن تكون اللغة الجديدة قابلة للاندماج داخل مشاريع Java القائمة، وأن تسمح باستخدام المكتبات الحالية دون طبقة تحويل منفصلة لكل مكتبة.</p>
+        <p><strong>كيف يعمل</strong></p>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>Kotlin/JVM وJava يستطيعان إنتاج JVM bytecode، وهو تمثيل وسيط للتعليمات البرمجية يمكن لبيئة JVM تنفيذه.</p>
+        <p>بالتالي، في مشروع Android أو JVM:</p>
+        <pre dir="ltr"><code>          Existing Java Code
+                  |
+                  v
+             Java Compiler
+                  |
+                  v
+             JVM Bytecode
+                  |
+                  |
+Kotlin Code       |
+      |           |
+      v           |
+Kotlin Compiler   |
+      |           |
+      v           |
+JVM Bytecode      |
+      |           |
+      +-----------+
+                  |
+                  v
+        Shared Application
+                  |
+                  v
+           Runtime</code></pre>
+        <p>هذا التوافق يسمح لك بالانتقال تدريجيًا من Java إلى Kotlin، أو الاستمرار في استخدام مكتبات Java داخل تطبيق مكتوب بالكامل تقريبًا بـ Kotlin.</p>
+        <p><strong>الآلية خطوة بخطوة</strong></p>
+        <p>عند استخدام Java class من Kotlin:</p>
+        <ol>
+          <li>يقرأ Kotlin compiler معلومات الـ class من Java bytecode أو source المتاح.</li>
+          <li>يتعرف على constructors وmethods وfields وtypes.</li>
+          <li>يسمح باستدعائها باستخدام syntax الخاصة بـ Kotlin.</li>
+          <li>يُنتج bytecode يمكن ربطه مع Java classes في مرحلة البناء.</li>
+        </ol>
+        <p>مثلًا، يمكن أن تكون لديك Java class:</p>
+        <pre dir="ltr"><code>public class PriceFormatter {
+    public String format(long amount) {
+        return amount + " EGP";
+    }
+}</code></pre>
+        <p>وتستدعيها من Kotlin مباشرة:</p>
+        <pre dir="ltr"><code>val formatter = PriceFormatter()
+val label = formatter.format(15000)</code></pre>
+        <p>لا تحتاج إلى adapter لمجرد أن إحدى اللغتين Java والأخرى Kotlin.</p>
+        <p><strong>الاتجاه العكسي: Java تستدعي Kotlin</strong></p>
+        <p>يمكن لملفات Java استدعاء Kotlin classes، لكن بعض خصائص Kotlin لا تظهر في Java بنفس الطريقة.</p>
+        <p>مثلًا، Kotlin تسمح بتعريف top-level function:</p>
+        <pre dir="ltr"><code>// CurrencyUtils.kt
+
+fun formatAmount(amount: Long): String {
+    return "$amount EGP"
+}</code></pre>
+        <p>تُتاح هذه الدالة لجهة Java من خلال class اصطناعية تمثل ملف Kotlin، ويكون اسمها الافتراضي مشتقًا من اسم الملف.</p>
+        <p>كما يمكن التحكم في طريقة ظهور بعض العناصر باستخدام annotations مثل:</p>
+        <ul>
+          <li><code dir="ltr">@JvmStatic</code></li>
+          <li><code dir="ltr">@JvmOverloads</code></li>
+          <li><code dir="ltr">@JvmField</code></li>
+          <li><code dir="ltr">@JvmName</code></li>
+        </ul>
+        <p>مثلًا:</p>
+        <pre dir="ltr"><code>@JvmOverloads
+fun formatAmount(
+    amount: Long,
+    currency: String = "EGP"
+): String {
+    return "$amount $currency"
+}</code></pre>
+        <p>تساعد <code dir="ltr">@JvmOverloads</code> على توليد overloads مناسبة كي يستطيع Java استدعاء الدالة باستخدام عدد أقل من المعلمات.</p>
+        <p>وهناك فرق مهم آخر: عند استدعاء Java لكود Kotlin، يمكن لـ Java تمرير <code dir="ltr">null</code> إلى parameter معلن في Kotlin على أنه non-nullable؛ لذلك يولّد Kotlin compiler runtime checks عند حدود الاستدعاءات المناسبة، لمنع استمرار القيمة الفارغة إلى داخل الكود الذي يفترض أنها غير فارغة.</p>
+        <p>هذه checks لا تعني أن جميع Java/Kotlin boundaries أصبحت آمنة تلقائيًا، لكنها تقلل مساحة انتشار الخطأ. <a href="https://kotlinlang.org/docs/java-interop.html">Calling Java from Kotlin</a></p>
+        <p><strong>مثال واقعي</strong></p>
+        <p>لنفترض أن تطبيقًا مصرفيًا يحتوي على مكتبة Java داخلية مسؤولة عن تشفير بعض البيانات.</p>
+        <p>بدل إعادة كتابة المكتبة، يمكنك استدعاء API مباشرة:</p>
+        <pre dir="ltr"><code>class SecureTokenRepository(
+    private val encryptor: LegacyJavaEncryptor
+) {
+    fun createToken(value: String): String {
+        return encryptor.encrypt(value)
+    }
+}</code></pre>
+        <p>تستطيع بناء Repository جديد باستخدام Kotlin والاستفادة من المكتبة القديمة، دون تغيير تنفيذها.</p>
+        <p>هذا يسمح بترحيل المشروع تدريجيًا:</p>
+        <pre dir="ltr"><code>Legacy Java Modules
+        |
+        v
+Java APIs / Libraries
+        |
+        v
+Kotlin Integration Layer
+        |
+        v
+New Kotlin Features
+        |
+        v
+Android Application</code></pre>
+        <p>يمكنك كذلك الاحتفاظ بالـ Java APIs التي تعتمد عليها أنظمة أخرى، وإضافة Kotlin implementations داخل المشروع نفسه.</p>
+        <p><strong>البدائل</strong></p>
+        <p>هناك ثلاثة أساليب عملية للتعامل مع مشروع يعتمد على Java:</p>
+        <ul>
+          <li>الاستمرار في Java عندما تكون التكلفة والفائدة لا تبرران التغيير.</li>
+          <li>استخدام Kotlin تدريجيًا مع بقاء Java libraries والـ modules القديمة.</li>
+          <li>إعادة كتابة وحدات محددة بـ Kotlin عندما تحتاج إلى تبسيطها أو تطويرها بشكل مستمر.</li>
+        </ul>
+        <p>لا يتطلب أي من هذه الخيارات أن يكون المشروع كله بلغة واحدة.</p>
+        <p><strong>أين يفشل</strong></p>
+        <p><strong>1. افتراض أن التكامل يعني تطابق اللغتين.</strong></p>
+        <p>هناك اختلافات في طريقة تمثيل properties وtop-level functions وdefault parameters وextension functions.</p>
+        <p>مثلًا، extension function في Kotlin لا تتحول إلى instance method حقيقية داخل Java class التي توسعها؛ بل تُمثّل عادةً كدالة static تتلقى الـ receiver كمعلمة.</p>
+        <p>لذلك لا تفترض أن كل syntax في Kotlin سيكون متاحًا بنفس الشكل لمستهلك Java.</p>
+        <p><strong>2. إهمال nullability annotations.</strong></p>
+        <p>إذا كانت Java APIs لا تصرح بوضوح عن nullability، قد تظهر Platform Types وتسمح بتمرير قيم تسبب أخطاء runtime.</p>
+        <p><strong>3. تغيير API تستخدمه Java دون مراجعة توافقه.</strong></p>
+        <p>قد يؤدي تعديل Kotlin class إلى تغيير شكل الـ bytecode أو الـ signatures التي تعتمد عليها Java callers.</p>
+        <p>خصوصًا عند استخدام:</p>
+        <ul>
+          <li>Top-level declarations.</li>
+          <li>Default parameters.</li>
+          <li>Properties.</li>
+          <li>Companion objects.</li>
+          <li>Generic types.</li>
+        </ul>
+        <p>راجع الـ generated API أو استخدم annotations المناسبة عندما تكون المكتبة مصممة ليستهلكها كود Java أيضًا.</p>
+        <p><strong>4. نسيان Kotlin Standard Library.</strong></p>
+        <p>هي مكتبة توفر الوظائف الأساسية التي تعتمد عليها برامج Kotlin، مثل collections functions وبعض الـ utility APIs.</p>
+        <p>تحتاج تطبيقات Kotlin/JVM عادةً إلى تضمين المكتبة المناسبة ضمن dependencies حتى تعمل أجزاء Kotlin التي تعتمد عليها.</p>
+        <p><strong>قاعدة القرار</strong></p>
+        <p>عامل Java وKotlin على أنهما لغتان يمكنهما المشاركة في النظام نفسه، وليس مشروعين منفصلين.</p>
+        <p>عند تصميم Kotlin APIs مخصصة لكي تستدعيها Java code، راجع شكل الـ generated bytecode وannotations والـ nullability، ولا تعتمد على أن جميع خصائص Kotlin ستظهر في Java تلقائيًا.</p>
+
+        <h4>2.4 Type Inference</h4>
+        <p><strong>المشكلة</strong></p>
+        <p>في لغة ذات static typing، تحتاج المتغيرات والمعلمات وقيم الإرجاع إلى أنواع محددة.</p>
+        <p>لكن كتابة النوع في كل تعبير عندما يكون واضحًا من السياق تنتج تكرارًا لا يضيف كثيرًا من المعلومات.</p>
+        <p>في الوقت نفسه، التخلص من الأنواع تمامًا سيؤدي إلى فقدان جزء مهم من الأمان الذي يوفره compiler.</p>
+        <p>المطلوب هو الاحتفاظ بـ static typing، مع السماح للغة باستنتاج النوع عندما تكون الأدلة كافية.</p>
+        <p><strong>كيف يعمل</strong></p>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>Type Inference هي قدرة compiler على استنتاج النوع من القيم والتعبيرات والسياق، بدل إجبارك على كتابته صراحةً في كل مرة.</p>
+        <p>لا تعني أن Kotlin لغة dynamically typed.</p>
+        <p>انظر إلى المثال:</p>
+        <pre dir="ltr"><code>val orderCount = 15
+val totalAmount = 24500L
+val currency = "EGP"</code></pre>
+        <p>الـ compiler يستنتج الأنواع التالية:</p>
+        <pre dir="ltr"><code>orderCount   -&gt; Int
+totalAmount  -&gt; Long
+currency     -&gt; String</code></pre>
+        <p>تظل الأنواع ثابتة بعد انتهاء compilation.</p>
+        <p>لا يمكن مثلًا إسناد <code dir="ltr">String</code> إلى <code dir="ltr">orderCount</code>:</p>
+        <pre dir="ltr"><code>orderCount = "Fifteen"</code></pre>
+        <p>وهناك مشكلة أخرى في هذا المثال: <code dir="ltr">orderCount</code> معرّف باستخدام <code dir="ltr">val</code>، ولذلك لا يمكن إعادة إسناد أي قيمة جديدة له أصلًا.</p>
+        <p><strong>الآلية الداخلية</strong></p>
+        <p>يحلل compiler التعبير ويستخرج المعلومات المتاحة عن نوع القيمة، ثم يستخدمها للتحقق من بقية العمليات.</p>
+        <p>كما يمكنه استنتاج أنواع generic arguments في حالات كثيرة.</p>
+        <pre dir="ltr"><code>val prices = listOf(15000L, 22000L, 31000L)</code></pre>
+        <p>يستنتج أن النوع هو:</p>
+        <pre dir="ltr"><code>List&lt;Long&gt;</code></pre>
+        <p>ويمكن أيضًا استنتاج نوع إرجاع دالة من expression body:</p>
+        <pre dir="ltr"><code>fun calculateDiscount(
+    price: Long,
+    percentage: Double
+) = (price * percentage / 100).toLong()</code></pre>
+        <p>نوع الإرجاع هنا <code dir="ltr">Long</code>.</p>
+        <p>لكن يجب أن تعرف أن inference له حدود؛ فمثلًا، الدوال ذات block body تحتاج عادةً إلى تحديد return type صراحةً:</p>
+        <pre dir="ltr"><code>fun calculateDiscount(
+    price: Long,
+    percentage: Double
+): Long {
+    return (price * percentage / 100).toLong()
+}</code></pre>
+        <p>هذا ليس تناقضًا، بل اختلاف في قواعد استنتاج أنواع الدوال.</p>
+        <p>يستخدم compiler أيضًا المعلومات الناتجة عن شروط التنفيذ، ويمكن أن يستفيد منها في smart casts وgeneric type inference.</p>
+        <p><a href="https://kotlinlang.org/docs/type-inference.html">Kotlin Type Inference</a></p>
+        <p><strong>مثال واقعي</strong></p>
+        <p>لنفترض أن تطبيقًا يعرض قائمة المدفوعات التي استعادها Repository:</p>
+        <pre dir="ltr"><code>val payments = paymentRepository.getPayments()</code></pre>
+        <p>إذا كان return type الخاص بالدالة هو:</p>
+        <pre dir="ltr"><code>fun getPayments(): List&lt;Payment&gt;</code></pre>
+        <p>فلا تحتاج إلى تكرار النوع عند إنشاء المتغير.</p>
+        <p>يستطيع Android Studio أيضًا استخدام المعلومات المستنتجة لإظهار الدوال والـ properties المتاحة وإكمال الكود والتحقق من النوع أثناء الكتابة.</p>
+        <p>لكن عند تعريف API عامة داخل Repository، يكون توضيح النوع غالبًا أفضل:</p>
+        <pre dir="ltr"><code>fun getPayments(): List&lt;Payment&gt; {
+    // ...
+}</code></pre>
+        <p>لأن return type جزء من العقد الذي تعتمده الطبقات الأخرى.</p>
+        <p><strong>البدائل</strong></p>
+        <p>يمكنك استخدام explicit type declarations في كل مكان، وهو أسلوب يوفر وضوحًا أكبر في بعض السياقات، لكنه يزيد التكرار.</p>
+        <p>ويمكنك أيضًا الاعتماد على inference محليًا، مع الاحتفاظ بتحديد الأنواع في حدود الدوال العامة والعقود المعمارية.</p>
+        <p>هذا المزيج غالبًا هو الأنسب لمشاريع Android المتوسطة والكبيرة.</p>
+        <p><strong>أين يفشل</strong></p>
+        <p><strong>1. الاعتقاد أن غياب النوع يعني غياب static typing.</strong></p>
+        <pre dir="ltr"><code>val amount = 500L</code></pre>
+        <p>النوع معروف للـ compiler، حتى لو لم تكتبه.</p>
+        <p><strong>2. إنشاء تعبيرات معقدة يصعب معرفة نوعها.</strong></p>
+        <p>خصوصًا عند استخدام generics وlambdas وnested collection operations.</p>
+        <pre dir="ltr"><code>val result = orders
+    .filter { it.isPaid }
+    .groupBy { it.customerId }
+    .mapValues { (_, values) -&gt; values.sumOf { it.total } }</code></pre>
+        <p>إذا أصبح النوع غير واضح أثناء القراءة أو debugging، أضف annotation صريحة أو قسّم التعبير إلى متغيرات بأسماء ذات معنى.</p>
+        <p><strong>3. ترك الأنواع غامضة عند حدود Architecture.</strong></p>
+        <p>في الأنظمة متعددة الطبقات، يجب أن يكون العقد بين Repository وViewModel وUI مفهومًا ومستقرًا.</p>
+        <p>لا تجعل سهولة inference سببًا لعدم توضيح الأنواع التي تعتمد عليها طبقات متعددة.</p>
+        <p><strong>قاعدة القرار</strong></p>
+        <p>استخدم inference عندما يكون النوع واضحًا محليًا، واكتب الأنواع صراحةً عندما يكون ذلك مهمًا لفهم API أو الحفاظ على وضوح الـ architecture.</p>
+
+        <h3>3. Where Kotlin runs</h3>
+        <h4>3.1 المشكلة</h4>
+        <p>عندما طُورت Kotlin، لم يكن الهدف حصرها في Android أو ربطها بنظام تشغيل واحد.</p>
+        <p>المشكلة الهندسية التي تحاول معالجتها هنا هي تكرار كتابة نفس المنطق في تطبيقات تعمل على منصات مختلفة.</p>
+        <p>لنفترض أن شركة تملك:</p>
+        <ul>
+          <li>تطبيق Android.</li>
+          <li>تطبيق iOS.</li>
+          <li>Backend مسؤولًا عن المصادقة وتسعير المنتجات.</li>
+          <li>تطبيق Web لإدارة العمليات.</li>
+        </ul>
+        <p>إذا كان لكل منصة تنفيذ مستقل لقواعد العمل، فقد تظهر اختلافات تدريجية في حساب الأسعار والتحقق من المدخلات والتعامل مع الحالات الاستثنائية.</p>
+        <p>من جهة أخرى، استخدام كود واحد بالكامل على كل المنصات ليس ممكنًا دائمًا؛ لأن كل منصة لها APIs وبيئة تشغيل وتجربة استخدام مختلفة.</p>
+        <p>Kotlin تقدم خيارات مختلفة بحسب مقدار الكود الذي تريد مشاركته.</p>
+
+        <h4>3.2 كيف يعمل</h4>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>لا تفكر في Kotlin على أنها لغة تعمل داخل JVM دائمًا.</p>
+        <p>فكّر فيها على أنها لغة لها Compiler قادر على استهداف بيئات تنفيذ مختلفة، ولكل بيئة ناتج وطريقة تشغيل مناسبة.</p>
+        <p>أهم البيئات التي ينبغي أن تعرفها:</p>
+        <p><strong>أولًا: Kotlin/JVM</strong></p>
+        <p>JVM هي اختصار Java Virtual Machine، وهي بيئة تشغيل تنفذ JVM bytecode وتوفر خدمات مثل إدارة الذاكرة وتنفيذ التعليمات وإدارة الكائنات.</p>
+        <p>عندما تستهدف Kotlin الـ JVM:</p>
+        <pre dir="ltr"><code>Kotlin Source
+      |
+      v
+Kotlin Compiler
+      |
+      v
+JVM Bytecode (.class)
+      |
+      v
+JVM
+      |
+      v
+Running Application</code></pre>
+        <p>يمكن استخدام Kotlin في الأنظمة التي تعتمد على Java ecosystem، بما فيها المكتبات والأدوات والأطر البرمجية المبنية حول JVM.</p>
+        <p><strong>ثانيًا: Android</strong></p>
+        <p>Android حالة مختلفة قليلًا عن تشغيل Kotlin على خادم JVM.</p>
+        <p>في Android، تستهدف Kotlin بيئة متوافقة مع JVM bytecode، لكن التطبيق لا يعمل على JVM التقليدية.</p>
+        <p>عملية البناء تكون بصورة مبسطة:</p>
+        <pre dir="ltr"><code>Kotlin Source (.kt)        Java Source (.java)
+        |                          |
+        v                          v
+ Kotlin Compiler              Java Compiler
+        |                          |
+        +------------+-------------+
+                     |
+                     v
+              JVM Bytecode
+                (.class)
+                     |
+                     v
+                    D8
+                     |
+                     v
+              DEX Bytecode
+                (.dex)
+                     |
+                     v
+              Android Runtime
+                  (ART)
+                     |
+                     v
+              Android Process</code></pre>
+        <p><code dir="ltr">D8</code> هو compiler ضمن Android Build Tools يحوّل Java bytecode إلى DEX bytecode المناسب لأجهزة Android.</p>
+        <p><code dir="ltr">DEX</code> هو تنسيق bytecode مصمم خصيصًا لتطبيقات Android، مع مراعاة متطلبات التشغيل واستهلاك الذاكرة.</p>
+        <p><code dir="ltr">ART</code> هو Android Runtime الذي ينفذ ملفات DEX ويدير خدمات مثل Garbage Collection وJIT وAOT compilation.</p>
+        <p>هذه تفاصيل مهمة جدًا؛ لأن Kotlin compiler ليس هو المسؤول وحده عن إنتاج الملف النهائي الذي يعمل على الجهاز. <a href="https://source.android.com/docs/core/runtime">Android Runtime</a></p>
+        <p><strong>ثالثًا: Server-side Kotlin</strong></p>
+        <p>يمكن تشغيل Kotlin على الخوادم باستخدام JVM.</p>
+        <p>مثلًا، تستطيع بناء Backend لتطبيق تجارة إلكترونية باستخدام Kotlin، مع الاستفادة من مكتبات Java الموجودة في النظام البيئي نفسه.</p>
+        <pre dir="ltr"><code>Android Application
+        |
+        | HTTPS
+        v
+Kotlin Backend
+        |
+        v
+Business Logic
+        |
+        +------ Database
+        |
+        +------ Cache
+        |
+        +------ External Services</code></pre>
+        <p>الميزة هنا أنك تستخدم اللغة نفسها في تطبيق Android والخادم، ويمكنك مشاركة بعض نماذج البيانات وقواعد التحقق والمكتبات.</p>
+        <p>لكن تشغيل Kotlin على Backend لا يعني أن التطبيق والخادم يشتركان تلقائيًا في نفس runtime؛ فكل منهما يعمل في بيئة مستقلة.</p>
+        <p><strong>رابعًا: Kotlin Multiplatform (KMP)</strong></p>
+        <p><code dir="ltr">Kotlin Multiplatform</code> هي تقنية تسمح بمشاركة كود Kotlin بين منصات مختلفة، مع الاحتفاظ بإمكانية استخدام APIs الأصلية لكل منصة.</p>
+        <p>الفكرة الأساسية هي فصل المنطق القابل للمشاركة عن التفاصيل الخاصة بكل منصة.</p>
+        <p>مثلًا، يمكن مشاركة:</p>
+        <ul>
+          <li>Business rules.</li>
+          <li>Data models.</li>
+          <li>Validation.</li>
+          <li>Networking.</li>
+          <li>أجزاء من Data Layer.</li>
+        </ul>
+        <p>مع الاحتفاظ بواجهة Android مكتوبة بـ Jetpack Compose وواجهة iOS مكتوبة بـ SwiftUI.</p>
+        <pre dir="ltr"><code>              Shared Kotlin Code
+                     |
+          +----------+----------+
+          |          |          |
+          v          v          v
+       Android      iOS       Server
+       Target       Target    Target
+          |          |          |
+          v          v          v
+       Android    Native       JVM
+       Runtime    Binary      Runtime
+          |          |          |
+          v          v          v
+       Compose    SwiftUI    Backend UI/API
+       / Native   / UIKit</code></pre>
+        <p>تحتوي مشاريع KMP على <code dir="ltr">source sets</code>، وهي مجموعات من ملفات المصدر والتبعيات التي تُبنى لأهداف محددة.</p>
+        <p>يمكن وضع الكود المشترك في <code dir="ltr">commonMain</code>، والكود الخاص بالمنصة في مجموعات مثل <code dir="ltr">androidMain</code> و<code dir="ltr">iosMain</code>.</p>
+        <p>عند البناء، يُترجم الكود المشترك لكل target معلن، مع تطبيق الاختلافات الخاصة بالمنصة عند الحاجة.</p>
+        <p>في iOS مثلًا، يمكن استخدام Kotlin/Native لإنتاج native binaries بدل الاعتماد على JVM.</p>
+        <p><strong>Kotlin Multiplatform ليست هي Compose Multiplatform.</strong></p>
+        <ul>
+          <li>KMP تهتم بمشاركة الكود بين المنصات، سواء كان Business Logic أو غيره.</li>
+          <li>Compose Multiplatform هو إطار واجهات يسمح بمشاركة UI أيضًا عبر المنصات المدعومة.</li>
+        </ul>
+        <p>يمكن استخدام KMP مع واجهات أصلية مستقلة تمامًا، ولا تحتاج إلى مشاركة UI حتى تستفيد منه. <a href="https://kotlinlang.org/docs/multiplatform.html">Kotlin Multiplatform</a></p>
+
+        <h4>3.3 مثال واقعي</h4>
+        <p>لنفترض أن لديك تطبيقًا مصرفيًا يعمل على Android وiOS.</p>
+        <p>تحتاج المنصتان إلى تنفيذ القواعد التالية:</p>
+        <ul>
+          <li>حساب رسوم التحويل.</li>
+          <li>التحقق من حدود المبالغ.</li>
+          <li>تحليل حالة العملية المصرفية.</li>
+          <li>تطبيق قواعد التحقق من بيانات التحويل.</li>
+        </ul>
+        <p>إذا كانت هذه القواعد متطابقة بين المنصتين، يمكن وضعها في shared Kotlin module.</p>
+        <pre dir="ltr"><code>data class TransferRequest(
+    val amountMinor: Long,
+    val availableBalanceMinor: Long
+)
+
+fun validateTransfer(
+    request: TransferRequest
+): Boolean {
+    return request.amountMinor &gt; 0 &amp;&amp;
+        request.amountMinor &lt;= request.availableBalanceMinor
+}</code></pre>
+        <p>يمكن استخدام هذه القاعدة في Android وiOS بدل إعادة تنفيذها مرتين.</p>
+        <p>لكن لا ينبغي أن تكون هذه الوظيفة وحدها هي المرجع النهائي لاعتماد تحويل مالي حقيقي؛ فالـ Backend يجب أن يتحقق من الرصيد والصلاحيات والقواعد الأمنية بنفسه، لأن تطبيق العميل يعمل في بيئة لا تتحكم فيها الشركة.</p>
+        <p>هذا مثال على قرار هندسي مهم: مشاركة منطق التطبيق لتحسين الاتساق لا تعني نقل مسؤولية الأمان من الخادم إلى العميل.</p>
+
+        <h4>3.4 البدائل</h4>
+        <table>
+          <thead>
+            <tr><th>الخيار</th><th>بيئة التشغيل</th><th>متى يكون مناسبًا؟</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Kotlin/JVM</td><td>JVM</td><td>تطبيقات وخدمات Server-side</td></tr>
+            <tr><td>Kotlin على Android</td><td>ART عبر DEX</td><td>تطبيقات Android الأصلية</td></tr>
+            <tr><td>Kotlin/Native</td><td>Native Runtime</td><td>منصات مثل iOS وبعض الأهداف الأصلية</td></tr>
+            <tr><td>Kotlin/Multiplatform</td><td>حسب target</td><td>مشاركة الكود بين Android وiOS وغيرها</td></tr>
+          </tbody>
+        </table>
+        <p>يمكن أيضًا استخدام Java في Android وJVM، أو استخدام لغة أخرى عند بناء الأنظمة متعددة المنصات.</p>
+        <p>الاختيار لا يعتمد على عدد المنصات فقط؛ بل على نوع الكود الذي تريد مشاركته، ومتطلبات الأداء، ودرجة اعتمادك على APIs الأصلية.</p>
+
+        <h4>3.5 أين يفشل</h4>
+        <p><strong>1. الاعتقاد أن KMP تعني Write Once, Run Everywhere دون قيود.</strong></p>
+        <p>قد تعتمد مكتبة على Android API لا توجد على iOS.</p>
+        <p>عند نقلها إلى <code dir="ltr">commonMain</code>، ستواجه مشكلة لأن الكود المشترك لا يستطيع الاعتماد على API متاحة لهدف واحد فقط.</p>
+        <p>الحل هو فصل واجهة الاستخدام العامة عن التنفيذ الخاص بكل منصة، وعدم وضع platform-specific dependencies في الكود المشترك دون مبرر.</p>
+        <p><strong>2. الخلط بين KMP وCompose Multiplatform.</strong></p>
+        <p>قد يحتاج المشروع إلى مشاركة Business Logic فقط، بينما تكون الواجهة أصلية لكل نظام.</p>
+        <p>إدخال UI framework مشترك في هذه الحالة قد يضيف كلفة لا تحتاج إليها.</p>
+        <p><strong>3. الاعتقاد أن Kotlin تعمل بنفس الطريقة في كل target.</strong></p>
+        <p>هناك اختلافات في المكتبات المتاحة وآليات إدارة الذاكرة والتكامل مع النظام المستهدف.</p>
+        <p>الكود الذي يعمل على JVM قد يعتمد على APIs غير موجودة في Kotlin/Native أو غير متاحة في <code dir="ltr">commonMain</code>.</p>
+        <p><strong>4. الاعتقاد أن مشاركة الكود تضمن التطابق التشغيلي.</strong></p>
+        <p>حتى لو كانت قواعد العمل مشتركة، تظل هناك اختلافات محتملة في الشبكة والتخزين والواجهات ودورة الحياة وإدارة الموارد.</p>
+
+        <h4>3.6 قاعدة القرار</h4>
+        <p>في Android، ركّز أولًا على فهم Kotlin/JVM وسلسلة التنفيذ عبر DEX وART.</p>
+        <p>انتقل إلى KMP عندما يكون لديك سبب واضح لمشاركة منطق بين منصات متعددة، وابدأ بالمكونات المستقلة عن النظام بدل محاولة مشاركة التطبيق بالكامل من البداية.</p>
+
+        <h3>4. Kotlin and Java compared</h3>
+        <h4>4.1 المشكلة</h4>
+        <p>من الأخطاء الشائعة عند تعلم Kotlin اعتبارها Java مختصرة، أو الاعتقاد بأن تعلم Java لم يعد مفيدًا بعد الانتقال إلى Kotlin.</p>
+        <p>كلا التصورين غير دقيق.</p>
+        <p>Kotlin وJava لغتان مختلفتان، لكنهما تتكاملان بشدة داخل JVM ecosystem، ولذلك يحتاج مهندس Android إلى فهم نقاط التشابه والاختلاف بينهما.</p>
+        <p>المقارنة الصحيحة يجب أن تفصل بين ثلاثة مستويات:</p>
+        <ol>
+          <li>Syntax وLanguage Features.</li>
+          <li>Interoperability.</li>
+          <li>Runtime وExecution.</li>
+        </ol>
+
+        <h4>4.2 كيف يعمل</h4>
+        <p><strong>أولًا: Syntax</strong></p>
+        <p>لنفترض أننا نريد تمثيل عملية دفع.</p>
+        <p>باستخدام Java الحديثة التي تدعم <code dir="ltr">record</code>:</p>
+        <pre dir="ltr"><code>public record Payment(
+    String id,
+    long amountMinor
+) {}</code></pre>
+        <p>وباستخدام Kotlin:</p>
+        <pre dir="ltr"><code>data class Payment(
+    val id: String,
+    val amountMinor: Long
+)</code></pre>
+        <p>كلاهما يهدف إلى تقليل الكود المتكرر عند تعريف نموذج بيانات، لكن لكل منهما قواعد وخصائص مختلفة.</p>
+        <p>في Kotlin ستلاحظ الاختلافات التالية:</p>
+        <p><strong>1. Variable Declaration</strong></p>
+        <p>في Kotlin:</p>
+        <pre dir="ltr"><code>val orderId = "ORD-105"
+var status = "PENDING"</code></pre>
+        <p>أما في Java:</p>
+        <pre dir="ltr"><code>final String orderId = "ORD-105";
+String status = "PENDING";</code></pre>
+        <p><code dir="ltr">val</code> تقابل مفهوم reference غير القابل لإعادة الإسناد، بينما <code dir="ltr">var</code> تسمح بإعادة الإسناد.</p>
+        <p>Java لديها أيضًا <code dir="ltr">var</code> للاستنتاج المحلي للأنواع منذ Java 10، لكنها لا تماثل <code dir="ltr">var</code> في Kotlin تمامًا؛ لأنها لا تعني قابلية إعادة الإسناد أو عدمها، بل تتعلق باستنتاج النوع المحلي.</p>
+        <p><strong>2. Nullability</strong></p>
+        <p>في Kotlin:</p>
+        <pre dir="ltr"><code>val customerName: String
+val phoneNumber: String?</code></pre>
+        <p>في Java، يمكن استخدام annotations لتوضيح احتمالية <code dir="ltr">null</code>:</p>
+        <pre dir="ltr"><code>@NotNull String customerName;
+@Nullable String phoneNumber;</code></pre>
+        <p>لكن nullability ليست جزءًا أصيلًا من Java type system بالطريقة نفسها التي هي عليها في Kotlin.</p>
+        <p>لذلك تستطيع Kotlin فرض قيود nullability أثناء compilation بصورة أكثر مباشرة.</p>
+        <p><strong>3. Default Parameters</strong></p>
+        <p>في Kotlin:</p>
+        <pre dir="ltr"><code>fun calculateTotal(
+    price: Long,
+    fee: Long = 0
+): Long {
+    return price + fee
+}</code></pre>
+        <p>يمكن استدعاؤها دون تمرير <code dir="ltr">fee</code>.</p>
+        <p>أما Java فلا توفر default parameters بالصيغة نفسها، ويمكن استخدام overloads أو Builder pattern لتحقيق نتيجة مشابهة.</p>
+        <p><strong>4. Named Arguments</strong></p>
+        <p>في Kotlin:</p>
+        <pre dir="ltr"><code>calculateTotal(
+    price = 15000,
+    fee = 500
+)</code></pre>
+        <p>تساعد named arguments في توضيح معنى القيم، خصوصًا عندما يكون هناك عدد كبير من parameters لها النوع نفسه.</p>
+        <p>Java لا توفر named arguments بهذه الصيغة.</p>
+        <p><strong>5. Expression-oriented Syntax</strong></p>
+        <p>في Kotlin، يمكن استخدام <code dir="ltr">if</code> و<code dir="ltr">when</code> كـ expressions تنتج قيمًا:</p>
+        <pre dir="ltr"><code>val deliveryMessage = if (isDelivered) {
+    "Delivered"
+} else {
+    "In transit"
+}</code></pre>
+        <p>في Java، يمكن استخدام ternary operator أو <code dir="ltr">switch expressions</code> في الإصدارات الحديثة بحسب الحالة.</p>
+        <p>إذن Java الحديثة ليست ثابتة عند مستوى Java القديمة؛ فقد تطورت وأصبحت تدعم خصائص مثل <code dir="ltr">records</code> و<code dir="ltr">var</code> و<code dir="ltr">switch expressions</code> وpattern matching.</p>
+        <p>الاختلاف ليس أن كل ميزة موجودة في Kotlin غائبة تمامًا عن Java، بل أن طريقة التعبير عن المنطق والعقود تختلف بين اللغتين. <a href="https://kotlinlang.org/docs/comparison-to-java.html">Comparison to Java</a></p>
+        <p><strong>ثانيًا: Interoperability</strong></p>
+        <p>هذا هو أحد أهم أسباب ملاءمة Kotlin لتطوير Android.</p>
+        <p>عندما تكتب Kotlin/JVM وJava داخل المشروع نفسه، لا تحتاج إلى ترجمة كل لغة إلى لغة الأخرى.</p>
+        <p>كل منهما يمكن أن ينتج JVM bytecode، ويمكن للكود الناتج استدعاء الـ classes والـ methods الموجودة في الآخر.</p>
+        <p>مثلًا، قد يحتوي المشروع على:</p>
+        <pre dir="ltr"><code>app/
+ |
+ +-- legacy/
+ |     +-- PaymentGateway.java
+ |     +-- LegacySessionManager.java
+ |
+ +-- data/
+ |     +-- PaymentRepository.kt
+ |
+ +-- domain/
+ |     +-- PaymentUseCase.kt
+ |
+ +-- presentation/
+       +-- PaymentViewModel.kt</code></pre>
+        <p>يمكن لـ <code dir="ltr">PaymentRepository.kt</code> استدعاء <code dir="ltr">PaymentGateway.java</code> مباشرة، دون إعادة كتابة الـ Gateway.</p>
+        <p>لكن التوافق لا يعني أن Java ترى جميع عناصر Kotlin بنفس syntax.</p>
+        <p>مثلًا:</p>
+        <ul>
+          <li>Kotlin properties تظهر لجهة Java من خلال getter وsetter المناسبين.</li>
+          <li>Top-level functions تظهر من خلال class اصطناعية تمثل ملف Kotlin.</li>
+          <li>Default parameters تحتاج إلى overloads مناسبة كي تستخدمها Java بسهولة.</li>
+          <li>Extension functions لا تتحول إلى member methods داخل Java classes.</li>
+        </ul>
+        <p>ولهذا توجد <code dir="ltr">@JvmStatic</code> و<code dir="ltr">@JvmOverloads</code> و<code dir="ltr">@JvmName</code> وغيرها للتحكم في شكل بعض declarations على مستوى JVM.</p>
+        <p><strong>ثالثًا: Runtime</strong></p>
+        <p>هنا يوجد مفهوم بالغ الأهمية:</p>
+        <p><strong>Kotlin/JVM وJava لا تحتاجان إلى بيئتي تشغيل منفصلتين.</strong></p>
+        <p>على خادم JVM، يمكن للغتين أن تعملا داخل البيئة نفسها.</p>
+        <p>أما على Android، فيمر الكود الناتج من اللغتين بمرحلة DEX compilation، ثم يعمل على ART.</p>
+        <pre dir="ltr"><code>              Kotlin Code
+                   |
+                   v
+             Kotlin Compiler
+                   |
+                   v
+              JVM Bytecode
+                   |
+                   |
+Java Code          |
+    |              |
+    v              |
+Java Compiler      |
+    |              |
+    v              |
+JVM Bytecode       |
+    |              |
+    +--------------+
+           |
+           v
+       Android Build
+           |
+           v
+        D8 / R8
+           |
+           v
+        DEX Files
+           |
+           v
+           ART
+           |
+           v
+       App Process</code></pre>
+        <p><code dir="ltr">R8</code> هو أداة Android مسؤولة عن عمليات مثل shrinking وoptimization وobfuscation عند تفعيلها في بناء التطبيق.</p>
+        <p>وجود R8 لا يعني أن Kotlin أصبحت تعمل على runtime مختلف عن Java.</p>
+        <p>الاختلافات بين اللغتين على مستوى التنفيذ تنشأ من bytecode الذي ينتجه كل compiler ومن المكتبات المستخدمة، وليس من وجود Android runtime خاص بـ Kotlin.</p>
+        <p>هناك نقطة إضافية: تحتاج Kotlin عادةً إلى Kotlin Standard Library، ولذلك يجب إدراج الاعتمادات اللازمة لها في عملية البناء.</p>
+        <p><a href="https://developer.android.com/build">Android Build Overview</a></p>
+
+        <h4>4.3 مثال واقعي</h4>
+        <p>لنفترض أن تطبيقًا مصرفيًا بدأ باستخدام Java منذ سنوات، ولديه عدة مكتبات داخلية.</p>
+        <p>قررت الشركة تطوير الشاشات الجديدة باستخدام Kotlin وJetpack Compose.</p>
+        <p>يمكن أن يكون تدفق التنفيذ كالتالي:</p>
+        <pre dir="ltr"><code>              Jetpack Compose
+                    |
+                    v
+               ViewModel.kt
+                    |
+                    v
+            UseCase.kt (Kotlin)
+                    |
+                    v
+          PaymentRepository.kt
+                    |
+                    v
+          LegacyGateway.java
+                    |
+                    v
+             Banking Service</code></pre>
+        <p>لا تحتاج إلى إعادة كتابة <code dir="ltr">LegacyGateway.java</code> لمجرد أن الطبقات الأعلى أصبحت Kotlin.</p>
+        <p>وهذا يسمح بتقسيم تكلفة التطوير إلى وحدات أصغر، بدل تنفيذ migration واسعة تحمل مخاطر كبيرة.</p>
+        <p>لكن ينبغي أن تنتبه إلى الحدود الفاصلة بين Java وKotlin، وخصوصًا nullability وعقود الـ APIs.</p>
+
+        <h4>4.4 البدائل</h4>
+        <p>عند اختيار اللغة لمشروع Android:</p>
+        <p><strong>Java</strong> مناسبة عندما يكون المشروع قائمًا عليها، أو عندما يعتمد الفريق بدرجة كبيرة على خبرات وأدوات ومكتبات Java.</p>
+        <p><strong>Kotlin</strong> مناسبة للتطوير الحديث في Android، وخصوصًا عند استخدام Jetpack Compose والمكتبات الحديثة المصممة بأسلوب Kotlin-first.</p>
+        <p><strong>Mixed Java/Kotlin</strong> مناسبة عندما تريد تحديث المشروع تدريجيًا دون دفع تكلفة إعادة الكتابة دفعة واحدة.</p>
+        <p>من الناحية العملية، لا يوجد تعارض معماري بين استمرار استخدام Java في بعض الطبقات وكتابة طبقات أخرى بـ Kotlin.</p>
+
+        <h4>4.5 أين يفشل</h4>
+        <p><strong>1. توقع أن Java وKotlin تنتجان دائمًا نفس bytecode.</strong></p>
+        <p>ليستا compilerين متطابقين، وقد تختلف طريقة تمثيل بعض خصائص اللغة والمكتبات في bytecode.</p>
+        <p>لا تبنِ قرارات الأداء على عدد الأسطر أو شكل syntax.</p>
+        <p><strong>2. الاعتقاد أن Kotlin أسرع تلقائيًا من Java.</strong></p>
+        <p>لا توجد قاعدة عامة تقول إن مجرد تحويل الكود من Java إلى Kotlin سيجعل التطبيق أسرع.</p>
+        <p>الأداء يعتمد على العمليات المنفذة، والـ bytecode الناتج، وعمليات JIT/AOT والتحسينات التي تحدث أثناء التنفيذ.</p>
+        <p>يمكن أن يكون كود Java أسرع من كود Kotlin سيئ التصميم، والعكس صحيح.</p>
+        <p><strong>3. التعامل مع Java APIs كما لو كانت مكتوبة بـ Kotlin.</strong></p>
+        <p>قد تكون Java method ترجع null دون توضيح ذلك في توقيعها.</p>
+        <p>المؤشر المهم هنا هو Platform Type، وليس مجرد أن الكود اجتاز compilation.</p>
+        <p><strong>4. تجاهل API Compatibility عند بناء مكتبة مشتركة.</strong></p>
+        <p>قد يحتوي Kotlin class على public declarations يستخدمها Java consumers، وبالتالي يجب مراجعة شكل الـ generated API عند تغييرها.</p>
+        <p><strong>5. افتراض أن استخدام Kotlin يلغي الحاجة إلى فهم Java.</strong></p>
+        <p>هذا خطأ عملي في Android؛ فكثير من APIs والمكتبات والأمثلة القديمة ما زالت تستخدم Java.</p>
+
+        <h4>4.6 قاعدة القرار</h4>
+        <p>تعامل مع Kotlin باعتبارها اللغة الأساسية المناسبة لتطوير Android الحديث، ومع Java باعتبارها جزءًا مستمرًا ومهمًا من بيئة Android وJVM.</p>
+        <p>لا تخلط بين اختلاف syntax واختلاف runtime، ولا تعِد كتابة Java code إلا عندما توجد فائدة هندسية واضحة.</p>
+
+        <h3>5. Kotlin Versions and the K2 Compiler</h3>
+        <h4>5.1 المشكلة</h4>
+        <p>Kotlin لغة تتطور باستمرار.</p>
+        <p>تظهر مع الوقت تحسينات في compiler وtype inference وlanguage features والمكتبات والأدوات.</p>
+        <p>لكن في مشروع Android، تحديث Kotlin ليس مجرد تغيير رقم الإصدار؛ لأن عملية البناء تعتمد على عدة مكونات يجب أن تكون متوافقة مع بعضها.</p>
+        <p>قد تستخدم Kotlin version أحدث، لكن Android Gradle Plugin أو أحد compiler plugins في المشروع لا يدعمها بالصورة المطلوبة.</p>
+        <p>وقد ينتج عن ذلك أخطاء build رغم أن الكود نفسه لم يتغير.</p>
+        <p>المشكلة إذًا هي المحافظة على توافق مجموعة الأدوات وليس فقط المحافظة على صحة الكود.</p>
+
+        <h4>5.2 كيف يعمل</h4>
+        <p><strong>أولًا: فهم Kotlin Versions</strong></p>
+        <p>تستخدم Kotlin أرقام إصدارات مثل:</p>
+        <pre dir="ltr"><code>2.4.21
+| |  |
+| |  +--- Patch release
+| +------ Minor release
++-------- Major version</code></pre>
+        <p>في الممارسة، تختلف طبيعة الإصدارات:</p>
+        <ul>
+          <li>Language releases: قد تضيف ميزات لغوية وتغييرات مهمة في compiler.</li>
+          <li>Tooling releases: تركز على الأدوات والأداء والتوافق وإصلاحات compiler.</li>
+          <li>Bug-fix releases: تعالج أخطاء في إصدار سابق.</li>
+        </ul>
+        <p>على سبيل المثال، في سلسلة Kotlin 2.4:</p>
+        <table>
+          <thead>
+            <tr><th>الإصدار</th><th>تاريخ الإصدار</th><th>طبيعته</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2.4.0</td><td>3 يونيو 2026</td><td>Language release</td></tr>
+            <tr><td>2.4.20</td><td>7 سبتمبر 2026</td><td>Tooling release</td></tr>
+            <tr><td>2.4.21</td><td>8 أكتوبر 2026</td><td>Bug-fix release</td></tr>
+          </tbody>
+        </table>
+        <p><strong>أحدث إصدار مستقر في 19 نوفمبر 2026</strong></p>
+        <p><strong>Kotlin 2.4.21</strong></p>
+        <p>هذا هو أحدث إصدار مستقر وفق سجل الإصدارات الرسمي المتاح حتى تاريخ إعداد هذا المرجع. <a href="https://kotlinlang.org/docs/releases.html">Kotlin Release Process</a></p>
+        <p>لكن من المهم عدم التعامل مع أحدث إصدار باعتباره بالضرورة أفضل إصدار لمشروعك الحالي؛ التوافق مع منظومة البناء شرط أساسي.</p>
+        <p><strong>ثانيًا: فهم مكونات الإصدارات</strong></p>
+        <p>في مشروع Android، ستواجه عدة أرقام إصدارات مختلفة:</p>
+        <table>
+          <thead>
+            <tr><th>المكوّن</th><th>مسؤوليته</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Kotlin Compiler</td><td>تحليل Kotlin code والتحقق منه وإنتاج المخرجات المناسبة</td></tr>
+            <tr><td>Kotlin Gradle Plugin</td><td>دمج Kotlin compilation مع عملية البناء التي يديرها Gradle</td></tr>
+            <tr><td>Kotlin Standard Library</td><td>توفير الوظائف الأساسية التي تعتمد عليها Kotlin</td></tr>
+            <tr><td>Android Gradle Plugin (AGP)</td><td>إدارة عملية بناء تطبيق Android ودمج أدوات Android</td></tr>
+            <tr><td>Gradle</td><td>تشغيل مهام البناء وإدارة الاعتمادات والتنسيق بين plugins</td></tr>
+            <tr><td>D8</td><td>تحويل JVM bytecode إلى DEX</td></tr>
+            <tr><td>R8</td><td>تحسين التطبيق وتقليل حجمه وعمليات أخرى عند تفعيلها</td></tr>
+            <tr><td>Compose Compiler Plugin</td><td>تحويل بناءات Compose إلى تمثيل تنفيذي مناسب لآلية Compose</td></tr>
+          </tbody>
+        </table>
+        <p>ليس من الضروري أن تحمل هذه المكونات أرقام إصدار متطابقة؛ المهم هو توافق الإصدارات وفق مصفوفات الدعم الرسمية.</p>
+        <p>مثلًا، توضح وثائق Android وجود حدود توافق بين Kotlin وAGP وD8 وR8. وهذه الحدود تتغير مع الإصدارات الجديدة. <a href="https://developer.android.com/build/kotlin-support">AGP, D8, and R8 compatibility</a></p>
+        <p>يمكنك تصور الاعتماد بينها كالتالي:</p>
+        <pre dir="ltr"><code>              Android Studio
+                    |
+                    v
+                 Gradle
+                    |
+          +---------+---------+
+          |                   |
+          v                   v
+   Kotlin Gradle Plugin     AGP
+          |                   |
+          v                   |
+    Kotlin Compiler           |
+          |                   |
+          +---------+---------+
+                    |
+                    v
+              JVM Bytecode
+                    |
+                    v
+                  D8
+                    |
+                    v
+             R8 (if enabled)
+                    |
+                    v
+                DEX / APK</code></pre>
+        <p>هذا رسم مبسط لعلاقة الأدوات؛ فالترتيب الفعلي لبعض المهام يختلف حسب إعدادات البناء واستخدام incremental compilation وR8.</p>
+        <p><strong>ثالثًا: ما هو K2 Compiler؟</strong></p>
+        <p><code dir="ltr">K2</code> هو الجيل الجديد من Kotlin compiler frontend، والذي أعاد JetBrains تصميمه لتحسين طريقة تحليل البرنامج وفهم معناه والتحقق من الأنواع.</p>
+        <p>لفهم أهميته، تحتاج إلى معرفة أن compiler لا يحول النص البرمجي مباشرة إلى bytecode دون تحليل.</p>
+        <p>هناك مرحلة مسؤولة عن فهم الكود، وتحديد الأنواع، وحل استدعاءات الدوال، واكتشاف الأخطاء.</p>
+        <p>تسمى هذه المرحلة Compiler Frontend.</p>
+        <p><strong>النموذج الذهني</strong></p>
+        <p>تخيل compiler على أنه يتكون بصورة مفاهيمية من قسمين:</p>
+        <pre dir="ltr"><code>             Kotlin Source
+                   |
+                   v
+             Compiler Frontend
+                   |
+         +---------+---------+
+         |         |         |
+         v         v         v
+      Semantic   Type      Call
+      Analysis  Inference  Resolution
+         |         |         |
+         +---------+---------+
+                   |
+                   v
+            Intermediate
+            Representation
+                   |
+                   v
+            Compiler Backend
+                   |
+                   v
+             Target Output</code></pre>
+        <p><code dir="ltr">Intermediate Representation (IR)</code> هو تمثيل وسيط للكود يستخدمه compiler لتنفيذ التحليلات والتحويلات قبل توليد مخرجات المنصة المستهدفة.</p>
+        <p>في K2، أعادت JetBrains بناء Frontend باستخدام بنية أكثر توحيدًا وغنى بالمعلومات الدلالية.</p>
+        <p>هذه البنية مسؤولة عن أمور مثل:</p>
+        <ul>
+          <li>Semantic analysis.</li>
+          <li>Call resolution.</li>
+          <li>Type inference.</li>
+          <li>اكتشاف الأخطاء والتحقق من صحة التعبيرات.</li>
+        </ul>
+        <p>النتيجة هي تحليل أكثر اتساقًا وتحسينات في قدرات compiler وأدائه أثناء عملية البناء.</p>
+        <p>هذا لا يعني أن K2 قدم لغة Kotlin جديدة مستقلة، ولا أنه استبدل الـ runtime المستخدم على Android.</p>
+        <p>إنه تطوير لطريقة تحليل الكود وترجمته. <a href="https://kotlinlang.org/docs/k2-compiler-migration-guide.html">K2 Compiler Migration Guide</a></p>
+        <p><strong>رابعًا: علاقة K2 بإصدارات Kotlin</strong></p>
+        <p>أصبحت K2 مستقرة منذ Kotlin 2.0.0.</p>
+        <p>يوضح دليل الانتقال الرسمي مستويات الاستقرار التالية:</p>
+        <table>
+          <thead>
+            <tr><th>إصدارات Kotlin</th><th>حالة دعم K2</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2.0.0 – 2.4.21</td><td>Stable</td></tr>
+            <tr><td>1.9.20 – 1.9.25</td><td>Beta</td></tr>
+            <tr><td>1.9.0 – 1.9.10</td><td>JVM Beta</td></tr>
+            <tr><td>1.7.0 – 1.8.22</td><td>Alpha</td></tr>
+          </tbody>
+        </table>
+        <p>إذًا، عند استخدام Kotlin 2.x، فأنت تستخدم K2 compiler بصورة افتراضية، ولا تحتاج إلى التعامل معه باعتباره compiler تجريبيًا منفصلًا.</p>
+        <p><a href="https://kotlinlang.org/docs/k2-compiler-migration-guide.html">K2 Compiler Migration Guide</a></p>
+
+        <h4>5.3 مثال واقعي</h4>
+        <p>لنفترض أن لديك تطبيق Android مبنيًا باستخدام Kotlin 1.9، وتريد تحديثه إلى Kotlin 2.4.</p>
+        <p>قد يبدو التغيير بسيطًا:</p>
+        <pre dir="ltr"><code>Kotlin 1.9 -&gt; Kotlin 2.4</code></pre>
+        <p>لكن القرار الفعلي يحتاج إلى مراجعة أكثر من ملف.</p>
+        <p>افترض أن المشروع يستخدم:</p>
+        <ul>
+          <li>Android Gradle Plugin.</li>
+          <li>Kotlin Gradle Plugin.</li>
+          <li>Jetpack Compose.</li>
+          <li>Kotlin Serialization.</li>
+          <li>KSP.</li>
+        </ul>
+        <p><code dir="ltr">KSP</code> هي أداة لمعالجة الـ Kotlin symbols أثناء compilation، وتُستخدم بواسطة مكتبات وأدوات تحتاج إلى توليد كود اعتمادًا على تعريفات Kotlin.</p>
+        <p>عند تحديث Kotlin، يجب التحقق من توافق plugins المعتمدة على compiler APIs، وليس فقط التأكد من أن ملفات <code dir="ltr">.kt</code> لا تحتوي على أخطاء.</p>
+        <p>التسلسل الهندسي الصحيح يكون كالتالي:</p>
+        <pre dir="ltr"><code>Select Kotlin Version
+         |
+         v
+Check AGP Compatibility
+         |
+         v
+Check Gradle Compatibility
+         |
+         v
+Check Compiler Plugin Compatibility
+         |
+         +------ Compose Compiler
+         |
+         +------ KSP
+         |
+         +------ Serialization
+         |
+         v
+Build Project
+         |
+         v
+Run Existing Tests
+         |
+         v
+Verify App Behavior
+         |
+         v
+Adopt New Configuration</code></pre>
+        <p>هذا لا يعني أن كل تحديث يتطلب تغيير جميع المكونات، بل يعني أن كل مكوّن يجب أن يُفحص وفق متطلبات الإصدار الجديد.</p>
+        <p>ومن المهم أيضًا عدم الخلط بين:</p>
+        <ul>
+          <li>فشل compilation بسبب تغيير في compiler.</li>
+          <li>فشل Gradle بسبب عدم توافق plugins.</li>
+          <li>فشل D8 أو R8 بسبب إصدار غير متوافق.</li>
+          <li>مشكلة runtime ظهرت بعد نجاح عملية البناء.</li>
+        </ul>
+        <p>كل حالة تشير إلى مرحلة مختلفة من النظام وتحتاج إلى تشخيص مختلف.</p>
+
+        <h4>5.4 البدائل</h4>
+        <p>عندما تتعامل مع تحديث Kotlin، توجد عدة استراتيجيات:</p>
+        <p><strong>1. Stable Kotlin Version</strong></p>
+        <p>استخدام إصدار مستقر ومدعوم من أدوات المشروع.</p>
+        <p>هذا هو الخيار الطبيعي للتطبيقات الإنتاجية.</p>
+        <p><strong>2. Early Access Preview (EAP)</strong></p>
+        <p><code dir="ltr">EAP</code> هي إصدارات تجريبية متاحة قبل الإصدار المستقر، وتُستخدم لاختبار الميزات الجديدة وإرسال الملاحظات إلى المطورين.</p>
+        <p>يمكن استخدامها في مشروع تجريبي أو بيئة منفصلة للتحقق من التوافق القادم.</p>
+        <p>لا تجعل إصدار EAP اعتمادًا أساسيًا في تطبيق إنتاجي إلا مع وجود سبب وخطة واضحة للمخاطر.</p>
+        <p><strong>3. تأجيل الترقية</strong></p>
+        <p>قد يكون البقاء على إصدار أقدم مناسبًا عندما تكون تكلفة الترقية أكبر من فائدتها الفورية، بشرط أن يظل الإصدار مدعومًا ومتوافقًا مع احتياجات المشروع.</p>
+        <p>لكن يجب عدم تحويل التأجيل إلى تجميد دائم؛ لأن ذلك يزيد لاحقًا كلفة تحديث الأدوات والمكتبات ومعالجة التوافق.</p>
+
+        <h4>5.5 أين يفشل</h4>
+        <p><strong>1. تحديث Kotlin دون فحص AGP.</strong></p>
+        <p>قد تكون Kotlin version صحيحة من ناحية اللغة، لكن إصدار Android Gradle Plugin أو أدوات D8/R8 الموجودة في المشروع لا يوفر التوافق المطلوب.</p>
+        <p>التشخيص: راجع رسالة الخطأ أولًا، ثم مصفوفة التوافق الرسمية الخاصة بإصدار Kotlin وAGP وD8/R8.</p>
+        <p><strong>2. الخلط بين Kotlin compiler وAndroid runtime.</strong></p>
+        <p>K2 لا يستبدل ART.</p>
+        <p>إذا حدث crash على جهاز المستخدم، فلا تفترض أن K2 هو المسؤول لمجرد أنك انتقلت إليه؛ افحص stack trace والـ generated artifacts والمشكلة الفعلية.</p>
+        <p><strong>3. الاعتقاد أن K2 سيجعل التطبيق أسرع تلقائيًا.</strong></p>
+        <p>التحسين الأساسي لـ K2 يتعلق بالـ compiler وتجربة التطوير وعملية التحليل والبناء.</p>
+        <p>لا تستنتج من ذلك أن عملية عرض الشاشة أو تنفيذ طلب الشبكة ستصبح أسرع بمجرد تحديث compiler.</p>
+        <p>لتحليل أداء التطبيق، استخدم Android Profiler وقياسات الأداء الفعلية.</p>
+        <p><strong>4. تجاهل Compiler Plugins.</strong></p>
+        <p>قد يكون Kotlin compiler متوافقًا مع مشروعك، بينما أحد plugins يحتاج إلى إصدار مختلف.</p>
+        <p>افحص توافق KSP وSerialization وCompose compiler وأي compiler plugins أخرى مستخدمة.</p>
+        <p><strong>5. استخدام أحدث إصدار دون سبب أو خطة.</strong></p>
+        <p>التحديث ليس هدفًا مستقلًا؛ الهدف هو الاستفادة من التحسينات مع الحفاظ على استقرار عملية البناء وسلوك التطبيق.</p>
+        <p><strong>6. عدم التمييز بين Language Version وAPI Version.</strong></p>
+        <p><code dir="ltr">Language Version</code> تحدد مستوى ميزات اللغة والتوافق اللغوي الذي يسمح به compiler.</p>
+        <p>أما <code dir="ltr">API Version</code> فتحدد مجموعة إصدارات Kotlin APIs المتاحة للاستخدام، وهو أمر مهم عند تطوير مكتبات يجب أن تعمل مع إصدارات أقدم من Kotlin.</p>
+        <p>هذان الإعدادان ليسا نفس رقم إصدار Kotlin Gradle Plugin بالضرورة.</p>
+
+        <h4>5.6 قاعدة القرار</h4>
+        <p>استخدم Stable Kotlin releases في تطبيقات الإنتاج، وتحقق من توافق Kotlin Compiler وKotlin Gradle Plugin وGradle وAGP وD8/R8 والـ compiler plugins قبل التحديث.</p>
+        <p>تعامل مع K2 باعتباره compiler architecture الحديثة والمستقرة، وليس runtime جديدًا أو تحسينًا تلقائيًا لأداء التطبيق بعد تشغيله.</p>
+
+        <h2>6. الخلاصة الهندسية للجزء</h2>
+        <p>بعد دراسة الموضوعات السابقة، يجب أن تستطيع تحليل القرارات التالية دون الاعتماد على حفظ syntax.</p>
+
+        <h3>6.1 كيف ترتبط المفاهيم ببعضها؟</h3>
+        <p><strong>Kotlin Engineering Model</strong></p>
+        <pre dir="ltr"><code>                 Kotlin Language
+                         |
+                         v
+  Syntax - Type System - Null Safety - Interoperability
+                         |
+                         v
+                Kotlin Compiler (K2)
+                         |
+                         v
+ Analysis - Type Inference - Resolution - Code Generation
+                         |
+                         v
+                 Target Compilation
+                         |
+             +-----------+-----------+
+             |                       |
+             v                       v
+          JVM Target             Native Target
+             |                       |
+             v                       v
+         JVM Bytecode             Native Binary
+             |                       |
+             v                       v
+       JVM / ART Runtime       Platform Native Runtime
+       Execution Environment   Platform-specific execution</code></pre>
+        <p>رسم مفاهيمي؛ KMP يبني لكل target مُعلن، وAndroid يمر عبر مرحلة DEX قبل التنفيذ على ART.</p>
+        <p>الفكرة المركزية هي أن اللغة تحدد كيفية كتابة البرنامج وفحصه، والـ compiler يحوّل البرنامج إلى شكل مناسب، والمنصة المستهدفة توفر بيئة التشغيل.</p>
+        <p>لا تخلط هذه المستويات عند تشخيص المشكلات.</p>
+
+        <h3>6.2 قرارات يجب أن تستطيع اتخاذها</h3>
+        <table>
+          <thead>
+            <tr><th>السيناريو</th><th>القرار الهندسي</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>قيمة من API قد تكون غائبة</td><td>استخدم nullable type وتعامل مع القيمة صراحةً</td></tr>
+            <tr><td>كود Java قديم يحتاج إليه التطبيق</td><td>استخدمه من Kotlin بدل إعادة كتابته تلقائيًا</td></tr>
+            <tr><td>متغير لا يحتاج إلى إعادة إسناد</td><td>استخدم <code dir="ltr">val</code>، مع الانتباه إلى mutability الداخلية</td></tr>
+            <tr><td>نوع محلي واضح من initializer</td><td>استخدم Type Inference</td></tr>
+            <tr><td>API عامة بين الطبقات</td><td>اجعل أنواع المدخلات والمخرجات واضحة</td></tr>
+            <tr><td>مشروع Android جديد</td><td>ابدأ بـ Kotlin</td></tr>
+            <tr><td>تطبيق Android وiOS يحتاجان قواعد عمل مشتركة</td><td>قيّم KMP مع إبقاء UI أصلية عند الحاجة</td></tr>
+            <tr><td>تحديث Kotlin في مشروع إنتاجي</td><td>افحص توافق منظومة البناء والـ compiler plugins أولًا</td></tr>
+            <tr><td>مشكلة crash بعد تشغيل التطبيق</td><td>افحص runtime stack trace بدل افتراض أن compiler هو السبب</td></tr>
+          </tbody>
+        </table>
+
+        <h3>6.3 اختبار الفهم الهندسي</h3>
+        <p><strong>مراجعة الفهم</strong></p>
+        <ol>
+          <li>
+            <p>لديك Java API ترجع String دون Nullability Annotation. Kotlin تسمح باستدعاء length مباشرة، لكن التطبيق يتعرض أحيانًا إلى NullPointerException. ما التفسير الأدق؟</p>
+            <ol>
+              <li>Kotlin compiler لا يدعم Null Safety</li>
+              <li>القيمة من Java قد تكون Platform Type، ولذلك لا يضمن compiler عدم كونها null</li>
+              <li>ART لا يستطيع تنفيذ Kotlin String</li>
+            </ol>
+            <p><strong>الإجابة الصحيحة:</strong> القيمة من Java قد تكون Platform Type، ولذلك لا يضمن compiler عدم كونها null.</p>
+            <p>Platform Types تسمح بمرونة عند حدود Java، لكنها لا تمنح ضمان null safety. يجب توضيح nullability أو معالجة القيمة عند الحد الفاصل.</p>
+          </li>
+          <li>
+            <p>لديك val يشير إلى MutableList. هل يمكن إضافة عنصر إليها؟</p>
+            <ol>
+              <li>لا، لأن val تعني أن الكائن immutable</li>
+              <li>نعم، لأن val تمنع إعادة إسناد المرجع ولا تمنع تعديل الكائن المشار إليه</li>
+              <li>نعم فقط إذا كانت القائمة فارغة</li>
+            </ol>
+            <p><strong>الإجابة الصحيحة:</strong> نعم، لأن val تمنع إعادة إسناد المرجع ولا تمنع تعديل الكائن المشار إليه.</p>
+            <p>عدم قابلية إعادة الإسناد ليست هي immutability. نوع الكائن نفسه هو الذي يحدد إمكان تعديل محتوياته.</p>
+          </li>
+          <li>
+            <p>هل Kotlin على Android تعمل داخل JVM تقليدية؟</p>
+            <ol>
+              <li>نعم، التطبيق يشغّل JVM كاملة على الجهاز</li>
+              <li>لا، Kotlin تُترجم إلى JVM bytecode ثم DEX وينفذ ART النتيجة</li>
+              <li>لا، Kotlin تتحول دائمًا مباشرة إلى Native Binary</li>
+            </ol>
+            <p><strong>الإجابة الصحيحة:</strong> لا، Kotlin تُترجم إلى JVM bytecode ثم DEX وينفذ ART النتيجة.</p>
+            <p>Android يستخدم مسار JVM bytecode ثم DEX، والـ runtime هو ART.</p>
+          </li>
+          <li>
+            <p>لماذا لا يكفي تحديث Kotlin Compiler وحده عند ترقية إصدار المشروع؟</p>
+            <ol>
+              <li>لأن Kotlin لا تدعم Gradle</li>
+              <li>لأن AGP وD8/R8 وCompiler Plugins قد تحتاج إلى إصدارات متوافقة</li>
+              <li>لأن كل تحديث Kotlin يتطلب إعادة كتابة Java</li>
+            </ol>
+            <p><strong>الإجابة الصحيحة:</strong> لأن AGP وD8/R8 وCompiler Plugins قد تحتاج إلى إصدارات متوافقة.</p>
+            <p>عملية بناء Android تتكون من عدة أدوات مترابطة؛ يجب التحقق من مصفوفة التوافق كاملة.</p>
+          </li>
+          <li>
+            <p>ما الفرق الجوهري بين KMP وCompose Multiplatform؟</p>
+            <ol>
+              <li>لا يوجد أي فرق</li>
+              <li>KMP تشارك الكود، بينما Compose Multiplatform تتيح مشاركة UI أيضًا</li>
+              <li>KMP خاصة بـ iOS فقط</li>
+            </ol>
+            <p><strong>الإجابة الصحيحة:</strong> KMP تشارك الكود، بينما Compose Multiplatform تتيح مشاركة UI أيضًا.</p>
+            <p>KMP لا تشترط مشاركة الواجهات؛ يمكن مشاركة Business Logic مع الاحتفاظ بواجهات أصلية.</p>
+          </li>
+        </ol>
+        <p>نتيجتك في مراجعة المفاهيم الأساسية.</p>
+
+        <h3>6.4 المراجع الرسمية</h3>
+        <p>للتعمق في التفاصيل التي تتطور مع إصدارات Kotlin وAndroid، اعتمد على الوثائق التالية باعتبارها مصادر الحقيقة:</p>
+        <ol>
+          <li><a href="https://kotlinlang.org/docs/faq.html">Kotlin FAQ</a> — تعريف اللغة وتاريخها وخصائصها.</li>
+          <li><a href="https://kotlinlang.org/docs/null-safety.html">Kotlin Null Safety</a> — أنواع البيانات nullable وآليات التعامل مع null.</li>
+          <li><a href="https://kotlinlang.org/docs/java-interop.html">Calling Java from Kotlin</a> — Java interoperability وPlatform Types.</li>
+          <li><a href="https://kotlinlang.org/docs/comparison-to-java.html">Comparison to Java</a> — الفروق بين خصائص اللغتين.</li>
+          <li><a href="https://kotlinlang.org/docs/multiplatform.html">What is Kotlin Multiplatform</a> — النموذج العام لمشاركة الكود.</li>
+          <li><a href="https://kotlinlang.org/docs/releases.html">Kotlin Release Process</a> — الإصدارات ودورة الدعم.</li>
+          <li><a href="https://kotlinlang.org/docs/k2-compiler-migration-guide.html">K2 Compiler Migration Guide</a> — معمارية K2 ومستويات الاستقرار.</li>
+          <li><a href="https://developer.android.com/build/kotlin-support">AGP, D8, and R8 compatibility</a> — توافق Kotlin مع أدوات بناء Android.</li>
+        </ol>
+        <p><strong>معيار إتقان هذا الجزء:</strong> يجب أن تستطيع شرح الفرق بين Kotlin Compiler وART، وتحديد لماذا لا تمنح Java interoperability ضمان null safety كاملًا، وشرح الفرق بين KMP وCompose Multiplatform، واتخاذ قرار مبرر عند تحديث Kotlin version. هذه المفاهيم ستظهر باستمرار عند الانتقال إلى Android SDK وAndroid project structure وJetpack Compose.</p>
+      </article>
+    </main>
+  </body>
+</html>

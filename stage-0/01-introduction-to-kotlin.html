@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#34a853" />
+    <title>01-Introduction to Kotlin - مقدمة إلى Kotlin | Android Engineering Mindset</title>
+    <link
+      rel="shortcut icon"
+      href="https://www.gstatic.com/devrel-devsite/prod/v579d635a54d6e1f40caad46ce407560c5106c8915e5ff7e6341f5b13eb245c5a/android/images/favicon.svg"
+    />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+
+  <body>
+    <main class="page-container">
+      <header class="hero">
+        <div class="hero__top">
+          <div class="hero__eyebrow">Stage 0</div>
+          <a class="hero__back" href="../index.html">العودة إلى الخطة</a>
+        </div>
+        <h1 class="hero__title">01-Introduction to Kotlin - مقدمة إلى Kotlin</h1>
+        <p class="hero__lead"><!--SLOT:hero-lead--></p>
+      </header>
+
+      <section class="content-section">
+        <h2 class="content-section__title">شرح وتطبيق كل موضوع</h2>
+
+        <div class="article-content article-content--numbered">
+          <div class="topic-block">
+            <h3 class="topic-block__title">What Kotlin Is - ما هي Kotlin</h3>
+            <p>
+              قبل الدخول في Android نحتاج أن نفهم الأداة التي سنكتب بها. بدأت JetBrains، الشركة التي تصنع IntelliJ IDEA
+              (الذي بُني عليه Android Studio)، العمل على Kotlin عام 2010 وكشفت عنها عام 2011. كانت تبني منتجاتها بـ Java على
+              JVM وأرادت لغة أفضل منها، لكن بشرط واضح: ألا تفرض إعادة كتابة ما كُتب بـ Java.
+            </p>
+
+            <div class="callout callout--definition">
+              <span class="callout__label">تعريف</span>
+              <p>
+                Kotlin لغة statically typed عامة الأغراض تجمع الأسلوب الكائني (object-oriented) والوظيفي (functional)،
+                طوّرتها JetBrains وهي مفتوحة المصدر برخصة Apache 2.0. وصفتها JetBrains عند الإصدار 1.0 بأنها pragmatic:
+                صُمّمت حول حالات استعمال حقيقية، وتركّز على interoperability وsafety وclarity وtooling.
+              </p>
+            </div>
+
+            <p>يمكن تلخيص المشكلات التي استهدفتها في أربع:</p>
+
+            <ul>
+              <li>
+                <strong>الكود المتكرر (boilerplate):</strong> صنف يحمل بيانات في Java يحتاج حقولًا وconstructor وgetters
+                وequals وhashCode وtoString، فيضيع المنطق الفعلي بين السطور. تعالجه الصياغة المختصرة.
+              </li>
+              <li>
+                <strong>أخطاء القيم الفارغة:</strong> أي مرجع في Java قد يكون <code>null</code> والمترجم لا يحذّرك، فتظهر
+                <code>NullPointerException</code> وقت التشغيل بعيدًا عن سببها. يعالجها نظام الأنواع بفصل ما يقبل
+                <code>null</code> عمّا لا يقبله.
+              </li>
+              <li>
+                <strong>كلفة الترحيل:</strong> لا تستطيع شركة إعادة كتابة ملايين الأسطر لتجرّب لغة جديدة، ولذلك صُمّمت
+                Kotlin لتعيش مع Java في المشروع نفسه.
+              </li>
+              <li>
+                <strong>دعم الأدوات:</strong> لغة بلا IDE جيد لا تُستعمل، ولذلك طوّرت JetBrains اللغة وأدواتها معًا.
+              </li>
+            </ul>
+
+            <p>
+              قد تسأل: لماذا لم تُصلَح Java نفسها؟ Java تطورت فعلًا (أضافت <code>var</code> وrecords مثلًا)، لكن لغة بهذا
+              العمر لا تستطيع أن تجعل كل <code>String</code> غير فارغة دون كسر كود قائم. لغة جديدة تبدأ بنظام أنواع يفصل
+              بين الحالتين من اليوم الأول. هذا تفسير هندسي لسبب وجود Kotlin وليس حكمًا بأن Java لغة سيئة، وسنقارن بينهما
+              بإنصاف في الموضوع الرابع.
+            </p>
+
+            <div class="table-wrap table-wrap--fit">
+              <table>
+                <thead>
+                  <tr>
+                    <th>التاريخ</th>
+                    <th>الحدث</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2011</td>
+                    <td>JetBrains تكشف عن Kotlin</td>
+                  </tr>
+                  <tr>
+                    <td>فبراير 2016</td>
+                    <td>Kotlin 1.0، أول إصدار مستقر، مع التزام بتوافق اللغة والـ standard library مع الإصدارات اللاحقة</td>
+                  </tr>
+                  <tr>
+                    <td>مايو 2017</td>
+                    <td>Google تعلن دعمًا رسميًا لـ Kotlin في Android (Google I/O 2017)</td>
+                  </tr>
+                  <tr>
+                    <td>مايو 2019</td>
+                    <td>Google تلتزم بنهج Kotlin-first لتطوير Android (Google I/O 2019)</td>
+                  </tr>
+                  <tr>
+                    <td>نوفمبر 2023</td>
+                    <td>Kotlin Multiplatform مستقر مع Kotlin 1.9.20</td>
+                  </tr>
+                  <tr>
+                    <td>مايو 2024</td>
+                    <td>Kotlin 2.0.0 ومعه مترجم K2 مستقرًّا</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout--note">
+              <span class="callout__label">ملاحظة</span>
+              <p>
+                Kotlin-first لا تعني أن Java ممنوعة. تعني، بحسب Google، أن التوثيق والعيّنات والمكتبات والأدوات الجديدة
+                تُصمَّم لـ Kotlin أولًا مع استمرار دعم Java. أما Jetpack Compose، أداة بناء الواجهات الحديثة في Android،
+                فمكتوبة بـ Kotlin وتُستعمل بها فقط. لهذا تبدأ هذه السلسلة بـ Kotlin.
+              </p>
+            </div>
+            <p>
+              كيف تعمل Kotlin داخليًا؟ على JVM لا توجد «آلة Kotlin». المترجم <code>kotlinc</code> يقرأ ملفات
+              <code>.kt</code> وينتج ملفات <code>.class</code> بصيغة JVM bytecode نفسها التي ينتجها مترجم Java. الـ JVM لا
+              يعرف بأي لغة كُتب الـ bytecode الذي يشغّله، وهذا أساس التوافق مع Java الذي نعود إليه في الموضوعين الثاني
+              والرابع.
+            </p>
+
+            <p>
+              لنتحقق من ذلك. الملف التالي فيه دالة واحدة مكتوبة خارج أي class. ماذا تتوقع أن تجد في مجلد
+              <code>out</code> بعد ترجمته، وما الدوال الموجودة داخل الـ class الناتج؟
+            </p>
+
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Hello.kt — دالة واحدة بلا class</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    println("Hello, Musab")
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Terminal — ترجمة الملف وفحص الناتج</span>
+                <span class="code-block__lang">Bash</span>
+              </div>
+              <pre class="code-block__body"><code>kotlinc Hello.kt -d out
+ls out
+javap -p -cp out HelloKt</code></pre>
+            </div>
+
+            <details class="reveal">
+              <summary>النتيجة</summary>
+              <div class="reveal__body">
+                <div class="output-block">
+                  <span class="output-block__label">Terminal</span>
+                  <pre class="output-block__body">HelloKt.class
+META-INF
+Compiled from "Hello.kt"
+public final class HelloKt {
+  public static final void main();
+  public static void main(java.lang.String[]);
+}</pre>
+                </div>
+                <p>
+                  التوقع الشائع هو ملف <code>Hello.class</code> فيه دالة <code>main</code> واحدة. الواقع مختلف في ثلاثة
+                  أمور. أولًا، الدوال المكتوبة خارج أي class تُجمَّع في class يحمل اسم الملف مع اللاحقة
+                  <code>Kt</code>، ولهذا ظهر <code>HelloKt.class</code>. ثانيًا، ظهرت دالتا <code>main</code>: الأولى هي
+                  دالتنا بلا parameters، والثانية <code>main(String[])</code> ولّدها المترجم لتستدعي الأولى، لأن JVM تبحث
+                  عن نقطة دخول بهذا الشكل تحديدًا. ثالثًا، المجلد <code>META-INF</code> يحمل metadata خاصة بـ Kotlin
+                  يقرؤها المترجم حين يُستعمل هذا الناتج من كود Kotlin آخر.
+                </p>
+              </div>
+            </details>
+
+            <p>
+              الأداة <code>javap</code> تأتي مع JDK وتعرض محتوى ملف <code>.class</code>، وهي تعمل هنا لأن الناتج bytecode
+              عادي. تترتب على ذلك نتائج عملية: تستطيع Java أن تستدعي هذا الكود كأي class آخر، وتعمل أدوات JVM
+              (debuggers وprofilers) على الناتج، ويعامل Android هذا الـ bytecode كما يعامل ناتج Java، كما سنرى في
+              الموضوع الثالث.
+            </p>
+
+            <div class="callout callout--note">
+              <span class="callout__label">ملاحظة</span>
+              <p>
+                تسمية <code>HelloKt</code> للدوال ذات المستوى الأعلى سلوك موثّق لأن Java تعتمد عليه عند الاستدعاء. أما
+                تفاصيل التعليمات داخل الـ bytecode فهي تنفيذ داخلي للمترجم وقد تتغير بين الإصدارات، فلا تبنِ عليها.
+              </p>
+            </div>
+
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                الخطأ: التعامل مع Kotlin كأنها بيئة تشغيل منفصلة عن Java، أو افتراض أن نظام أنواعها القوي يلغي أخطاء
+                التشغيل. نتيجته: عند ظهور <code>NullPointerException</code> أو <code>NoClassDefFoundError</code> في برنامج
+                Kotlin تبحث في المكان الخطأ. الإصلاح: اعتبر Kotlin مترجمًا فوق JVM. ضماناتها تُفحص وقت الترجمة لما يراه
+                المترجم فقط، وتحمل رسائل الأخطاء أسماء الـ classes المولّدة (مثل <code>HelloKt</code>) مع اسم ملف
+                <code>.kt</code> ورقم السطر، فتدلّك على كودك مباشرة.
+              </p>
+            </div>
+          </div>
+
+          <div class="topic-block">
+            <h3 class="topic-block__title">Core Language Traits - الخصائص الأساسية للغة</h3>
+            <p>
+              رأينا أن Kotlin مترجم فوق JVM ينتج bytecode عاديًا. نتناول الآن أربع خصائص تعطي اللغة طابعها، ونشرح لكل منها
+              المشكلة التي تحلّها وكيف تعمل وأين تضعف: الصياغة المختصرة، والأمان من القيم الفارغة، والتشغيل البيني مع Java،
+              واستنتاج الأنواع.
+            </p>
+            <h4>Concise Syntax - الصياغة المختصرة</h4>
+
+            <p>
+              المشكلة: الكود الذي يكرّر ما يعرفه المترجم أصلًا يُبطئ القراءة، لأن القارئ يبحث عن سطر المنطق بين سطور
+              الشكل. تعالج Kotlin ذلك بأن يولّد المترجم ما يمكن اشتقاقه. المثال الأوضح هو <code>data class</code>: تعلن
+              الخصائص في الـ primary constructor، فيولّد المترجم <code>equals</code> و<code>hashCode</code> و<code>toString</code>
+              و<code>copy</code>. لا سحر هنا: الدوال المولّدة موجودة فعلًا في الـ bytecode الناتج، والاختصار في المصدر فقط.
+            </p>
+
+            <p>
+              في متجر Musab الصغير منتجان لهما الاسم والسعر نفسهما. Ahmed قادم من Java ويعرف أن <code>==</code> على
+              الكائنات يقارن المراجع. ماذا تتوقع أن تطبع الأسطر الأربعة التالية؟
+            </p>
+
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Product.kt — data class ومقارنة كائنين</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>data class Product(val name: String, val priceCents: Int)
+
+fun main() {
+    val keyboard = Product("Keyboard", 4999)
+    val same = Product("Keyboard", 4999)
+    println(keyboard == same)
+    println(keyboard === same)
+    println(keyboard)
+    println(keyboard.copy(priceCents = 3999))
+}</code></pre>
+            </div>
+
+            <details class="reveal">
+              <summary>النتيجة</summary>
+              <div class="reveal__body">
+                <div class="output-block">
+                  <span class="output-block__label">Console</span>
+                  <pre class="output-block__body">true
+false
+Product(name=Keyboard, priceCents=4999)
+Product(name=Keyboard, priceCents=3999)</pre>
+                </div>
+                <p>
+                  إن توقّعت <code>false</code> في السطر الأول بحكم عادة Java فالفرق في معنى العامل. <code>==</code> في
+                  Kotlin يستدعي <code>equals</code> فيقارن المحتوى، فكان الناتج <code>true</code>. أما
+                  <code>===</code> فيقارن الهوية (هل هما الكائن نفسه)، وهو ما يفعله <code>==</code> في Java على الكائنات،
+                  فكان الناتج <code>false</code> لأن هناك كائنين منفصلين. السطر الثالث يظهر فيه <code>toString</code>
+                  المولّدة، والرابع نسخة جديدة غُيّرت فيها الخاصية المسماة فقط، والكائن الأصلي لا يتأثر لأن خصائصه
+                  <code>val</code>.
+                </p>
+              </div>
+            </details>
+
+            <p>
+              الاختصار لا يقف عند الأصناف. الدالة التالية تجمع أربعة اختصارات: جسم الدالة تعبير واحد بعد <code>=</code>،
+              وقيمة افتراضية لـ parameter، وتضمين المتغيرات والتعابير داخل النص بالعلامة <code>$</code>، وتسمية الـ
+              arguments عند الاستدعاء بأي ترتيب.
+            </p>
+
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Syntax.kt — expression body وdefault وnamed arguments</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun priceLabel(name: String, priceCents: Int, unit: String = "cents"): String =
+    "${name.uppercase()}: $priceCents $unit"
+
+fun main() {
+    println(priceLabel("Keyboard", 4999))
+    println(priceLabel(priceCents = 2500, name = "Mouse"))
+}</code></pre>
+            </div>
+
+            <div class="output-block">
+              <span class="output-block__label">Console</span>
+              <pre class="output-block__body">KEYBOARD: 4999 cents
+MOUSE: 2500 cents</pre>
+            </div>
+
+            <p>
+              لاحظ أيضًا <code>val</code> في الأمثلة: تعلن مرجعًا لا يُعاد إسناده، بينما <code>var</code> يسمح بإعادة
+              الإسناد. القاعدة المتّبعة هي البدء بـ <code>val</code> وعدم استعمال <code>var</code> إلا عند الحاجة.
+            </p>
+
+            <p>
+              البدائل موجودة: أضافت Java الـ records (من Java 16) فصار الصنف الحامل للبيانات قصيرًا فيها أيضًا، وتولّد
+              مكتبات مثل Lombok الكود نفسه عبر annotation processing. لذلك لا تكمن ميزة Kotlin في الصنف الحامل للبيانات
+              وحده، بل في أن الاختصار جزء من اللغة ويشمل الدوال والـ arguments كذلك، دون أداة إضافية. سنضع كود Java
+              الكامل بجانب سطر Kotlin الواحد في الموضوع الرابع.
+            </p>
+
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                الخطأ: افتراض أن <code>equals</code> المولّدة تقارن كل خصائص الصنف. هي تقارن فقط الخصائص المعلنة في الـ
+                primary constructor. نتيجته: كائنان يختلفان في خاصية معلنة داخل جسم الصنف (مثل <code>note</code> في
+                سلة Ahmed) يُعدّان متساويين فعلًا. الإصلاح: انقل الخاصية إلى الـ constructor إن كان يجب أن تدخل في
+                المساواة، وإلا فاكتب <code>equals</code> و<code>hashCode</code> بنفسك.
+              </p>
+            </div>
+            <h4>Null Safety - الأمان من القيم الفارغة</h4>
+
+            <p>
+              المشكلة: في Java أي مرجع قد يكون <code>null</code> والمترجم لا يعترض على استعماله، فتظهر
+              <code>NullPointerException</code> وقت التشغيل، وغالبًا بعيدًا عن المكان الذي دخلت منه القيمة الفارغة.
+              ترى Kotlin أن هذا الفحص مكانه المترجم لا المستخدم.
+            </p>
+
+            <div class="callout callout--definition">
+              <span class="callout__label">تعريف</span>
+              <p>
+                Null safety في Kotlin أن تكون قابلية القيمة للفراغ جزءًا من نوعها: <code>String</code> لا تقبل
+                <code>null</code> أبدًا، و<code>String?</code> تقبله، ولا يُسمح باستعمال النوع القابل للفراغ قبل معالجة
+                الحالة الفارغة.
+              </p>
+            </div>
+
+            <p>
+              كيف تعمل داخليًا؟ الفحص يقوم به المترجم. في الـ bytecode يظهر النوعان <code>String</code> و<code>String?</code>
+              بالنوع <code>java.lang.String</code> نفسه، ويُحفظ الفرق في metadata وفي annotations يضيفها المترجم لتراها
+              أدوات Java. وعند حدود الكود العام يُدخل المترجم في بداية الدوال العامة فحصًا لكل parameter غير قابل للفراغ،
+              فإذا استدعاها كود Java بـ <code>null</code> فشل الاستدعاء فورًا برسالة تسمّي الـ parameter بدل أن تنتشر القيمة
+              الفارغة داخل البرنامج. سنرى أثر هذا الفحص عمليًا في الموضوع الرابع.
+            </p>
+
+            <div class="callout callout--note">
+              <span class="callout__label">ملاحظة</span>
+              <p>
+                ما تضمنه اللغة هو أن النوعين مختلفان عند المترجم. أما شكل الفحص المُدخَل ومكانه في الـ bytecode فهو
+                تفصيل تنفيذ قد يتغير بين الإصدارات.
+              </p>
+            </div>
+
+            <p>
+              البديل في Java هو <code>Optional</code> وannotations مثل <code>@Nullable</code>. الأول نوع مكتبة يغلّف القيمة
+              في كائن إضافي، والمرجع <code>Optional</code> نفسه قد يكون <code>null</code>، ولا تفرض اللغة استعماله. الثانية
+              تنتج تحذيرات من الأدوات لا أخطاء من اللغة. اختارت Kotlin فرض القاعدة في نظام الأنواع، دون كائن إضافي وقت
+              التشغيل. لنرَ ما يحدث حين نخالفها:
+            </p>
+
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">Checkout.kt — خطأ مقصود: لا يُترجم</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun cityNameLength(city: String?): Int {
+    return city.length
+}</code></pre>
+            </div>
+
+            <div class="output-block">
+              <span class="output-block__label">Compiler</span>
+              <pre class="output-block__body">Checkout.kt:2:16: error: only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'String?'.
+    return city.length
+               ^</pre>
+            </div>
+
+            <p>
+              رفض المترجم السطر قبل أن يصل البرنامج إلى المستخدم، وهذا المقصود: انتقل الخطأ من وقت التشغيل إلى وقت
+              الترجمة. تعطيك Kotlin أربع طرق لمعالجة الحالة الفارغة. في Java، استدعاء <code>length()</code> على مرجع فارغ
+              يرمي استثناء. ماذا تتوقع أن يفعل السطر الأول في البرنامج التالي حين تكون <code>city</code> فارغة: يرمي
+              استثناء، أم يطبع <code>null</code>، أم يطبع <code>0</code>؟ وماذا عن بقية الأسطر؟
+            </p>
+
+            <div class="code-block">
+              <div class="code-block__header">
+                <span class="code-block__filename">NullSafety.kt — safe call وElvis وsmart cast و!!</span>
+                <span class="code-block__lang">Kotlin</span>
+              </div>
+              <pre class="code-block__body"><code>fun main() {
+    val city: String? = null
+    val country: String? = "Egypt"
+
+    println(city?.length)
+    println(city?.length ?: 0)
+
+    if (country != null) {
+        println(country.length)
+    }
+
+    try {
+        println(city!!.length)
+    } catch (e: Exception) {
+        println(e::class.simpleName)
+    }
+}</code></pre>
+            </div>
+
+            <details class="reveal">
+              <summary>النتيجة</summary>
+              <div class="reveal__body">
+                <div class="output-block">
+                  <span class="output-block__label">Console</span>
+                  <pre class="output-block__body">null
+0
+5
+NullPointerException</pre>
+                </div>
+                <p>
+                  السطر الأول طبع <code>null</code> ولم يرمِ استثناء: العامل <code>?.</code> (safe call) يتوقف ويُرجع
+                  <code>null</code> حين يكون المستقبِل فارغًا، ولذلك نوع التعبير كله <code>Int?</code> وليس
+                  <code>Int</code>. السطر الثاني استعمل <code>?:</code> (Elvis) لتحديد قيمة بديلة فصار النوع
+                  <code>Int</code> والناتج <code>0</code>. في الثالث عرف المترجم، بعد الفحص <code>country != null</code>،
+                  أن <code>country</code> غير فارغة داخل الـ <code>if</code> فسمح باستعمال <code>length</code> مباشرة، وهذا
+                  هو smart cast. أما الرابع فقال فيه <code>!!</code> للمترجم «أنا متأكد»، وتحمّلنا المسؤولية، فرُميت
+                  <code>NullPointerException</code> والتقطناها وطبعنا اسمها.
+                </p>
+              </div>
+            </details>
+
+            <p>
+              الضمانة تسري على ما يراه المترجم فقط، وتضعف في مواضع محددة. أولها <code>!!</code> لأن المبرمج يتجاوز بها
+              الفحص بإرادته. وثانيها حدود Java التي لا يعرف المترجم عندها قابلية الفراغ، وهو موضوع الخاصية التالية.
+              وثالثها المكتبات التي تملأ الحقول بالـ reflection دون المرور عبر الـ constructor، فقد تضع <code>null</code>
+              في خاصية معلنة غير قابلة للفراغ. ورابعها <code>lateinit</code> التي تؤجل التهيئة، فتُرمى
+              <code>UninitializedPropertyAccessException</code> إن قُرئت قبل أن تُهيّأ.
+            </p>
+
+            <div class="callout callout--warning">
+              <span class="callout__label">انتبه</span>
+              <p>
+                الخطأ: استعمال <code>!!</code> لإسكات المترجم كلما اعترض. نتيجته: تعود <code>NullPointerException</code>
+                كما رأينا في السطر الرابع، وتفقد الفائدة التي جئت من أجلها. الإصلاح: عالج الحالة الفارغة بـ
+                <code>?.</code> أو <code>?:</code> أو فحص صريح، واسأل أولًا لماذا وصلت القيمة قابلة للفراغ إلى هذا الموضع،
+                فقد يكون الحل تغيير النوع عند المصدر.
+              </p>
+            </div>
+            <!--SLOT:topic-2-c-->
+            <!--SLOT:topic-2-d-->
+          </div>
+
+          <div class="topic-block">
+            <h3 class="topic-block__title">Where Kotlin Runs - أين تعمل Kotlin</h3>
+            <!--SLOT:topic-3-->
+          </div>
+
+          <div class="topic-block">
+            <h3 class="topic-block__title">Kotlin and Java Compared - مقارنة Kotlin وJava</h3>
+            <!--SLOT:topic-4-intro-->
+            <!--SLOT:topic-4-a-->
+            <!--SLOT:topic-4-b-->
+            <!--SLOT:topic-4-c-->
+          </div>
+
+          <div class="topic-block">
+            <h3 class="topic-block__title">Kotlin Versions and the K2 Compiler - إصدارات Kotlin ومترجم K2</h3>
+            <!--SLOT:topic-5-a-->
+            <!--SLOT:topic-5-b-->
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <h2 class="content-section__title">قرارات اختيار اللغة: Kotlin أم Java؟</h2>
+        <!--SLOT:comparison-->
+      </section>
+
+      <section class="content-section">
+        <h2 class="content-section__title">أهم ما يجب تذكّره</h2>
+
+        <div class="summary-card">
+          <ul class="summary-card__list">
+            <!--SLOT:summary-->
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
