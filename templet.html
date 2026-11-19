@@ -9,45 +9,33 @@
       rel="shortcut icon"
       href="https://www.gstatic.com/devrel-devsite/prod/v579d635a54d6e1f40caad46ce407560c5106c8915e5ff7e6341f5b13eb245c5a/android/images/favicon.svg"
     />
-    <!-- أبقِ هذا الرابط كما هو. لا تنسخ CSS داخل الصفحة. -->
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
 
   <body>
     <!-- ======================================================================
-      Android Engineering Mindset — Page Template v2
+      Android Engineering Mindset — Page Template v4
 
-      هذا الملف هو المرجع الوحيد: لا يُرفق معه CSS ولا أي ملف آخر.
-      الناتج: ملف HTML واحد فقط، باسم الصفحة (القسم 5)، بلا تعليقات ولا عناصر […].
-      =======================================================================
-
-      0) طريقة العمل
-      1. اقرأ الـ prompt: عنوان الصفحة، ونوعها (P أو PR أو T)، وقائمة الموضوعات.
-      2. اختر الـ profile من القسم 3، ثم طبّق فوقه ما يطلبه الـ prompt.
-      3. املأ الهيكل أدناه. احذف كل التعليقات والعناصر النائبة […] والأقسام غير المستعملة.
-      4. سمِّ الملف حسب القسم 5، وافحصه حسب القسم 6، ثم سلّمه.
-
-      الأولوية عند التعارض:  Contract (القسم 1)  >  الـ prompt  >  Profile (القسم 3)
-      الـ prompt يغيّر الأقسام والمحتوى والأعداد.
-      الـ prompt لا يغيّر الـ classes ولا السمات ولا قواعد الكود والمخططات.
-      إن طلب الـ prompt ما يخالف الـ Contract: نفّذ أقرب صيغة مسموحة (القسم 4)
-      وسجّل ذلك في التقرير (القسم 6). لا تخالف الـ Contract أبدًا.
+      الناتج: ملف HTML واحد، بلا تعليقات ولا عناصر […] ولا أقسام غير مستعملة.
+      الصفحة تعتمد على ../assets/style.css الذي لن يُرفق معك.
+      الأولوية: Contract (القسم 1) > الـ prompt > بقية القالب.
+      الـ prompt يغيّر المحتوى والأقسام والأعداد، ولا يغيّر الـ Contract.
+      إن طلب الـ prompt ما يخالف الـ Contract: نفّذ أقرب صيغة مسموحة (القسم 3) وسجّل ذلك في التقرير.
 
       ----------------------------------------------------------------------
       1) Contract — ثابت دائمًا
       ----------------------------------------------------------------------
-      الصفحة تعتمد على style.css الذي لن يُرفق معك، ويحمّله المتصفح من ../assets/style.css.
-
-      - لا JavaScript، ولا وسم style، ولا سمة style="", ولا link أو script إضافي.
-      - لا classes خارج القائمة أدناه. لا أزرار ولا أيقونات ولا footer.
-      - لا شريط علوي، ولا شريط تنقل، ولا شريط تقدم، ولا قائمة محتويات.
-      - السمات المسموحة: class وid وhref وaria-label فقط.
-      - الوسوم العادية تُكتب بلا class: p وul وol وli وtable وthead وtbody وtr وth وtd
-        وstrong وem وcode وpre وa وh4 وdetails وsummary.
-      - المتصفح لا يلوّن الكود ولا يضيف زر نسخ: اكتب الكود نصًا خامًا.
+      - head كما هو، ويُغيَّر title فقط.
+      - لا JavaScript، ولا وسم style، ولا سمة style، ولا link أو script إضافي، ولا أزرار ولا أيقونات
+        ولا footer، ولا شريط علوي أو تنقل أو تقدم، ولا قائمة محتويات.
+      - السمات المسموحة: class وhref فقط. لا id ولا روابط # داخل الصفحة.
+      - لا classes خارج القائمة أدناه.
+      - وسوم بلا class: p ul ol li table thead tbody tr th td strong em code a h4 summary.
+        وسم pre لا يُكتب إلا مع class من القائمة، وdetails إلا مع reveal.
       - الترقيم (الموضوعات وخطوات flow-diagram) يأتي من CSS: لا تكتبه.
+      - تُهرَّب < > & في كل نص الصفحة (الكود، وcode السطري، والجداول، والعناوين). مثال: List&lt;String&gt;
 
-      القائمة الكاملة للـ classes المسموحة:
+      Classes المسموحة:
         page-container
         hero (hero__top, hero__back, hero__eyebrow, hero__title, hero__lead)
         content-section (content-section__title, content-section__description)
@@ -60,178 +48,123 @@
         ascii-diagram
         code-block (code-block__header, code-block__filename, code-block__lang, code-block__body)
         output-block (output-block__label, output-block__body)
-        reveal (reveal--hint, reveal__body)
+        reveal (reveal__body)
         summary-card (summary-card__list)
 
-      المعرّفات (id):
-      - أحرف لاتينية صغيرة وأرقام وشرطات فقط، وفريدة في الصفحة (مثل null-safety).
-      - الأقسام الثابتة: explanation وcomparison وquiz وexercise وsummary.
-        أي قسم إضافي يأخذ id لاتينيًا جديدًا (مثل requirements أو references).
-      - رابط hero__back يعيد إلى بطاقة الصفحة في الخطة: ../index.html#P5 أو #PR1 أو #T2.
+      الهيكل:
+      - الأقسام بالترتيب: الشرح ← المقارنة (عند مفاضلة حقيقية فقط) ← الخلاصة.
+        قسم يطلبه الـ prompt ولا يرد هنا: يُضاف (Fallback). قسم يستثنيه الـ prompt: يُحذف.
+        القسم التمهيدي قبل الشرح، وقسم المراجع بعد الخلاصة.
+      - كل topic-block ابن مباشر لـ article-content--numbered (الترقيم يعتمد على ذلك).
+      - hero__eyebrow: اسم المرحلة كما ورد في الـ prompt. hero__back: ../index.html (بلا #).
 
       الكود والمخططات والجداول:
-      - code-block__filename: اسم الملف الحقيقي (MainActivity.kt وbuild.gradle.kts
-        وAndroidManifest.xml وهكذا). يجوز بعده وصف عربي قصير بعد « — ».
+      - code-block__filename: اسم الملف الحقيقي (MainActivity.kt وbuild.gradle.kts وهكذا)،
+        ويجوز بعده « — » ووصف عربي قصير.
       - code-block__lang: Kotlin أو XML أو Gradle أو Bash أو JSON أو Java.
-      - الكود صحيح ويُترجم كما هو، وفيه الـ imports اللازمة، وتُهرَّب فيه < > &.
-        الاستثناء: كود يعرض خطأ مقصودًا. اذكر ذلك في filename، ويليه output-block بالرسالة.
+      - الكود نص خام (لا تلوين ولا زر نسخ)، صحيح ويُترجم كما هو، وفيه الـ imports اللازمة.
+        الاستثناء: كود يعرض خطأ مقصودًا، ويُذكر ذلك في filename.
       - الكود داخل السطر <code> حتى ~40 حرفًا؛ الأطول في code-block.
-      - output-block يلي code-block فقط حين يطبع الكود مخرجات فعلية (Console وLogcat
-        وTerminal)، وتطابق ما يطبعه الكود فعلًا (نص خام داخل pre بلا code).
-        كود الواجهة (Compose/XML) أو الإعدادات بلا مخرجات: لا output-block،
-        وصِف النتيجة في فقرة.
+      - output-block يلي code-block مباشرة (بلا فقرة بينهما)، أو يكون داخل reveal__body.
+        يُكتب فقط لمخرجات فعلية (Console وLogcat وTerminal) أو رسالة خطأ حقيقية،
+        ويطابق ما يُطبع فعلًا (نص خام داخل pre بلا code).
+        كود الواجهة (Compose/XML) والإعدادات بلا مخرجات: لا output-block، وصِف النتيجة في فقرة.
+      - reveal: details بـ class="reveal" فيه summary ثم div بـ reveal__body.
+        يُستعمل فقط لإخفاء نتيجة طُلب من القارئ أن يتوقعها.
       - flow-diagram: حتى 6 خطوات، وبين كل خطوتين flow-arrow.
-      - ascii-diagram: حتى 30 سطرًا، ونصوص لاتينية فقط داخله، وبلا output-block.
+      - ascii-diagram: حتى 30 سطرًا، ونصوص لاتينية فقط، وبلا output-block.
       - الجدول الصغير داخل table-wrap--fit، والكبير داخل table-wrap. table بلا class.
 
       ----------------------------------------------------------------------
-      2) Content policy — افتراضات يجوز للـ prompt تغييرها
+      2) افتراضات المحتوى — يجوز للـ prompt تغييرها
       ----------------------------------------------------------------------
-      1. الشرح ثم مثاله مباشرة داخل topic-block نفسها؛ لا تجمع كل النظري ثم كل العملي.
-      2. موضوع مفهومي بلا مثال: شرح فقط. موضوعان لهما مثال طبيعي واحد: مثال واحد.
-      3. ما عليه علامة «اختياري» تضيفه فقط إن أضاف قيمة.
-      4. الخطأ الشائع الخاص بموضوع ← callout--warning داخل topic-block ذلك الموضوع.
-      5. التعريف أو القاعدة ← callout--definition، وcallout__label: «تعريف» أو «قاعدة».
-         المعلومة المهمة ← callout--note، وcallout__label: «ملاحظة».
-      6. example للمثال غير البرمجي: فقرة ثم خطوات مرقّمة ثم النتيجة.
-      7. اختر المكوّنات حسب نوع الموضوع:
+      1. الشرح ثم مثاله داخل topic-block نفسها؛ لا تجمع كل النظري ثم كل العملي.
+         موضوع مفهومي بلا مثال: شرح فقط.
+      2. التعريف أو القاعدة ← callout--definition (label: «تعريف» أو «قاعدة»).
+         المعلومة المهمة ← callout--note (label: «ملاحظة»).
+         الخطأ الشائع الخاص بالموضوع ← callout--warning (label: «انتبه») داخل topic-block ذلك الموضوع.
+      3. المثال غير البرمجي ← example: فقرة، ثم خطوات مرقّمة، ثم النتيجة.
+      4. المكوّن حسب نوع الموضوع:
          مفاهيم (Architecture / Lifecycle / Principles) ← callout + example + جدول + flow-diagram
          كود (Kotlin / Compose / Gradle / XML)          ← code-block (+ output-block عند وجود مخرجات)
          أدوات وأوامر (Gradle / adb / Git)              ← code-block بلغة Bash + output-block
          قرارات تصميمية                                 ← جدول مقارنة + ascii-diagram
-      8. quiz: سؤال واحد على الأقل لكل موضوع أساسي (حتى 5)، بمستويات متدرجة
-         (فهم ← تطبيق ← تحليل ← قرار). الإجابة داخل reveal، وتنتهي بـ «(راجع: اسم الموضوع)».
-      9. exercise: سيناريو واحد من 3 أو 4 خطوات (نفّذ ← أصلح أو تتبّع ← فسّر أو قرّر)
-         وآخرها سؤال «عقلية المهندس». التلميح اختياري، والحل داخل reveal،
-         ولا تعرض المخرجات المتوقعة قبل الحل.
-      10. summary: علامة ✓ من CSS فلا تكتبها. آخر نقطة: «عقلية المهندس: …» بجملة واحدة.
+      5. نتيجة غير بديهية: فقرة تسأل القارئ ماذا يتوقع، ثم code-block، ثم reveal (summary: «النتيجة»)
+         بداخله output-block وفقرة تقارن النتيجة بالتوقع. نتيجة بديهية: output-block ظاهر بلا reveal.
+      6. summary: آخر نقطة «عقلية المهندس: …» بجملة واحدة.
 
       ----------------------------------------------------------------------
-      3) Profiles — الأقسام الافتراضية حسب نوع الصفحة
-      ----------------------------------------------------------------------
-      P  (مرحلة)
-         eyebrow: «المرحلة N · اسم الجزء»     hero__back: ../index.html#PN
-         الأقسام: explanation ← comparison (عند مفاضلة حقيقية فقط) ← quiz ← exercise ← summary
-      PR (مشروع)
-         eyebrow: «المشروع N · اسم المشروع»   hero__back: ../index.html#PRN
-         الأقسام: requirements (المتطلبات الوظيفية ثم معايير القبول) ← explanation
-         (التصميم والتنفيذ بترتيب البناء) ← summary. exercise اختياري للتوسعة. بلا quiz.
-      T  (مسار)
-         eyebrow: «المسار N · اسم المسار»     hero__back: ../index.html#TN
-         الأقسام: explanation (مختصر لكل موضوع) ← comparison (عند مفاضلة حقيقية فقط) ← summary.
-         بلا quiz وبلا exercise.
-
-      - قسم يطلبه الـ prompt ولا يرد في الـ profile: يُضاف. قسم يستثنيه الـ prompt: يُحذف.
-      - الأقسام الإضافية تُبنى من المكوّنات المسموحة فقط وتوضع حسب منطقها:
-        requirements قبل explanation، وreferences بعد summary.
-      - إن لم يحدد الـ prompt النوع: استنتجه من عنوان البطاقة (المرحلة أو المشروع أو المسار)،
-        وإلا فاعتبرها P.
-
-      ----------------------------------------------------------------------
-      4) Fallback — محتوى لا يوجد له component
+      3) Fallback — محتوى لا يوجد له component
       ----------------------------------------------------------------------
       لا تخترع class ولا وسمًا ولا سمة. حوّل إلى أقرب مكوّن مسموح:
         flow أكثر من 6 خطوات              ← ascii-diagram + جدول
-        بطاقات أو تبويبات أو accordion    ← h4 داخل topic-block، أو reveal
+        بطاقات أو تبويبات أو accordion    ← h4 داخل topic-block
         قائمة روابط أو مراجع              ← content-section فيه article-content وul
         تمييز أو تلوين خاص                ← callout المناسب
-        قسم غير موجود في الهيكل           ← content-section بـ id لاتيني جديد
-        أي شيء آخر                        ← أقرب مكوّن، وسجّله في «فجوات» (القسم 6)
+        قسم غير موجود في الهيكل           ← content-section جديد (مثل المراجع)
+        أي شيء آخر                        ← أقرب مكوّن، وسجّله في «فجوات»
 
       ----------------------------------------------------------------------
-      5) اسم الملف
+      4) اسم الملف
       ----------------------------------------------------------------------
-      - اسم الصفحة بالإنجليزية: أحرف لاتينية صغيرة وأرقام وشرطات (kebab-case) ثم .html
-        مثال: object-model-memory.html
-      - يُؤخذ من الاسم الإنجليزي في عنوان المرحلة أو الموضوع، مثل
-        «Null Safety وأنظمة الأنواع (Type System)» ← null-safety-type-system.html
-        فإن لم يوجد اسم إنجليزي: أقصر اسم تقني إنجليزي معتاد.
-      - بلا مسافات، وبلا شرطات سفلية، وبلا حروف عربية، وبلا رقم المرحلة،
-        وبلا بادئات مثل page- أو phase-.
-      - الاسم نفسه عند الكتابة وعند التسليم.
+      استعمل الاسم الوارد في الـ prompt كما هو. وإن لم يرد فاشتقه من الاسم الإنجليزي للجزء كما ورد حرفيًا:
+      أحرف صغيرة، وكل تتابع من غير الأحرف والأرقام اللاتينية (مسافة أو - أو / أو ,) يصبح شرطة واحدة،
+      وتُقصّ الشرطات من الطرفين، ثم .html. بلا رقم المرحلة وبلا بادئات مثل page-.
+        Higher-Order Functions               ← higher-order-functions.html
+        CI/CD                                ← ci-cd.html
+        Arrays, Ranges, and Code Organization ← arrays-ranges-and-code-organization.html
+      الاسم نفسه عند الكتابة وعند التسليم.
 
       ----------------------------------------------------------------------
-      6) فحص ذاتي قبل التسليم، ثم تقرير
+      5) فحص ذاتي قبل التسليم، ثم تقرير
       ----------------------------------------------------------------------
       افحص الملف النهائي (بسكربت إن توفرت أداة تنفيذ):
       - كل class في القائمة، وكل سمة من المسموح، والوسوم متوازنة.
-      - لا تعليقات، ولا عناصر […]، ولا أقسام فارغة، ولا id مكرر أو مخالف للقاعدة.
-      - < > & مهرّبة داخل الكود، وflow-diagram لا يتجاوز 6 خطوات، وascii-diagram لا يتجاوز 30 سطرًا.
-      - كل output-block يطابق ما يطبعه الكود فعلًا.
+      - لا تعليقات، ولا عناصر […]، ولا أقسام فارغة، ولا id، ولا href يبدأ بـ #.
+      - عدد topic-block = عدد سطور الموضوعات في الـ prompt، وكلها أبناء مباشرون لـ article-content--numbered.
+      - < > & مهرّبة في كل نص، وflow-diagram لا يتجاوز 6 خطوات، وascii-diagram لا يتجاوز 30 سطرًا.
+      - كل output-block يطابق ما يطبعه الكود فعلًا، وكل reveal فيه summary وreveal__body.
 
-      سلّم الملف فقط، ولا تعرض الـ HTML في الرد. يتبعه في الرد 3 أسطر كحد أقصى:
+      سلّم الملف فقط، ولا تعرض الـ HTML في الرد. يتبعه في الرد 4 أسطر كحد أقصى:
         الملف: اسم-الملف.html
+        تحقق: ما شُغّل فعلًا، وما لم يُشغَّل (يُذكر بالاسم).
         تحويلات: ما حُوِّل بسبب القيود (إن وُجد).
         فجوات: ما لم يتسع له الـ Contract (إن وُجد).
     ======================================================================== -->
 
     <main class="page-container">
-      <!-- ======================================================================
-        Hero
-        hero__eyebrow: موقع الصفحة في الخطة، بحسب الـ profile (القسم 3).
-        hero__lead: مقدمة الصفحة كاملة (ما تضيفه ولماذا تهم الآن)؛ لا يوجد قسم «مقدمة» بعدها.
-      ======================================================================= -->
+      <!-- hero__lead: ما المشكلة التي تحلّها الصفحة، وماذا سيستطيع القارئ أن يفعله أو يفسّره بعدها
+           (جملتان أو ثلاث). لا يوجد قسم «مقدمة» بعدها. hero__title: «English - العربية». -->
       <header class="hero">
         <div class="hero__top">
-          <div class="hero__eyebrow">[المرحلة 0 · اسم الجزء]</div>
-          <a class="hero__back" href="../index.html#[معرّف-البطاقة]"
-            >العودة إلى الخطة</a
-          >
+          <div class="hero__eyebrow">[اسم المرحلة]</div>
+          <a class="hero__back" href="../index.html">العودة إلى الخطة</a>
         </div>
-        <h1 class="hero__title">[عنوان الصفحة]</h1>
-        <p class="hero__lead">
-          [مقدمة موجزة: ما الذي تضيفه هذه الصفحة تحديدًا ولماذا يهم الآن.]
-        </p>
+        <h1 class="hero__title">[English - العربية]</h1>
+        <p class="hero__lead">[المشكلة التي تحلّها الصفحة، وما سيستطيعه القارئ بعدها.]</p>
       </header>
 
-      <!-- ======================================================================
-        قسم إضافي (اختياري): requirements أو references أو أي قسم يطلبه الـ prompt.
-        id لاتيني جديد، ومكوّنات مسموحة فقط (ul أو جدول أو callout أو code-block).
-        احذفه إن لم يلزم.
-      ======================================================================= -->
-      <section class="content-section" id="[extra-section-slug]">
-        <h2 class="content-section__title">[عنوان القسم]</h2>
-        <p class="content-section__description">[وصف قصير (اختياري).]</p>
-
-        <div class="article-content">
-          <ul>
-            <li>[بند]</li>
-            <li>[بند]</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- ======================================================================
-        شرح وتطبيق: موجود في كل profile.
-        article-content--numbered يرقّم الموضوعات تلقائيًا من CSS.
-        كل بند في قائمة موضوعات الصفحة = topic-block واحدة، بنفس ترتيب الخطة.
-      ======================================================================= -->
-      <section class="content-section" id="explanation">
+      <section class="content-section">
         <h2 class="content-section__title">شرح وتطبيق كل موضوع</h2>
 
         <div class="article-content article-content--numbered">
-          <!-- ============ Topic Block 1: [اسم الموضوع] (يعرض كل المكوّنات الممكنة) ============ -->
-          <div class="topic-block" id="[topic-1-slug]">
-            <h3 class="topic-block__title">[اسم الموضوع 1]</h3>
+          <!-- ====== Topic Block 1: يعرض كل المكوّنات الممكنة؛ كلها اختيارية ما عدا العنوان والفقرة ====== -->
+          <div class="topic-block">
+            <h3 class="topic-block__title">[English - العربية]</h3>
 
-            <p>
-              [المشكلة التي يحلّها الموضوع، ثم الفكرة: كيف يعمل داخليًا ولماذا
-              نستعمله.]
-            </p>
+            <p>[المشكلة التي يحلّها الموضوع، ثم الفكرة وكيف تعمل داخليًا، ثم البديل وأين تفشل.]</p>
 
-            <!-- تعريف أو قاعدة (اختياري) -->
             <div class="callout callout--definition">
               <span class="callout__label">تعريف</span>
               <p>[التعريف الدقيق في جملة أو جملتين.]</p>
             </div>
 
-            <!-- ملاحظة (اختياري) -->
             <div class="callout callout--note">
               <span class="callout__label">ملاحظة</span>
               <p>[معلومة مهمة يجب أن يعرفها القارئ.]</p>
             </div>
 
-            <!-- مثال غير برمجي (اختياري): سيناريو ثم خطوات ثم النتيجة -->
+            <!-- مثال غير برمجي: سيناريو ثم خطوات ثم النتيجة -->
             <div class="example">
               <span class="example__label">مثال</span>
               <div class="example__body">
@@ -244,7 +177,6 @@
               </div>
             </div>
 
-            <!-- جدول صغير (اختياري) -->
             <div class="table-wrap table-wrap--fit">
               <table>
                 <thead>
@@ -258,15 +190,10 @@
                     <td>[قيمة]</td>
                     <td>[قيمة]</td>
                   </tr>
-                  <tr>
-                    <td>[قيمة]</td>
-                    <td>[قيمة]</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
 
-            <!-- Flow Diagram (اختياري): حتى 6 خطوات؛ الترقيم من CSS؛ أبقِ flow-arrow بين الخطوات -->
             <div class="flow-diagram">
               <div class="flow-step">
                 <div class="flow-step__title">[خطوة 1]</div>
@@ -279,10 +206,11 @@
               </div>
             </div>
 
-            <!-- مخطط ASCII (اختياري): حتى 30 سطرًا، نصوص لاتينية فقط -->
             <pre class="ascii-diagram">UI ──▶ ViewModel ──▶ Repository ──▶ Data Source</pre>
 
-            <!-- المثال البرمجي لنفس الموضوع -->
+            <!-- نتيجة غير بديهية: سؤال التوقع ← الكود ← reveal. نتيجة بديهية: output-block بعد الكود مباشرة بلا reveal -->
+            <p>[ماذا تتوقع أن يحدث عند تشغيل هذا الكود؟]</p>
+
             <div class="code-block">
               <div class="code-block__header">
                 <span class="code-block__filename">[MainActivity.kt] — [وصف قصير]</span>
@@ -291,45 +219,45 @@
               <pre class="code-block__body"><code>// [كود المثال هنا]</code></pre>
             </div>
 
-            <!-- Output (اختياري: فقط إن كان للكود مخرجات فعلية) -->
-            <div class="output-block">
-              <span class="output-block__label">Output</span>
-              <pre class="output-block__body">[المخرجات هنا]</pre>
-            </div>
+            <details class="reveal">
+              <summary>النتيجة</summary>
+              <div class="reveal__body">
+                <div class="output-block">
+                  <span class="output-block__label">Output</span>
+                  <pre class="output-block__body">[المخرجات هنا]</pre>
+                </div>
+                <p>[قارن النتيجة بالتوقع، وفسّر أي فرق.]</p>
+              </div>
+            </details>
 
-            <p>
-              [شرح التنفيذ: لماذا كُتب هكذا، وأي تفاصيل مهمة.]
-            </p>
+            <p>[شرح التنفيذ: لماذا كُتب هكذا، وأي تفاصيل مهمة.]</p>
 
-            <!-- الخطأ الشائع الخاص بهذا الموضوع (اختياري) -->
             <div class="callout callout--warning">
               <span class="callout__label">انتبه</span>
-              <p>[الخطأ الشائع أو سوء الفهم المرتبط بهذا الموضوع تحديدًا.]</p>
+              <p>[الخطأ الشائع المرتبط بهذا الموضوع: الخطأ ونتيجته أولًا، ثم الإصلاح ولماذا يعمل.]</p>
             </div>
           </div>
 
-          <!-- ============ Topic Block 2: [اسم الموضوع] (مفهومي بلا مثال) ============ -->
-          <div class="topic-block" id="[topic-2-slug]">
-            <h3 class="topic-block__title">[اسم الموضوع 2]</h3>
+          <!-- ====== Topic Block 2: موضوع مفهومي بلا مثال ====== -->
+          <div class="topic-block">
+            <h3 class="topic-block__title">[English - العربية]</h3>
             <p>[شرح نظري.]</p>
           </div>
 
-          <!-- كرر topic-block لكل موضوع باقٍ -->
+          <!-- كرر topic-block لكل موضوع باقٍ، بنفس ترتيب الـ prompt -->
         </div>
       </section>
 
-      <!-- ======================================================================
-        مقارنة (اختياري): P وT فقط، وعند وجود مفاضلة حقيقية؛ وإلا احذف القسم.
-        للقرارات الهندسية: القرار | البديل | السبب | الثمن (حتى 4 أعمدة).
-      ======================================================================= -->
-      <section class="content-section" id="comparison">
+      <!-- مقارنة: عند وجود مفاضلة حقيقية فقط، وإلا احذف القسم. h2 عنوان وصفي بالعربية.
+           للقرارات الهندسية: القرار | البديل | السبب | الثمن (حتى 4 أعمدة). -->
+      <section class="content-section">
         <h2 class="content-section__title">[عنوان المقارنة]</h2>
 
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>الميزة</th>
+                <th>الجانب</th>
                 <th>[الخيار أ]</th>
                 <th>[الخيار ب]</th>
               </tr>
@@ -340,87 +268,12 @@
                 <td>[وصف]</td>
                 <td>[وصف]</td>
               </tr>
-              <tr>
-                <td>[نقطة المقارنة]</td>
-                <td>[وصف]</td>
-                <td>[وصف]</td>
-              </tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- ======================================================================
-        اختبر نفسك (P افتراضيًا): تتكرر topic-block لكل سؤال (سؤال 1، سؤال 2 ...).
-        احذف القسم إن استثناه الـ prompt أو كان الـ profile لا يتضمنه.
-      ======================================================================= -->
-      <section class="content-section" id="quiz">
-        <h2 class="content-section__title">اختبر نفسك</h2>
-        <p class="content-section__description">
-          حاول أن تجيب بنفسك قبل أن تفتح الإجابة تحت كل سؤال.
-        </p>
-
-        <div class="article-content">
-          <div class="topic-block" id="q1">
-            <h3 class="topic-block__title">سؤال 1</h3>
-            <p>[نص السؤال: مفهوم بذاته، بلا إحالات على ما لم يُعرض في الصفحة.]</p>
-            <details class="reveal">
-              <summary>الإجابة</summary>
-              <div class="reveal__body">
-                <p>[إجابة من جملتين إلى ثلاث، تنتهي بـ «(راجع: اسم الموضوع)».]</p>
-              </div>
-            </details>
-          </div>
-        </div>
-      </section>
-
-      <!-- ======================================================================
-        تمرين شامل (P افتراضيًا، وPR اختياري للتوسعة): لا تعرض المخرجات المتوقعة قبل الحل.
-      ======================================================================= -->
-      <section class="content-section" id="exercise">
-        <h2 class="content-section__title">[عنوان التمرين]</h2>
-
-        <div class="article-content">
-          <p>[السيناريو الواقعي في فقرة قصيرة.]</p>
-
-          <!-- المعطيات (اختياري): code-block أو جدول صغير -->
-
-          <ol>
-            <li>[الخطوة 1: نفّذ.]</li>
-            <li>[الخطوة 2: أصلح أو تتبّع.]</li>
-            <li>[الخطوة 3: فسّر أو قرّر.]</li>
-            <li>
-              [الخطوة الأخيرة — عقلية المهندس: ماذا لو…؟ ولماذا اخترنا هذا
-              الحل؟]
-            </li>
-          </ol>
-
-          <!-- تلميح (اختياري) -->
-          <details class="reveal reveal--hint">
-            <summary>تلميح</summary>
-            <div class="reveal__body">
-              <p>[تلميح واحد.]</p>
-            </div>
-          </details>
-
-          <details class="reveal">
-            <summary>الحل</summary>
-            <div class="reveal__body">
-              <!-- حل كل خطوة بالترتيب: code-block ثم output-block، ثم شرح قصير -->
-              <p>[حل الخطوة 1.]</p>
-              <p>
-                <strong>عقلية المهندس:</strong> [حل السؤال الأخير: ماذا حدث؟
-                ولماذا؟ وماذا نفعل؟ وكيف نتحقق؟]
-              </p>
-            </div>
-          </details>
-        </div>
-      </section>
-
-      <!-- ======================================================================
-        الخلاصة: موجودة في كل profile. آخر نقطة «عقلية المهندس: …» ما لم يغيّر الـ prompt ذلك.
-      ======================================================================= -->
-      <section class="content-section" id="summary">
+      <section class="content-section">
         <h2 class="content-section__title">أهم ما يجب تذكّره</h2>
 
         <div class="summary-card">
