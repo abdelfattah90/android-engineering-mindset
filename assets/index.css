@@ -562,39 +562,328 @@ ul.ix-topics {
   padding: 1px 10px;
 }
 
-@media (max-width: 600px) {
-  .ix-container {
-    padding: 14px 10px;
-  }
-
-  .ix-card,
-  .ix-info {
-    padding: 14px;
-  }
-
-  .ix-tag {
-    width: 84px;
-    font-size: 12px;
-  }
-
-  .ix-topic {
-    gap: 8px;
-  }
-
-  .ix-title {
-    font-size: 26px;
-  }
-}
-
 @media (min-width: 700px) {
   html {
     scroll-padding-top: 100px;
   }
 }
 
+/* The author rule `.ix-topic { display: flex }` would otherwise beat the UA [hidden] rule. */
+.ix-page [hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.ix-page a,
+.ix-page button,
+.ix-page input,
+.ix-page summary {
+  touch-action: manipulation;
+}
+
+@media (hover: none) {
+  .ix-page a:hover {
+    text-decoration: none;
+  }
+
+  .ix-toggle:hover,
+  .ix-toolbar button:not([aria-pressed='true']):hover {
+    background: var(--ix-bg);
+  }
+}
+
 @media (max-width: 699px) {
   .ix-toolbar {
     position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .ix-page {
+    font-size: 15.5px;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+
+  .ix-page h2 {
+    font-size: 19px;
+  }
+
+  .ix-page h3 {
+    font-size: 16px;
+  }
+
+  .ix-page code {
+    font-size: 0.88em;
+    overflow-wrap: anywhere;
+  }
+
+  .ix-container {
+    padding: 12px 10px calc(48px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ix-title {
+    font-size: 26px;
+    margin-bottom: 16px;
+    text-wrap: balance;
+  }
+
+  /* Toolbar: progress, then search, then the three action buttons */
+  .ix-toolbar {
+    padding: 10px;
+    margin-bottom: 14px;
+  }
+
+  .ix-toolbar__row:first-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+  }
+
+  .ix-toolbar__row:first-child > .ix-toolbar__progress {
+    grid-column: 1 / -1;
+    min-width: 0;
+    font-size: 13.5px;
+  }
+
+  .ix-toolbar #q {
+    order: 1;
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 16px; /* 16px prevents iOS Safari from zooming on focus */
+    line-height: normal;
+  }
+
+  .ix-toolbar__row:first-child > button {
+    order: 2;
+  }
+
+  .ix-toolbar button {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .ix-toolbar__row + .ix-toolbar__row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ix-border);
+  }
+
+  .ix-toolbar__label {
+    flex: 1 1 100%;
+  }
+
+  .ix-toolbar__spacer {
+    display: none;
+  }
+
+  .ix-chip {
+    min-height: 36px;
+    padding: 2px 10px 2px 8px;
+    border: 1px solid var(--ix-border);
+    border-radius: 999px;
+    background: var(--ix-bg);
+  }
+
+  #fold-all,
+  #open-all {
+    flex: 1 1 40%;
+  }
+
+  /* Cards: badge + link + count + toggle on the first line, title below */
+  .ix-card,
+  .ix-info {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .ix-card > header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 0;
+    margin-bottom: 10px;
+  }
+
+  .ix-card > header h2 {
+    order: 5;
+    flex: 1 1 100%;
+    font-size: 18px;
+  }
+
+  .ix-card__count {
+    order: 3;
+    margin-inline-start: auto;
+  }
+
+  .ix-toggle {
+    order: 4;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    line-height: 1.2;
+  }
+
+  .ix-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+    line-height: 1;
+  }
+
+  /* Parts */
+  .ix-part {
+    margin: 18px 0;
+  }
+
+  .ix-part > h3 {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+  }
+
+  .ix-part > h3 > .ix-link {
+    order: 1;
+    margin-inline-start: auto;
+  }
+
+  .ix-part > h3 > span:last-child {
+    order: 2;
+    flex: 1 1 100%;
+  }
+
+  .ix-meta,
+  .ix-note {
+    font-size: 14.5px;
+  }
+
+  /* Topics: checkbox + text on the first row, tag pill under the text */
+  .ix-topic {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 6px;
+    align-items: start;
+    padding: 10px 2px;
+  }
+
+  .ix-topic input {
+    grid-column: 1;
+    grid-row: 1;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+  }
+
+  .ix-topic__text {
+    grid-column: 2;
+    grid-row: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .ix-topic > .ix-tag {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    width: auto;
+    margin: 0;
+    padding: 0 10px;
+    font-size: 11.5px;
+    line-height: 1.7;
+  }
+
+  .ix-subs {
+    padding-inline-start: 16px;
+    font-size: 14px;
+  }
+
+  .ix-topics .ix-ref {
+    margin-inline-start: 36px;
+    padding: 2px 0 10px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .ix-panel {
+    margin: 14px 0;
+    padding: 10px 12px;
+  }
+
+  /* Info sections */
+  .ix-page blockquote {
+    padding: 8px 12px;
+    font-size: 14.5px;
+  }
+
+  .ix-page details {
+    padding: 4px 12px;
+  }
+
+  .ix-page summary {
+    padding: 8px 0;
+  }
+
+  .ix-table-wrap {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ix-page table {
+    min-width: 480px;
+    font-size: 13.5px;
+  }
+
+  .ix-page th,
+  .ix-page td {
+    padding: 6px 8px;
+  }
+
+  .ix-path > li {
+    padding: 10px 0 10px 40px;
+  }
+
+  .ix-path > li::before {
+    top: 11px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+  }
+
+  .ix-path div a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ix-container {
+    padding-inline: 8px;
+  }
+
+  .ix-title {
+    font-size: 23px;
+  }
+
+  .ix-card,
+  .ix-info {
+    padding: 12px;
+  }
+
+  .ix-card > header h2 {
+    font-size: 17px;
   }
 }
 
