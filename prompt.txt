@@ -29,11 +29,11 @@
 <task>
 اشرح الجزء التالي من الخطة.
 
-<part></part>
+<part>Collections - Destructuring and Sequences</part>
 
 <topics>
-- 
-- 
+-  Destructuring declarations (pairs, map entries, lists).
+- Sequences and lazy evaluation: asSequence, when sequences help and when they do not.
 </topics>
 
 اكتب الشرح كاملًا في نص الرد نفسه، وليس ملفًا ولا artifact ولا مستندًا.
