@@ -24,15 +24,15 @@
 <task>
 اشرح الجزء التالي من الخطة.
 
-<part></part>
+<part>Function Basics</part>
 
 <topics>
-- .
-- .
-- .
-- .
-- .
-- .
+- Function declaration, parameters, and return types.
+- Unit and single-expression functions.
+- Default arguments and named arguments.
+- Function overloading: the same name with different parameters, and how the compiler picks one.
+- vararg and the spread operator *.
+- Local functions; recursion vs iteration (tailrec).
 </topics>
 
 اكتب الشرح كاملًا في نص الرد نفسه، وليس ملفًا ولا artifact ولا مستندًا.
