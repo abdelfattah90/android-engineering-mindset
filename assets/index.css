@@ -181,12 +181,11 @@ html {
 
 @media (min-width: 700px) {
   :root {
-    --stick: 68px;
+    --stick: 0px;
   }
 
   .top-nav {
-    position: sticky;
-    top: 8px;
+    position: relative;
   }
 }
 
@@ -237,7 +236,7 @@ html {
   height: 30px;
   border-radius: var(--ix-radius);
   background: var(--ix-primary-light);
-  color: #16233d;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
 }
